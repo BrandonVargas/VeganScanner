@@ -1,0 +1,24 @@
+# Privacy Policy (draft)
+
+_Last updated: 2026-10-07. This draft will be finalized before the first store release._
+
+Vegan Scanner is a free, open-source app. It is built to collect as little data as possible.
+
+## What the app does today
+
+- **Camera:** used only on your device to read barcodes. No images leave your device.
+- **Barcode lookups:** when you scan, the barcode number is sent to [Open Food Facts](https://world.openfoodfacts.org) to fetch product data. Open Food Facts receives the request like any website visit. See their [privacy policy](https://world.openfoodfacts.org/privacy).
+- **Scan history and product cache:** stored only on your device. You can delete entries or clear the history at any time. Uninstalling the app removes them.
+- **No accounts, no ads, no tracking, no analytics.**
+
+## Planned features
+
+This document will be updated before these ship:
+
+- **Crash reporting** (Firebase Crashlytics) to fix bugs.
+- **Community verdicts:** when on-device AI decides a product is vegan, the barcode and the verdict will be shared anonymously so other users benefit, and other users can report wrong verdicts.
+- **Marketplace:** sellers will choose to publish listings, an approximate location (rounded to about 1 km) and a WhatsApp contact number. Account deletion will remove all of this.
+
+## Contact
+
+Open an issue at https://github.com/BrandonVargas/VeganScanner/issues.

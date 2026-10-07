@@ -1,0 +1,664 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		008B3208B187BF3C928F7635 /* VerdictPresentation.swift in Sources */ = {isa = PBXBuildFile; fileRef = FEAE727047DB67D3CF7E1907 /* VerdictPresentation.swift */; };
+		057E0B64730D418AE2B660A1 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 44898683D0B7556DF71D2451 /* Assets.xcassets */; };
+		05B6A0D5D8AC96F56FA6DA5C /* BarcodeScannerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D5FE5645EE29D77327F1359 /* BarcodeScannerView.swift */; };
+		2D9B408C3404E87ACBACD6AA /* ScannerModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 88933ED3F98DD31CE91C6255 /* ScannerModel.swift */; };
+		4D87144DC058B3E24E411700 /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 847D443C91E4576FF78FA585 /* RootView.swift */; };
+		4F3A1DDF6530D51438C5B987 /* ScanFlowUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 65AAF87D95A554171B4C7AAD /* ScanFlowUITests.swift */; };
+		61CC4D8A241A844A1DC4BC8C /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 335450EADFB1E4729866E648 /* Localizable.xcstrings */; };
+		7CAC3DB931D12CD419E41DC9 /* ScannerModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2970842D1AB88EAA532DA1B6 /* ScannerModelTests.swift */; };
+		8D91C405F66754B617C0ED5E /* VeganScannerApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 182A60BC0BFA0263AEDBC227 /* VeganScannerApp.swift */; };
+		8DDD0AE38665B196AFB7ABB5 /* HistoryModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD7DC7D59E80DCE9A4022339 /* HistoryModel.swift */; };
+		9C93FBE3E90BE445747FAD85 /* ScannerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77E7E626A7A785660BB029E6 /* ScannerView.swift */; };
+		A38A9BBF1F5B6409BA9F3C75 /* HistoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B99330CF3C907460A1141A12 /* HistoryView.swift */; };
+		C23282BBD357D9079F637467 /* InfoPlist.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 61382C952342430B59B3EC97 /* InfoPlist.xcstrings */; };
+		C961A1971CF0EC982293F82D /* ResultView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AE7C5A7A19A75086D5F77F3B /* ResultView.swift */; };
+		FCA196CEF39D3459E906904F /* ResultModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0FFBCBAC50E9C3092B6BD07B /* ResultModel.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		2B006C8113ABC3FB66110162 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 1806F11C5A9805AD436C353D /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = DBC4167334550E45684F624C;
+			remoteInfo = VeganScanner;
+		};
+		5D8C83837B367663DCA959E5 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 1806F11C5A9805AD436C353D /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = DBC4167334550E45684F624C;
+			remoteInfo = VeganScanner;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		0D5FE5645EE29D77327F1359 /* BarcodeScannerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BarcodeScannerView.swift; sourceTree = "<group>"; };
+		0FFBCBAC50E9C3092B6BD07B /* ResultModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResultModel.swift; sourceTree = "<group>"; };
+		182A60BC0BFA0263AEDBC227 /* VeganScannerApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VeganScannerApp.swift; sourceTree = "<group>"; };
+		2970842D1AB88EAA532DA1B6 /* ScannerModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScannerModelTests.swift; sourceTree = "<group>"; };
+		29743B70FBCF610D30AA4BF5 /* Config.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Config.xcconfig; sourceTree = "<group>"; };
+		2F56270BF178E4E211441725 /* VeganScannerUITests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = VeganScannerUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		335450EADFB1E4729866E648 /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
+		44898683D0B7556DF71D2451 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		61382C952342430B59B3EC97 /* InfoPlist.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = InfoPlist.xcstrings; sourceTree = "<group>"; };
+		65AAF87D95A554171B4C7AAD /* ScanFlowUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScanFlowUITests.swift; sourceTree = "<group>"; };
+		6E2B76E5FACF9E40BDD333F5 /* VeganScannerTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = VeganScannerTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		721EFD83FFC5345DE1BFB404 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		77E7E626A7A785660BB029E6 /* ScannerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScannerView.swift; sourceTree = "<group>"; };
+		847D443C91E4576FF78FA585 /* RootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootView.swift; sourceTree = "<group>"; };
+		88933ED3F98DD31CE91C6255 /* ScannerModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScannerModel.swift; sourceTree = "<group>"; };
+		AE7C5A7A19A75086D5F77F3B /* ResultView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResultView.swift; sourceTree = "<group>"; };
+		B99330CF3C907460A1141A12 /* HistoryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HistoryView.swift; sourceTree = "<group>"; };
+		DD7DC7D59E80DCE9A4022339 /* HistoryModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HistoryModel.swift; sourceTree = "<group>"; };
+		F939DC4B5B544F71902C44C3 /* VeganScanner.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = VeganScanner.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		FEAE727047DB67D3CF7E1907 /* VerdictPresentation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VerdictPresentation.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXGroup section */
+		14ABF1BE5C9F5A4E9907D65E = {
+			isa = PBXGroup;
+			children = (
+				479CEF9976AF006BBE96018A /* Configuration */,
+				D40FFA179895D35546036A80 /* VeganScanner */,
+				78637B26DA05EF2C64739F2A /* VeganScannerTests */,
+				6E07A5026ACC2FFEABB095DC /* VeganScannerUITests */,
+				4BE1CFB6C049E5A423D3D3EB /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		2A5D9293FDBB8D7996AB223C /* Result */ = {
+			isa = PBXGroup;
+			children = (
+				0FFBCBAC50E9C3092B6BD07B /* ResultModel.swift */,
+				AE7C5A7A19A75086D5F77F3B /* ResultView.swift */,
+			);
+			path = Result;
+			sourceTree = "<group>";
+		};
+		38BA3B2B83C9430E2698B844 /* App */ = {
+			isa = PBXGroup;
+			children = (
+				847D443C91E4576FF78FA585 /* RootView.swift */,
+				182A60BC0BFA0263AEDBC227 /* VeganScannerApp.swift */,
+			);
+			path = App;
+			sourceTree = "<group>";
+		};
+		46533DF3CC34B642F8D9B75D /* Scanner */ = {
+			isa = PBXGroup;
+			children = (
+				0D5FE5645EE29D77327F1359 /* BarcodeScannerView.swift */,
+				88933ED3F98DD31CE91C6255 /* ScannerModel.swift */,
+				77E7E626A7A785660BB029E6 /* ScannerView.swift */,
+			);
+			path = Scanner;
+			sourceTree = "<group>";
+		};
+		479CEF9976AF006BBE96018A /* Configuration */ = {
+			isa = PBXGroup;
+			children = (
+				29743B70FBCF610D30AA4BF5 /* Config.xcconfig */,
+			);
+			path = Configuration;
+			sourceTree = "<group>";
+		};
+		4BE1CFB6C049E5A423D3D3EB /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				F939DC4B5B544F71902C44C3 /* VeganScanner.app */,
+				6E2B76E5FACF9E40BDD333F5 /* VeganScannerTests.xctest */,
+				2F56270BF178E4E211441725 /* VeganScannerUITests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		6E07A5026ACC2FFEABB095DC /* VeganScannerUITests */ = {
+			isa = PBXGroup;
+			children = (
+				65AAF87D95A554171B4C7AAD /* ScanFlowUITests.swift */,
+			);
+			path = VeganScannerUITests;
+			sourceTree = "<group>";
+		};
+		78637B26DA05EF2C64739F2A /* VeganScannerTests */ = {
+			isa = PBXGroup;
+			children = (
+				2970842D1AB88EAA532DA1B6 /* ScannerModelTests.swift */,
+			);
+			path = VeganScannerTests;
+			sourceTree = "<group>";
+		};
+		7E0C61F667D7D820609F11D0 /* Shared */ = {
+			isa = PBXGroup;
+			children = (
+				FEAE727047DB67D3CF7E1907 /* VerdictPresentation.swift */,
+			);
+			path = Shared;
+			sourceTree = "<group>";
+		};
+		93D36951EDB23A82B415581C /* History */ = {
+			isa = PBXGroup;
+			children = (
+				DD7DC7D59E80DCE9A4022339 /* HistoryModel.swift */,
+				B99330CF3C907460A1141A12 /* HistoryView.swift */,
+			);
+			path = History;
+			sourceTree = "<group>";
+		};
+		D40FFA179895D35546036A80 /* VeganScanner */ = {
+			isa = PBXGroup;
+			children = (
+				721EFD83FFC5345DE1BFB404 /* Info.plist */,
+				38BA3B2B83C9430E2698B844 /* App */,
+				93D36951EDB23A82B415581C /* History */,
+				DC45120C5FEF979C863242C9 /* Resources */,
+				2A5D9293FDBB8D7996AB223C /* Result */,
+				46533DF3CC34B642F8D9B75D /* Scanner */,
+				7E0C61F667D7D820609F11D0 /* Shared */,
+			);
+			path = VeganScanner;
+			sourceTree = "<group>";
+		};
+		DC45120C5FEF979C863242C9 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				44898683D0B7556DF71D2451 /* Assets.xcassets */,
+				61382C952342430B59B3EC97 /* InfoPlist.xcstrings */,
+				335450EADFB1E4729866E648 /* Localizable.xcstrings */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		DBC4167334550E45684F624C /* VeganScanner */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 97F19D795B332205B8F62CA5 /* Build configuration list for PBXNativeTarget "VeganScanner" */;
+			buildPhases = (
+				47EF0C0817A0C5E32B65AFD8 /* Compile Kotlin framework */,
+				90560B61A44DB9307CAC3A28 /* Sources */,
+				3359353A8C4E0535917AE436 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = VeganScanner;
+			packageProductDependencies = (
+			);
+			productName = VeganScanner;
+			productReference = F939DC4B5B544F71902C44C3 /* VeganScanner.app */;
+			productType = "com.apple.product-type.application";
+		};
+		E8724DCF03F207035CB686BE /* VeganScannerUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 53FBFCF0C6F99AF0DE8F2B94 /* Build configuration list for PBXNativeTarget "VeganScannerUITests" */;
+			buildPhases = (
+				370A9D2267ED8D905F0BE12C /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				B8775E27C2F4E0F54E594F16 /* PBXTargetDependency */,
+			);
+			name = VeganScannerUITests;
+			packageProductDependencies = (
+			);
+			productName = VeganScannerUITests;
+			productReference = 2F56270BF178E4E211441725 /* VeganScannerUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
+		F845139B730DFEBFC7A930B4 /* VeganScannerTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 058FD5672B22D0EEB648C9C7 /* Build configuration list for PBXNativeTarget "VeganScannerTests" */;
+			buildPhases = (
+				EF25D23BC346C7827A517821 /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				3EEB7178F2AF596A6CDC4EA7 /* PBXTargetDependency */,
+			);
+			name = VeganScannerTests;
+			packageProductDependencies = (
+			);
+			productName = VeganScannerTests;
+			productReference = 6E2B76E5FACF9E40BDD333F5 /* VeganScannerTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		1806F11C5A9805AD436C353D /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 1430;
+				TargetAttributes = {
+					E8724DCF03F207035CB686BE = {
+						TestTargetID = DBC4167334550E45684F624C;
+					};
+				};
+			};
+			buildConfigurationList = 378B9E2816B290053880F11A /* Build configuration list for PBXProject "VeganScanner" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				Base,
+				en,
+				es,
+			);
+			mainGroup = 14ABF1BE5C9F5A4E9907D65E;
+			minimizedProjectReferenceProxies = 1;
+			preferredProjectObjectVersion = 77;
+			productRefGroup = 4BE1CFB6C049E5A423D3D3EB /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				DBC4167334550E45684F624C /* VeganScanner */,
+				F845139B730DFEBFC7A930B4 /* VeganScannerTests */,
+				E8724DCF03F207035CB686BE /* VeganScannerUITests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		3359353A8C4E0535917AE436 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				057E0B64730D418AE2B660A1 /* Assets.xcassets in Resources */,
+				C23282BBD357D9079F637467 /* InfoPlist.xcstrings in Resources */,
+				61CC4D8A241A844A1DC4BC8C /* Localizable.xcstrings in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		47EF0C0817A0C5E32B65AFD8 /* Compile Kotlin framework */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			name = "Compile Kotlin framework";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "if [ \"YES\" = \"$OVERRIDE_KOTLIN_BUILD_IDE_SUPPORTED\" ]; then\n  echo \"Skipping Gradle build task invocation due to OVERRIDE_KOTLIN_BUILD_IDE_SUPPORTED environment variable set to \\\"YES\\\"\"\n  exit 0\nfi\ncd \"$SRCROOT/..\"\n./gradlew :shared:umbrella:embedAndSignAppleFrameworkForXcode\n";
+		};
+/* End PBXShellScriptBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		370A9D2267ED8D905F0BE12C /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				4F3A1DDF6530D51438C5B987 /* ScanFlowUITests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		90560B61A44DB9307CAC3A28 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				05B6A0D5D8AC96F56FA6DA5C /* BarcodeScannerView.swift in Sources */,
+				8DDD0AE38665B196AFB7ABB5 /* HistoryModel.swift in Sources */,
+				A38A9BBF1F5B6409BA9F3C75 /* HistoryView.swift in Sources */,
+				FCA196CEF39D3459E906904F /* ResultModel.swift in Sources */,
+				C961A1971CF0EC982293F82D /* ResultView.swift in Sources */,
+				4D87144DC058B3E24E411700 /* RootView.swift in Sources */,
+				2D9B408C3404E87ACBACD6AA /* ScannerModel.swift in Sources */,
+				9C93FBE3E90BE445747FAD85 /* ScannerView.swift in Sources */,
+				8D91C405F66754B617C0ED5E /* VeganScannerApp.swift in Sources */,
+				008B3208B187BF3C928F7635 /* VerdictPresentation.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		EF25D23BC346C7827A517821 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				7CAC3DB931D12CD419E41DC9 /* ScannerModelTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		3EEB7178F2AF596A6CDC4EA7 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = DBC4167334550E45684F624C /* VeganScanner */;
+			targetProxy = 5D8C83837B367663DCA959E5 /* PBXContainerItemProxy */;
+		};
+		B8775E27C2F4E0F54E594F16 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = DBC4167334550E45684F624C /* VeganScanner */;
+			targetProxy = 2B006C8113ABC3FB66110162 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		20F943CAC675F9239E242281 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				FRAMEWORK_SEARCH_PATHS = "$(SRCROOT)/../shared/umbrella/build/xcode-frameworks/$(CONFIGURATION)/$(SDK_NAME)";
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = VeganScanner/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "Vegan Scanner";
+				INFOPLIST_KEY_NSCameraUsageDescription = "Vegan Scanner uses the camera to read product barcodes.";
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				OTHER_LDFLAGS = (
+					"$(inherited)",
+					"-framework",
+					VeganKit,
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = dev.brandonvargas.veganscanner;
+				PRODUCT_NAME = VeganScanner;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Release;
+		};
+		52A3B8416D6B577D6A553B08 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 29743B70FBCF610D30AA4BF5 /* Config.xcconfig */;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"DEBUG=1",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MARKETING_VERSION = 0.1.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		5C55412A596266F9C6B62C7A /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = dev.brandonvargas.VeganScannerUITests;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = VeganScanner;
+			};
+			name = Debug;
+		};
+		B98ABD8B928CB424FDE7FBBE /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 29743B70FBCF610D30AA4BF5 /* Config.xcconfig */;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MARKETING_VERSION = 0.1.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+		BCE233C8720A6E629A76B50F /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = dev.brandonvargas.VeganScannerUITests;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = VeganScanner;
+			};
+			name = Release;
+		};
+		BFD7EBC53BB243467A77513E /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				FRAMEWORK_SEARCH_PATHS = "$(SRCROOT)/../shared/umbrella/build/xcode-frameworks/$(CONFIGURATION)/$(SDK_NAME)";
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = dev.brandonvargas.VeganScannerTests;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/VeganScanner.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/VeganScanner";
+			};
+			name = Release;
+		};
+		D64BC6856AD4350451064B2A /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				FRAMEWORK_SEARCH_PATHS = "$(SRCROOT)/../shared/umbrella/build/xcode-frameworks/$(CONFIGURATION)/$(SDK_NAME)";
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = VeganScanner/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "Vegan Scanner";
+				INFOPLIST_KEY_NSCameraUsageDescription = "Vegan Scanner uses the camera to read product barcodes.";
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				OTHER_LDFLAGS = (
+					"$(inherited)",
+					"-framework",
+					VeganKit,
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = dev.brandonvargas.veganscanner;
+				PRODUCT_NAME = VeganScanner;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Debug;
+		};
+		E9178B0ED52BC433AC7BCEC4 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				FRAMEWORK_SEARCH_PATHS = "$(SRCROOT)/../shared/umbrella/build/xcode-frameworks/$(CONFIGURATION)/$(SDK_NAME)";
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = dev.brandonvargas.VeganScannerTests;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/VeganScanner.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/VeganScanner";
+			};
+			name = Debug;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		058FD5672B22D0EEB648C9C7 /* Build configuration list for PBXNativeTarget "VeganScannerTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				E9178B0ED52BC433AC7BCEC4 /* Debug */,
+				BFD7EBC53BB243467A77513E /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		378B9E2816B290053880F11A /* Build configuration list for PBXProject "VeganScanner" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				52A3B8416D6B577D6A553B08 /* Debug */,
+				B98ABD8B928CB424FDE7FBBE /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		53FBFCF0C6F99AF0DE8F2B94 /* Build configuration list for PBXNativeTarget "VeganScannerUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				5C55412A596266F9C6B62C7A /* Debug */,
+				BCE233C8720A6E629A76B50F /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		97F19D795B332205B8F62CA5 /* Build configuration list for PBXNativeTarget "VeganScanner" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				D64BC6856AD4350451064B2A /* Debug */,
+				20F943CAC675F9239E242281 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 1806F11C5A9805AD436C353D /* Project object */;
+}
