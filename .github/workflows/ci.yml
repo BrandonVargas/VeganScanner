@@ -68,4 +68,11 @@ jobs:
           -destination 'platform=iOS Simulator,name=iPhone 17,OS=latest'
           -only-testing:VeganScannerTests
           -only-testing:VeganScannerUITests/ScanFlowUITests/testInvalidBarcodeShowsValidationError
+          -resultBundlePath build/TestResults.xcresult
           CODE_SIGNING_ALLOWED=NO
+      - name: Upload test results
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: ios-test-results
+          path: iosApp/build/TestResults.xcresult

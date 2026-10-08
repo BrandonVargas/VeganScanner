@@ -14,7 +14,7 @@ final class ScanFlowUITests: XCTestCase {
     /// Offline: validation happens in shared Kotlin code before any network call.
     func testInvalidBarcodeShowsValidationError() {
         enterBarcode("3017620422004")
-        XCTAssertTrue(app.staticTexts["That doesn't look like a valid barcode"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.staticTexts["manualEntry.error"].waitForExistence(timeout: 15))
         attachScreenshot(named: "invalid-barcode")
     }
 
@@ -40,12 +40,18 @@ final class ScanFlowUITests: XCTestCase {
         XCTAssertTrue(app.staticTexts["Vegan"].waitForExistence(timeout: 20))
     }
 
+    /// Uses accessibility identifiers (not localized text) and waits on state, so slow CI simulators don't flake.
     private func enterBarcode(_ barcode: String) {
-        let field = app.textFields["e.g. 7501234567893"]
-        XCTAssertTrue(field.waitForExistence(timeout: 10))
+        let field = app.textFields["manualEntry.field"]
+        XCTAssertTrue(field.waitForExistence(timeout: 30))
         field.tap()
         field.typeText(barcode)
-        app.buttons["Look up"].tap()
+        XCTAssertEqual(field.value as? String, barcode)
+
+        let submit = app.buttons["manualEntry.submit"]
+        let enabled = expectation(for: NSPredicate(format: "isEnabled == true"), evaluatedWith: submit)
+        wait(for: [enabled], timeout: 10)
+        submit.tap()
     }
 
     private func attachScreenshot(named name: String) {

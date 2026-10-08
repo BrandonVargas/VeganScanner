@@ -73,6 +73,7 @@ struct ScannerView: View {
                     .keyboardType(.numberPad)
                     .textFieldStyle(.roundedBorder)
                     .focused($isManualEntryFocused)
+                    .accessibilityIdentifier("manualEntry.field")
                     .onChange(of: manualEntry) { _, newValue in
                         let sanitized = model.sanitize(newValue)
                         if sanitized != newValue { manualEntry = sanitized }
@@ -87,11 +88,13 @@ struct ScannerView: View {
                 }
                 .buttonStyle(.borderedProminent)
                 .disabled(manualEntry.isEmpty)
+                .accessibilityIdentifier("manualEntry.submit")
             }
             if model.state.isManualEntryInvalid {
                 Text("manual_entry.invalid")
                     .font(.footnote)
                     .foregroundStyle(.red)
+                    .accessibilityIdentifier("manualEntry.error")
             }
         }
         .padding()
