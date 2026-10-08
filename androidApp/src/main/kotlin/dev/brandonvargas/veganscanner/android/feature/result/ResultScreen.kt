@@ -152,7 +152,9 @@ private fun FoundContent(
         if (state.isResearching) ResearchingIndicator()
         state.researchIssue?.let { if (state.unresearchedCount > 0) ResearchIssueNote(it, state.unresearchedCount) }
         ProductHeader(product)
-        if (verdict.flaggedIngredients.isNotEmpty()) FlaggedIngredients(verdict)
+        if (verdict.flaggedIngredients.isNotEmpty()) {
+            FlaggedIngredients(verdict, reportedKeys = state.reportedKeys, onReport = onReport)
+        }
         if (verdict.researched.isNotEmpty()) {
             ResearchedIngredients(verdict.researched, reportedKeys = state.reportedKeys, onReport = onReport)
         }
@@ -218,7 +220,11 @@ private fun ProductHeader(product: Product) {
 }
 
 @Composable
-private fun FlaggedIngredients(verdict: VeganVerdict) {
+private fun FlaggedIngredients(
+    verdict: VeganVerdict,
+    reportedKeys: Set<String>,
+    onReport: (String) -> Unit,
+) {
     val title =
         when (verdict.status) {
             VeganStatus.NON_VEGAN -> R.string.flagged_non_vegan
@@ -242,13 +248,24 @@ private fun FlaggedIngredients(verdict: VeganVerdict) {
                     IngredientVeganStatus.UNKNOWN, IngredientVeganStatus.YES -> R.string.ingredient_status_unknown
                 }
             Text("• ${flagged.name} — ${stringResource(reason)}", style = MaterialTheme.typography.bodyLarge)
-            flagged.note?.let {
-                Text(
-                    it,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(start = 12.dp),
-                )
+            if (flagged.note == null && flagged.researchKey == null) return@forEach
+            Column(Modifier.padding(start = 12.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                flagged.note?.let {
+                    Text(
+                        it,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+                if (flagged.researchKey != null) {
+                    // An AI explanation of a dictionary finding: the status above didn't come from the AI.
+                    Text(
+                        stringResource(R.string.research_explanation_hint),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                    ResearchLinks(flagged, reportedKeys, onReport)
+                }
             }
         }
     }
@@ -298,7 +315,6 @@ private fun ResearchedIngredients(
     reportedKeys: Set<String>,
     onReport: (String) -> Unit,
 ) {
-    val uriHandler = LocalUriHandler.current
     Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.tertiaryContainer)) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -318,27 +334,35 @@ private fun ResearchedIngredients(
                         fontWeight = FontWeight.SemiBold,
                     )
                     ingredient.note?.let { Text(it, style = MaterialTheme.typography.bodyMedium) }
-                    ingredient.sources.take(3).forEach { source ->
-                        Text(
-                            source.title,
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.primary,
-                            textDecoration = TextDecoration.Underline,
-                            modifier = Modifier.clickable { uriHandler.openUri(source.url) },
-                        )
-                    }
-                    ingredient.researchKey?.let { key ->
-                        if (key in reportedKeys) {
-                            Text(
-                                stringResource(R.string.research_reported),
-                                style = MaterialTheme.typography.labelMedium,
-                            )
-                        } else {
-                            TextButton(onClick = { onReport(key) }) { Text(stringResource(R.string.research_report)) }
-                        }
-                    }
+                    ResearchLinks(ingredient, reportedKeys, onReport)
                 }
             }
+        }
+    }
+}
+
+/** Sources and the report option of a web-researched ingredient. */
+@Composable
+private fun ResearchLinks(
+    ingredient: FlaggedIngredient,
+    reportedKeys: Set<String>,
+    onReport: (String) -> Unit,
+) {
+    val uriHandler = LocalUriHandler.current
+    ingredient.sources.take(3).forEach { source ->
+        Text(
+            source.title,
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.primary,
+            textDecoration = TextDecoration.Underline,
+            modifier = Modifier.clickable { uriHandler.openUri(source.url) },
+        )
+    }
+    ingredient.researchKey?.let { key ->
+        if (key in reportedKeys) {
+            Text(stringResource(R.string.research_reported), style = MaterialTheme.typography.labelMedium)
+        } else {
+            TextButton(onClick = { onReport(key) }) { Text(stringResource(R.string.research_report)) }
         }
     }
 }

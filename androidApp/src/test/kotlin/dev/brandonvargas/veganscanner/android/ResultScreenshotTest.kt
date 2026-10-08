@@ -12,6 +12,7 @@ import dev.brandonvargas.veganscanner.core.model.FlaggedIngredient
 import dev.brandonvargas.veganscanner.core.model.IngredientVeganStatus
 import dev.brandonvargas.veganscanner.core.model.IngredientsSource
 import dev.brandonvargas.veganscanner.core.model.Product
+import dev.brandonvargas.veganscanner.core.model.SourceLink
 import dev.brandonvargas.veganscanner.core.model.VeganStatus
 import dev.brandonvargas.veganscanner.core.model.VeganVerdict
 import dev.brandonvargas.veganscanner.core.model.VerdictSource
@@ -113,6 +114,27 @@ class ResultScreenshotTest {
                 ),
                 unresearchedCount = 1,
                 researchIssue = ResearchIssue.OFFLINE,
+            ),
+        )
+
+    @Test
+    fun maybeVeganExplained() =
+        capture(
+            ProductResultUiState.Found(
+                product.copy(ingredientsText = "Base de avena (agua, avena), palmitato de vitamina A, sal"),
+                VeganVerdict(
+                    VeganStatus.MAYBE_VEGAN,
+                    VerdictSource.RULE_ENGINE,
+                    listOf(
+                        FlaggedIngredient(
+                            "vitamina A",
+                            IngredientVeganStatus.MAYBE,
+                            note = "Suele ser sintética, pero puede obtenerse de aceite de pescado o lanolina.",
+                            sources = listOf(SourceLink("Vitamina A (Wikipedia ES)", "https://es.wikipedia.org")),
+                            researchKey = "vitamina a",
+                        ),
+                    ),
+                ),
             ),
         )
 

@@ -182,10 +182,40 @@ private struct FoundContent: View {
                         Text(verbatim: "—")
                         Text(flagged.status.reason).foregroundStyle(.secondary)
                     }
-                    if let note = flagged.note {
-                        Text(note).font(.callout).foregroundStyle(.secondary).padding(.leading, 14)
+                    VStack(alignment: .leading, spacing: 4) {
+                        if let note = flagged.note {
+                            Text(note).font(.callout).foregroundStyle(.secondary)
+                        }
+                        if flagged.researchKey != nil {
+                            // An AI explanation of a dictionary finding: the status above didn't come from the AI.
+                            Text("research.explanation_hint").font(.caption).foregroundStyle(.secondary)
+                            ResearchLinks(ingredient: flagged, reportedKeys: reportedKeys, onReport: onReport)
+                        }
                     }
+                    .padding(.leading, 14)
                 }
+            }
+        }
+    }
+}
+
+/// Sources and the report option of a web-researched ingredient.
+private struct ResearchLinks: View {
+    let ingredient: FlaggedIngredient
+    let reportedKeys: Set<String>
+    let onReport: (String) -> Void
+
+    var body: some View {
+        ForEach(Array(ingredient.sources.prefix(3).enumerated()), id: \.offset) { _, source in
+            if let url = URL(string: source.url) {
+                Link(source.title, destination: url).font(.footnote)
+            }
+        }
+        if let key = ingredient.researchKey {
+            if reportedKeys.contains(key) {
+                Text("research.reported").font(.footnote).foregroundStyle(.secondary)
+            } else {
+                Button("research.report") { onReport(key) }.font(.footnote)
             }
         }
     }
@@ -213,18 +243,7 @@ private struct ResearchedIngredients: View {
                     if let note = ingredient.note {
                         Text(note).font(.callout)
                     }
-                    ForEach(Array(ingredient.sources.prefix(3).enumerated()), id: \.offset) { _, source in
-                        if let url = URL(string: source.url) {
-                            Link(source.title, destination: url).font(.footnote)
-                        }
-                    }
-                    if let key = ingredient.researchKey {
-                        if reportedKeys.contains(key) {
-                            Text("research.reported").font(.footnote).foregroundStyle(.secondary)
-                        } else {
-                            Button("research.report") { onReport(key) }.font(.footnote)
-                        }
-                    }
+                    ResearchLinks(ingredient: ingredient, reportedKeys: reportedKeys, onReport: onReport)
                 }
             }
         }

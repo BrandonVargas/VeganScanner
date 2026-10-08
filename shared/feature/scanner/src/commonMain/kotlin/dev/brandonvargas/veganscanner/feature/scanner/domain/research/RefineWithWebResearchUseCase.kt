@@ -28,11 +28,12 @@ data class ResearchRefinement(
 }
 
 /**
- * Looks up the ingredients the offline steps couldn't recognize on the web (Wikipedia + Gemini) and refines the
- * verdict. Runs after the result is shown, because a lookup can take several seconds.
- *
- * Safety: research can only resolve *unrecognized* ingredients. It never touches an ingredient the dictionaries
- * flagged as non-vegan or doubtful, and a researched "non_vegan" makes the product NON_VEGAN.
+ * Looks up ingredients on the web (Gemini + Wikipedia / Google Search) after the result is shown, because a lookup
+ * can take several seconds:
+ * - **Unrecognized** ingredients are resolved, refining the verdict. A researched "non_vegan" makes the product
+ *   NON_VEGAN.
+ * - Ingredients already flagged **non-vegan or doubtful** only get an explanation (why, with sources). Their status
+ *   and the verdict never change, and an answer that disagrees (e.g. "vegan" for gelatin) isn't shown.
  */
 class RefineWithWebResearchUseCase(
     private val repository: IngredientResearchRepository,
@@ -40,8 +41,7 @@ class RefineWithWebResearchUseCase(
     private val clock: Clock,
     private val deviceLanguage: String,
 ) {
-    fun shouldResearch(verdict: VeganVerdict): Boolean =
-        repository.isAvailable && !verdict.isConclusive && unrecognized(verdict).isNotEmpty()
+    fun shouldResearch(verdict: VeganVerdict): Boolean = repository.isAvailable && namesToResearch(verdict).isNotEmpty()
 
     /**
      * Researches the unrecognized ingredients. The result carries the refined verdict (if anything was learned) and,
@@ -49,10 +49,10 @@ class RefineWithWebResearchUseCase(
      */
     suspend operator fun invoke(product: Product, verdict: VeganVerdict): ResearchRefinement {
         if (!shouldResearch(verdict)) return ResearchRefinement.Unchanged
-        val names = unrecognized(verdict).map { it.name }.take(MAX_NAMES)
+        val names = namesToResearch(verdict)
         val outcome = researchInBatches(names, LabelLanguage.guess(product.ingredientsText))
 
-        val refined = outcome.results.takeIf { it.isNotEmpty() }?.let { apply(verdict, it) }
+        val refined = outcome.results.takeIf { it.isNotEmpty() }?.let { apply(verdict, it) }?.takeIf { it != verdict }
         refined?.let { history.record(product.historyEntry(it, clock.now())) }
         return ResearchRefinement(
             verdict = refined,
@@ -83,9 +83,10 @@ class RefineWithWebResearchUseCase(
 
     internal fun apply(verdict: VeganVerdict, results: List<ResearchedIngredient>): VeganVerdict {
         val byName = results.associateBy { TextFolding.foldTerm(it.name) }
+        val explained = verdict.flaggedIngredients.map { flagged -> explain(flagged, byName) }
         val researched = mutableListOf<FlaggedIngredient>()
         val remaining =
-            verdict.flaggedIngredients.mapNotNull { flagged ->
+            explained.mapNotNull { flagged ->
                 val result = byName[TextFolding.foldTerm(flagged.name)]
                 if (flagged.status != IngredientVeganStatus.UNKNOWN || result == null) return@mapNotNull flagged
                 val resolved =
@@ -99,7 +100,7 @@ class RefineWithWebResearchUseCase(
                 researched += resolved
                 resolved.takeUnless { it.status == IngredientVeganStatus.YES }
             }
-        if (researched.isEmpty()) return verdict
+        if (researched.isEmpty()) return verdict.copy(flaggedIngredients = explained)
 
         val status =
             when {
@@ -121,10 +122,34 @@ class RefineWithWebResearchUseCase(
         )
     }
 
-    private fun unrecognized(verdict: VeganVerdict) =
-        verdict.flaggedIngredients
-            .filter { it.status == IngredientVeganStatus.UNKNOWN }
-            .distinctBy { TextFolding.foldTerm(it.name) }
+    /** Adds the researched reason to a non-vegan or doubtful ingredient when the research agrees it isn't vegan. */
+    private fun explain(flagged: FlaggedIngredient, byName: Map<String, ResearchedIngredient>): FlaggedIngredient {
+        if (!flagged.isExplainable) return flagged
+        val result = byName[TextFolding.foldTerm(flagged.name)] ?: return flagged
+        if (result.status != IngredientVeganStatus.NO && result.status != IngredientVeganStatus.MAYBE) return flagged
+        return flagged.copy(
+            note = result.reason(deviceLanguage),
+            sources = result.sources,
+            researchKey = result.key,
+        )
+    }
+
+    /** Unrecognized ingredients first (they can change the verdict), then the ones that only need an explanation. */
+    private fun namesToResearch(verdict: VeganVerdict): List<String> {
+        val unrecognized =
+            verdict.flaggedIngredients.takeUnless { verdict.isConclusive }.orEmpty()
+                .filter { it.status == IngredientVeganStatus.UNKNOWN }
+        val explainable = verdict.flaggedIngredients.filter { it.isExplainable }
+        return (unrecognized + explainable)
+            .map { it.name }
+            .distinctBy { TextFolding.foldTerm(it) }
+            .take(MAX_NAMES)
+    }
+
+    private val FlaggedIngredient.isExplainable: Boolean
+        get() =
+            note == null &&
+                (status == IngredientVeganStatus.NO || status == IngredientVeganStatus.MAYBE)
 
     private companion object {
         /** Matches the Edge Function's per-request limit. */

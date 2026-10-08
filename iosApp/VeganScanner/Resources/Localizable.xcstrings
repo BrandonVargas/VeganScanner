@@ -681,6 +681,23 @@
         }
       }
     },
+    "research.explanation_hint" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "AI explanation from web sources. It may be wrong."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Explicación de IA basada en fuentes web. Puede estar equivocada."
+          }
+        }
+      }
+    },
     "research.in_progress" : {
       "extractionState" : "manual",
       "localizations" : {

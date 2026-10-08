@@ -85,21 +85,86 @@ class RefineWithWebResearchUseCaseTest {
         }
 
     @Test
-    fun neverTouchesIngredientsTheDictionariesAlreadyJudged() =
+    fun judgedIngredientsAreExplainedButNeverChanged() =
         runTest {
-            repository.results = listOf(researched("saborizantes naturales", YES), researched("Xantolina", YES))
+            repository.results =
+                listOf(
+                    researched("saborizantes naturales", MAYBE),
+                    researched("grenetina", NO),
+                    researched("Xantolina", YES),
+                )
             val verdict =
                 VeganVerdict(
                     VeganStatus.MAYBE_VEGAN,
                     VerdictSource.RULE_ENGINE,
-                    listOf(FlaggedIngredient("saborizantes naturales", MAYBE), FlaggedIngredient("Xantolina", UNKNOWN)),
+                    listOf(
+                        FlaggedIngredient("saborizantes naturales", MAYBE),
+                        FlaggedIngredient("grenetina", NO),
+                        FlaggedIngredient("Xantolina", UNKNOWN),
+                    ),
                 )
 
             val refined = useCase(product, verdict).verdict!!
 
-            assertEquals(listOf(listOf("Xantolina")), repository.requested)
-            assertEquals(VeganStatus.MAYBE_VEGAN, refined.status)
-            assertEquals(listOf("saborizantes naturales"), refined.flaggedIngredients.map { it.name })
+            assertEquals(listOf(listOf("Xantolina", "saborizantes naturales", "grenetina")), repository.requested)
+            assertEquals(VeganStatus.NON_VEGAN, refined.status)
+            val gelatin = refined.flaggedIngredients.single()
+            assertEquals(NO, gelatin.status)
+            assertEquals("Razón en español", gelatin.note)
+            assertEquals("grenetina", gelatin.researchKey)
+            assertEquals(listOf("Xantolina"), refined.researched.map { it.name })
+        }
+
+    @Test
+    fun explanationsKeepTheVerdictAndItsSource() =
+        runTest {
+            repository.results = listOf(researched("Vitamina A", MAYBE))
+            val verdict =
+                VeganVerdict(
+                    VeganStatus.MAYBE_VEGAN,
+                    VerdictSource.RULE_ENGINE,
+                    listOf(FlaggedIngredient("Vitamina A", MAYBE)),
+                )
+
+            val refined = useCase(product, verdict).verdict!!
+
+            assertEquals(verdict.copy(flaggedIngredients = listOf(refined.flaggedIngredients.single())), refined)
+            assertEquals(MAYBE, refined.flaggedIngredients.single().status)
+            assertEquals("Razón en español", refined.flaggedIngredients.single().note)
+            assertTrue(refined.researched.isEmpty())
+        }
+
+    @Test
+    fun explanationsThatDisagreeAreNotShown() =
+        runTest {
+            repository.results = listOf(researched("grenetina", YES))
+            val verdict =
+                VeganVerdict(
+                    VeganStatus.NON_VEGAN,
+                    VerdictSource.RULE_ENGINE,
+                    listOf(FlaggedIngredient("grenetina", NO)),
+                )
+
+            assertNull(useCase(product, verdict).verdict)
+            assertTrue(history.entries.value.isEmpty())
+        }
+
+    @Test
+    fun conclusiveNonVeganVerdictsAreExplainedToo() =
+        runTest {
+            val verdict =
+                VeganVerdict(
+                    VeganStatus.NON_VEGAN,
+                    VerdictSource.OPEN_FOOD_FACTS,
+                    listOf(FlaggedIngredient("miel", NO)),
+                )
+
+            assertTrue(useCase.shouldResearch(verdict))
+            assertFalse(
+                useCase.shouldResearch(
+                    verdict.copy(flaggedIngredients = listOf(FlaggedIngredient("miel", NO, note = "x"))),
+                ),
+            )
         }
 
     @Test
