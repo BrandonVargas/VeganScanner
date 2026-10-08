@@ -79,6 +79,14 @@ class IngredientRuleEngineTest {
     }
 
     @Test
+    fun sorbitanStearatesAreDoubtful() {
+        assertEquals(
+            listOf("monoestearato de sorbitán" to MAYBE),
+            flagged("Levadura (Saccharomyces cerevisiae), monoestearato de sorbitán y ácido ascórbico"),
+        )
+    }
+
+    @Test
     fun cajetaIsDairy() {
         assertEquals(listOf("cajeta" to NO), flagged("Obleas con cajeta"))
     }

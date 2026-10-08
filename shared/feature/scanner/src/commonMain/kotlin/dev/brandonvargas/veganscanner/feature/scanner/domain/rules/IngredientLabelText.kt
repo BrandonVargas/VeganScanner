@@ -41,6 +41,13 @@ object IngredientLabelText {
             "cont net",
             "net wt",
             "net weight",
+            // Storage notes and claims often printed right after the list. Words that can also be part of an
+            // ingredient ("kosher salt", "non-GMO oil", "certified organic oats") are deliberately not here.
+            "mantenga en",
+            "mantengase",
+            "este producto es libre",
+            "este producto no contiene sellos",
+            "libre de alergenos",
         ).map { TextFolding.termRegex(it) }
 
     fun extract(rawText: String): String {

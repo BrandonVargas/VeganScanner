@@ -1,3 +1,4 @@
+import OSLog
 import SwiftUI
 import VeganKit
 
@@ -88,12 +89,22 @@ struct LabelScanView: View {
     private func captureAndRecognize() {
         model.send(LabelScanActionCaptureStarted.shared)
         Task {
+            var text = ""
             do {
                 let photo = try await camera.capturePhoto()
-                let text = try await TextRecognizer.recognizeText(in: photo)
-                model.send(LabelScanActionTextRecognized(rawText: text))
+                text = try await TextRecognizer.recognizeText(in: photo)
             } catch {
+                Logger.label.error("Photo capture or OCR failed: \(String(describing: error))")
+            }
+            if text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                // The live preview has been recognizing text all along; use it rather than failing.
+                text = camera.liveText()
+                Logger.label.info("Using live preview text (\(text.count) characters)")
+            }
+            if text.isEmpty {
                 model.send(LabelScanActionRecognitionFailed.shared)
+            } else {
+                model.send(LabelScanActionTextRecognized(rawText: text))
             }
         }
     }
