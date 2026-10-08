@@ -72,6 +72,7 @@ dependencies {
     implementation(libs.camerax.view)
     implementation(libs.camerax.mlkit.vision)
     implementation(libs.mlkit.barcode.scanning)
+    implementation(libs.mlkit.text.recognition)
 
     implementation(libs.coil.compose)
     implementation(libs.coil.network.ktor3)

@@ -33,6 +33,13 @@ extension VeganStatus {
                 systemImage: "exclamationmark.triangle.fill",
                 label: "verdict.maybe"
             )
+        case .likelyVegan:
+            VerdictStyle(
+                background: .adaptive(light: 0xCDEBD9, dark: 0x1F4D33),
+                foreground: .adaptive(light: 0x00210F, dark: 0xCDEBD9),
+                systemImage: "leaf.fill",
+                label: "verdict.likely"
+            )
         case .unknown:
             VerdictStyle(
                 background: .adaptive(light: 0xDEE5D8, dark: 0x424940),
@@ -49,6 +56,8 @@ extension VerdictSource {
         switch self {
         case .openFoodFacts: "source.off_analysis"
         case .openFoodFactsIngredients: "source.off_ingredients"
+        case .ruleEngine: "source.rule_engine"
+        case .labelScan: "source.label_scan"
         case .undetermined: "source.undetermined"
         }
     }

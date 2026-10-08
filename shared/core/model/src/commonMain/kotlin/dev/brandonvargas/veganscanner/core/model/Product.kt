@@ -10,7 +10,11 @@ data class Product(
     val ingredients: List<Ingredient>,
     /** The data source's own product-level vegan analysis, before the app applies its own rules. */
     val sourceAnalysis: VeganStatus,
+    /** Where [ingredientsText] came from. A scanned label replaces missing or outdated database text. */
+    val ingredientsSource: IngredientsSource = IngredientsSource.OPEN_FOOD_FACTS,
 )
+
+enum class IngredientsSource { OPEN_FOOD_FACTS, LABEL_SCAN }
 
 data class Ingredient(
     val id: String?,

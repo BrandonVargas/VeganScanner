@@ -8,6 +8,7 @@ Vegan Scanner is a free, open-source app. It is built to collect as little data 
 
 - **Camera:** used only on your device to read barcodes. No images leave your device.
 - **Barcode lookups:** when you scan, the barcode number is sent to [Open Food Facts](https://world.openfoodfacts.org) to fetch product data. Open Food Facts receives the request like any website visit. See their [privacy policy](https://world.openfoodfacts.org/privacy).
+- **Ingredient-label scans:** the photo is read by on-device text recognition (ML Kit on Android, Apple Vision on iOS) and discarded right away. It is never stored or uploaded. Only the ingredient text you confirm is saved, on your device, to evaluate that product.
 - **Scan history and product cache:** stored only on your device. You can delete entries or clear the history at any time. Uninstalling the app removes them.
 - **No accounts, no ads, no tracking, no analytics.**
 

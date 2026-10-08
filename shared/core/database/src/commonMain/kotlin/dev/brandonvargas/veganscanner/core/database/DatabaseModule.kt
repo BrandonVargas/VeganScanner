@@ -12,4 +12,5 @@ val databaseModule =
         single { get<androidx.room.RoomDatabase.Builder<VeganScannerDatabase>>().buildDatabase() }
         single { get<VeganScannerDatabase>().productCacheDao() }
         single { get<VeganScannerDatabase>().scanHistoryDao() }
+        single { get<VeganScannerDatabase>().labelScanDao() }
     }

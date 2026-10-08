@@ -32,7 +32,7 @@ struct HistoryView: View {
         } else {
             List {
                 ForEach(model.state.entries, id: \.barcode) { entry in
-                    NavigationLink(value: ResultRoute(barcode: entry.barcode)) {
+                    NavigationLink(value: AppRoute.result(barcode: entry.barcode)) {
                         HistoryRow(entry: entry)
                     }
                 }
@@ -59,9 +59,9 @@ private struct HistoryRow: View {
                 HStack(spacing: 4) {
                     Text(style.label)
                     if let brands = entry.brands {
-                        Text("· \(brands)")
+                        Text(verbatim: "· \(brands)")
                     }
-                    Text("· \(entry.scannedAt.date, format: .relative(presentation: .named))")
+                    Text(verbatim: "· ") + Text(entry.scannedAt.date, format: .relative(presentation: .named))
                 }
                 .font(.caption)
                 .foregroundStyle(.secondary)

@@ -2,8 +2,10 @@ package dev.brandonvargas.veganscanner.feature.scanner.domain
 
 import dev.brandonvargas.veganscanner.core.common.AppResult
 import dev.brandonvargas.veganscanner.core.model.Barcode
+import dev.brandonvargas.veganscanner.core.model.IngredientsSource
 import dev.brandonvargas.veganscanner.core.model.Product
 import dev.brandonvargas.veganscanner.core.model.ScanHistoryEntry
+import dev.brandonvargas.veganscanner.core.model.VeganStatus
 import dev.brandonvargas.veganscanner.core.model.VeganVerdict
 import dev.brandonvargas.veganscanner.feature.scanner.domain.verdict.VerdictPipeline
 import kotlin.time.Clock
@@ -14,17 +16,29 @@ sealed interface ScanOutcome {
     data class NotFound(val barcode: Barcode) : ScanOutcome
 }
 
-/** Looks up a barcode, runs the verdict pipeline and records the scan in history. */
+/**
+ * Looks up a barcode, runs the verdict pipeline and records the scan in history.
+ *
+ * If the user scanned this product's ingredient label, that text is used instead of the database's
+ * ingredient list, and it also works when the product isn't in the database or the device is offline.
+ */
 class ScanProductUseCase(
     private val productRepository: ProductRepository,
+    private val labelScanRepository: LabelScanRepository,
     private val verdictPipeline: VerdictPipeline,
     private val historyRepository: ScanHistoryRepository,
     private val clock: Clock,
 ) {
     suspend operator fun invoke(barcode: Barcode): AppResult<ScanOutcome> {
-        val result = productRepository.getProduct(barcode)
-        if (result is AppResult.Failure) return result
-        val product = (result as AppResult.Success).value ?: return AppResult.Success(ScanOutcome.NotFound(barcode))
+        val labelText = labelScanRepository.get(barcode.value)
+        val remote = productRepository.getProduct(barcode)
+        if (remote is AppResult.Failure && labelText == null) return remote
+
+        val product =
+            (remote as? AppResult.Success)?.value
+                ?.withLabel(labelText)
+                ?: labelText?.let { labelOnlyProduct(barcode, it) }
+                ?: return AppResult.Success(ScanOutcome.NotFound(barcode))
 
         val verdict = verdictPipeline.evaluate(product)
         historyRepository.record(
@@ -40,4 +54,25 @@ class ScanProductUseCase(
         )
         return AppResult.Success(ScanOutcome.Found(product, verdict))
     }
+
+    private fun Product.withLabel(labelText: String?): Product =
+        if (labelText ==
+            null
+        ) {
+            this
+        } else {
+            copy(ingredientsText = labelText, ingredientsSource = IngredientsSource.LABEL_SCAN)
+        }
+
+    private fun labelOnlyProduct(barcode: Barcode, labelText: String) =
+        Product(
+            barcode = barcode,
+            name = null,
+            brands = null,
+            imageUrl = null,
+            ingredientsText = labelText,
+            ingredients = emptyList(),
+            sourceAnalysis = VeganStatus.UNKNOWN,
+            ingredientsSource = IngredientsSource.LABEL_SCAN,
+        )
 }

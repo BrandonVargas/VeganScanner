@@ -14,6 +14,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.rounded.CloudOff
+import androidx.compose.material.icons.rounded.DocumentScanner
 import androidx.compose.material.icons.rounded.Info
 import androidx.compose.material.icons.rounded.SearchOff
 import androidx.compose.material3.Button
@@ -28,6 +29,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -50,6 +52,7 @@ import dev.brandonvargas.veganscanner.android.ui.components.messageRes
 import dev.brandonvargas.veganscanner.android.ui.components.style
 import dev.brandonvargas.veganscanner.core.common.AppError
 import dev.brandonvargas.veganscanner.core.model.IngredientVeganStatus
+import dev.brandonvargas.veganscanner.core.model.IngredientsSource
 import dev.brandonvargas.veganscanner.core.model.Product
 import dev.brandonvargas.veganscanner.core.model.VeganStatus
 import dev.brandonvargas.veganscanner.core.model.VeganVerdict
@@ -63,10 +66,11 @@ import org.koin.core.parameter.parametersOf
 fun ResultScreen(
     barcode: String,
     onBack: () -> Unit,
+    onScanLabel: () -> Unit,
     viewModel: ProductResultViewModel = koinViewModel { parametersOf(barcode) },
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
-    ResultContent(state = state, onBack = onBack, onAction = viewModel::onAction)
+    ResultContent(state = state, onBack = onBack, onScanLabel = onScanLabel, onAction = viewModel::onAction)
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -74,6 +78,7 @@ fun ResultScreen(
 fun ResultContent(
     state: ProductResultUiState,
     onBack: () -> Unit,
+    onScanLabel: () -> Unit,
     onAction: (ProductResultAction) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -100,17 +105,19 @@ fun ResultContent(
                 }
 
                 is ProductResultUiState.Found -> {
-                    FoundContent(state.product, state.verdict)
+                    FoundContent(state.product, state.verdict, onScanLabel)
                 }
 
                 is ProductResultUiState.NotFound -> {
-                    NotFoundContent(state.barcode, onBack)
+                    NotFoundContent(state.barcode, onScanAnother = onBack, onScanLabel = onScanLabel)
                 }
 
                 is ProductResultUiState.Error -> {
-                    ErrorContent(state.error, onRetry = {
-                        onAction(ProductResultAction.Retry)
-                    })
+                    ErrorContent(
+                        state.error,
+                        onRetry = { onAction(ProductResultAction.Retry) },
+                        onScanLabel = onScanLabel,
+                    )
                 }
             }
         }
@@ -118,7 +125,7 @@ fun ResultContent(
 }
 
 @Composable
-private fun FoundContent(product: Product, verdict: VeganVerdict) {
+private fun FoundContent(product: Product, verdict: VeganVerdict, onScanLabel: () -> Unit) {
     Column(
         Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
@@ -126,7 +133,12 @@ private fun FoundContent(product: Product, verdict: VeganVerdict) {
         VerdictBanner(verdict)
         ProductHeader(product)
         if (verdict.flaggedIngredients.isNotEmpty()) FlaggedIngredients(verdict)
-        if (!verdict.isConclusive) InconclusiveNotice()
+        if (!verdict.isConclusive) {
+            InconclusiveNotice(
+                fromLabel = product.ingredientsSource == IngredientsSource.LABEL_SCAN,
+                onScanLabel = onScanLabel,
+            )
+        }
         product.ingredientsText?.let { IngredientsText(it) }
         HorizontalDivider()
         Text(
@@ -184,7 +196,12 @@ private fun ProductHeader(product: Product) {
 
 @Composable
 private fun FlaggedIngredients(verdict: VeganVerdict) {
-    val title = if (verdict.status == VeganStatus.NON_VEGAN) R.string.flagged_non_vegan else R.string.flagged_check
+    val title =
+        when (verdict.status) {
+            VeganStatus.NON_VEGAN -> R.string.flagged_non_vegan
+            VeganStatus.LIKELY_VEGAN -> R.string.flagged_unrecognized
+            else -> R.string.flagged_check
+        }
     Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
         Text(
             stringResource(title),
@@ -207,15 +224,27 @@ private fun FlaggedIngredients(verdict: VeganVerdict) {
 }
 
 @Composable
-private fun InconclusiveNotice() {
+private fun InconclusiveNotice(fromLabel: Boolean, onScanLabel: () -> Unit) {
     Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer)) {
-        Row(Modifier.padding(16.dp)) {
-            Icon(Icons.Rounded.Info, contentDescription = null)
-            Text(
-                text = stringResource(R.string.inconclusive_notice),
-                style = MaterialTheme.typography.bodyMedium,
-                modifier = Modifier.padding(start = 12.dp),
-            )
+        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            Row {
+                Icon(Icons.Rounded.Info, contentDescription = null)
+                Text(
+                    text =
+                        stringResource(
+                            if (fromLabel) R.string.inconclusive_notice_label else R.string.inconclusive_notice,
+                        ),
+                    style = MaterialTheme.typography.bodyMedium,
+                    modifier = Modifier.padding(start = 12.dp),
+                )
+            }
+            Button(onClick = onScanLabel, modifier = Modifier.fillMaxWidth()) {
+                Icon(Icons.Rounded.DocumentScanner, contentDescription = null)
+                Text(
+                    stringResource(if (fromLabel) R.string.action_rescan_label else R.string.action_scan_label),
+                    modifier = Modifier.padding(start = 8.dp),
+                )
+            }
         }
     }
 }
@@ -233,28 +262,30 @@ private fun IngredientsText(text: String) {
 }
 
 @Composable
-private fun NotFoundContent(barcode: String, onScanAnother: () -> Unit) {
+private fun NotFoundContent(barcode: String, onScanAnother: () -> Unit, onScanLabel: () -> Unit) {
     val uriHandler = LocalUriHandler.current
     CenteredMessage(
         icon = { Icon(Icons.Rounded.SearchOff, contentDescription = null, modifier = Modifier.size(56.dp)) },
         title = stringResource(R.string.not_found_title),
         body = stringResource(R.string.not_found_body, barcode),
     ) {
-        Button(onClick = onScanAnother) { Text(stringResource(R.string.action_scan_another)) }
-        OutlinedButton(onClick = { uriHandler.openUri("https://world.openfoodfacts.org/product/$barcode") }) {
+        Button(onClick = onScanLabel) { Text(stringResource(R.string.action_scan_label)) }
+        OutlinedButton(onClick = onScanAnother) { Text(stringResource(R.string.action_scan_another)) }
+        TextButton(onClick = { uriHandler.openUri("https://world.openfoodfacts.org/product/$barcode") }) {
             Text(stringResource(R.string.action_add_to_off))
         }
     }
 }
 
 @Composable
-private fun ErrorContent(error: AppError, onRetry: () -> Unit) {
+private fun ErrorContent(error: AppError, onRetry: () -> Unit, onScanLabel: () -> Unit) {
     CenteredMessage(
         icon = { Icon(Icons.Rounded.CloudOff, contentDescription = null, modifier = Modifier.size(56.dp)) },
         title = stringResource(R.string.error_title),
         body = stringResource(error.messageRes()),
     ) {
         Button(onClick = onRetry) { Text(stringResource(R.string.action_retry)) }
+        OutlinedButton(onClick = onScanLabel) { Text(stringResource(R.string.action_scan_label_offline)) }
     }
 }
 

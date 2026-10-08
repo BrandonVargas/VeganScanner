@@ -81,6 +81,8 @@ data class VerdictColors(
     val onNonVegan: Color,
     val maybe: Color,
     val onMaybe: Color,
+    val likely: Color,
+    val onLikely: Color,
     val unknown: Color,
     val onUnknown: Color,
 )
@@ -92,6 +94,8 @@ private val LightVerdictColors = VerdictColors(
     onNonVegan = Color(0xFF410002),
     maybe = Color(0xFFFFDEA6),
     onMaybe = Color(0xFF271900),
+    likely = Color(0xFFCDEBD9),
+    onLikely = Color(0xFF00210F),
     unknown = Color(0xFFDEE5D8),
     onUnknown = Color(0xFF181D17),
 )
@@ -103,6 +107,8 @@ private val DarkVerdictColors = VerdictColors(
     onNonVegan = Color(0xFFFFDAD6),
     maybe = Color(0xFF5D4200),
     onMaybe = Color(0xFFFFDEA6),
+    likely = Color(0xFF1F4D33),
+    onLikely = Color(0xFFCDEBD9),
     unknown = Color(0xFF424940),
     onUnknown = Color(0xFFDFE4DA),
 )

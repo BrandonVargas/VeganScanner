@@ -5,6 +5,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.HelpOutline
 import androidx.compose.material.icons.rounded.Block
 import androidx.compose.material.icons.rounded.CheckCircle
+import androidx.compose.material.icons.rounded.Spa
 import androidx.compose.material.icons.rounded.WarningAmber
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.ReadOnlyComposable
@@ -55,6 +56,15 @@ fun VeganStatus.style(): VerdictStyle {
             )
         }
 
+        VeganStatus.LIKELY_VEGAN -> {
+            VerdictStyle(
+                colors.likely,
+                colors.onLikely,
+                Icons.Rounded.Spa,
+                R.string.verdict_likely,
+            )
+        }
+
         VeganStatus.UNKNOWN -> {
             VerdictStyle(
                 colors.unknown,
@@ -71,6 +81,8 @@ fun VerdictSource.labelRes(): Int =
     when (this) {
         VerdictSource.OPEN_FOOD_FACTS -> R.string.source_off_analysis
         VerdictSource.OPEN_FOOD_FACTS_INGREDIENTS -> R.string.source_off_ingredients
+        VerdictSource.RULE_ENGINE -> R.string.source_rule_engine
+        VerdictSource.LABEL_SCAN -> R.string.source_label_scan
         VerdictSource.UNDETERMINED -> R.string.source_none
     }
 

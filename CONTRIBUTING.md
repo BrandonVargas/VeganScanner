@@ -33,6 +33,10 @@ If you change the iOS project, edit `iosApp/project.yml` and run `xcodegen`. Don
 - Android UI: Roborazzi screenshot tests. If you change UI on purpose, re-record with `./gradlew :androidApp:recordRoborazziDebug` and commit the new PNGs.
 - iOS: Swift Testing for models, XCUITest for flows.
 
+## Ingredient dictionary
+
+The easiest way to help is by adding ingredient names from your country's labels to `shared/feature/scanner/dictionary/ingredients.json`. No Kotlin is required. See the [dictionary guide](shared/feature/scanner/dictionary/README.md).
+
 ## Translations
 
 Android strings live in `androidApp/src/main/res/values*/strings.xml`. iOS strings live in `iosApp/VeganScanner/Resources/Localizable.xcstrings`. Please update both.
