@@ -32,8 +32,9 @@ data class ResearchRefinement(
  * can take several seconds:
  * - **Unrecognized** ingredients are resolved, refining the verdict. A researched "non_vegan" makes the product
  *   NON_VEGAN.
- * - Ingredients already flagged **non-vegan or doubtful** only get an explanation (why, with sources). Their status
- *   and the verdict never change, and an answer that disagrees (e.g. "vegan" for gelatin) isn't shown.
+ * - Ingredients already flagged **doubtful** only get an explanation (why they may not be vegan, with sources). Their
+ *   status and the verdict never change, and an answer that disagrees (says "vegan") isn't shown. Non-vegan ones
+ *   ("leche") need no explanation.
  */
 class RefineWithWebResearchUseCase(
     private val repository: IngredientResearchRepository,
@@ -122,7 +123,7 @@ class RefineWithWebResearchUseCase(
         )
     }
 
-    /** Adds the researched reason to a non-vegan or doubtful ingredient when the research agrees it isn't vegan. */
+    /** Adds the researched reason to a doubtful ingredient when the research agrees it isn't clearly vegan. */
     private fun explain(flagged: FlaggedIngredient, byName: Map<String, ResearchedIngredient>): FlaggedIngredient {
         if (!flagged.isExplainable) return flagged
         val result = byName[TextFolding.foldTerm(flagged.name)] ?: return flagged
@@ -147,9 +148,7 @@ class RefineWithWebResearchUseCase(
     }
 
     private val FlaggedIngredient.isExplainable: Boolean
-        get() =
-            note == null &&
-                (status == IngredientVeganStatus.NO || status == IngredientVeganStatus.MAYBE)
+        get() = note == null && status == IngredientVeganStatus.MAYBE
 
     private companion object {
         /** Matches the Edge Function's per-request limit. */

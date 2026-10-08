@@ -25,7 +25,7 @@ After the dictionary and the Open Food Facts taxonomy (ADR 0006), some ingredien
 - **Reports:** users can report a researched verdict as wrong (`ingredient_reports`, one per user). Three reports mark it `disputed`, which hides it from everyone.
 - **App behavior** (`RefineWithWebResearchUseCase`):
   - The offline verdict appears immediately. Research runs in the background, only for **unrecognized** ingredients (at most 5), and the screen updates.
-  - Ingredients the dictionaries already judged non-vegan or doubtful are researched **only for an explanation**: the reason and sources appear under the ingredient (with an AI note and a report button) when the research agrees it isn't vegan. Their status and the verdict never change, and a disagreeing answer ("vegan" for gelatin) isn't shown.
+  - Ingredients the dictionaries judged **doubtful** are researched **only for an explanation**: the reason and sources appear under the ingredient (with an AI note and a report button) when the research agrees it isn't clearly vegan. Their status and the verdict never change, and a disagreeing answer ("vegan") isn't shown. Non-vegan ingredients ("leche") need no explanation, which keeps research calls down.
   - A researched "non_vegan" → NON_VEGAN. Every unrecognized ingredient researched as vegan → VEGAN, with source `WEB_RESEARCH`, an AI warning, per-ingredient reasons and sources, and a report button.
   - Results are cached locally for 30 days (Room v3).
 - **Optional:** a build without Supabase settings (forks, CI) simply has no online research (`DisabledIngredientResearchRepository`).

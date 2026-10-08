@@ -106,12 +106,11 @@ class RefineWithWebResearchUseCaseTest {
 
             val refined = useCase(product, verdict).verdict!!
 
-            assertEquals(listOf(listOf("Xantolina", "saborizantes naturales", "grenetina")), repository.requested)
+            assertEquals(listOf(listOf("Xantolina", "saborizantes naturales")), repository.requested)
             assertEquals(VeganStatus.NON_VEGAN, refined.status)
             val gelatin = refined.flaggedIngredients.single()
             assertEquals(NO, gelatin.status)
-            assertEquals("Razón en español", gelatin.note)
-            assertEquals("grenetina", gelatin.researchKey)
+            assertNull(gelatin.note)
             assertEquals(listOf("Xantolina"), refined.researched.map { it.name })
         }
 
@@ -137,12 +136,12 @@ class RefineWithWebResearchUseCaseTest {
     @Test
     fun explanationsThatDisagreeAreNotShown() =
         runTest {
-            repository.results = listOf(researched("grenetina", YES))
+            repository.results = listOf(researched("E471", YES))
             val verdict =
                 VeganVerdict(
-                    VeganStatus.NON_VEGAN,
+                    VeganStatus.MAYBE_VEGAN,
                     VerdictSource.RULE_ENGINE,
-                    listOf(FlaggedIngredient("grenetina", NO)),
+                    listOf(FlaggedIngredient("E471", MAYBE)),
                 )
 
             assertNull(useCase(product, verdict).verdict)
@@ -150,7 +149,7 @@ class RefineWithWebResearchUseCaseTest {
         }
 
     @Test
-    fun conclusiveNonVeganVerdictsAreExplainedToo() =
+    fun onlyDoubtfulIngredientsAreExplained() =
         runTest {
             val verdict =
                 VeganVerdict(
@@ -159,10 +158,16 @@ class RefineWithWebResearchUseCaseTest {
                     listOf(FlaggedIngredient("miel", NO)),
                 )
 
-            assertTrue(useCase.shouldResearch(verdict))
+            assertFalse(useCase.shouldResearch(verdict))
+            val doubtful =
+                verdict.copy(
+                    status = VeganStatus.MAYBE_VEGAN,
+                    flaggedIngredients = listOf(FlaggedIngredient("E471", MAYBE)),
+                )
+            assertTrue(useCase.shouldResearch(doubtful))
             assertFalse(
                 useCase.shouldResearch(
-                    verdict.copy(flaggedIngredients = listOf(FlaggedIngredient("miel", NO, note = "x"))),
+                    doubtful.copy(flaggedIngredients = listOf(FlaggedIngredient("E471", MAYBE, note = "x"))),
                 ),
             )
         }
