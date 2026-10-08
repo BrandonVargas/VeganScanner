@@ -23,6 +23,7 @@ sqlite = "2.7.1"
 lifecycle = "2.11.0"
 kermit = "2.2.0"
 turbine = "1.2.1"
+supabase = "3.8.0"
 
 # Android app
 androidx-core = "1.19.1"
@@ -62,6 +63,10 @@ sqlite-bundled = { module = "androidx.sqlite:sqlite-bundled", version.ref = "sql
 androidx-lifecycle-viewmodel = { module = "androidx.lifecycle:lifecycle-viewmodel", version.ref = "lifecycle" }
 kermit = { module = "co.touchlab:kermit", version.ref = "kermit" }
 turbine = { module = "app.cash.turbine:turbine", version.ref = "turbine" }
+supabase-bom = { module = "io.github.jan-tennert.supabase:bom", version.ref = "supabase" }
+supabase-auth = { module = "io.github.jan-tennert.supabase:auth-kt" }
+supabase-functions = { module = "io.github.jan-tennert.supabase:functions-kt" }
+supabase-postgrest = { module = "io.github.jan-tennert.supabase:postgrest-kt" }
 
 # Android app
 androidx-core-ktx = { module = "androidx.core:core-ktx", version.ref = "androidx-core" }

@@ -1,3 +1,4 @@
 // Shared build settings. Set your Apple team locally (not committed) to run on a device:
 // create Configuration/Local.xcconfig with `DEVELOPMENT_TEAM = XXXXXXXXXX`.
 #include? "Local.xcconfig"
+#include? "Secrets.xcconfig"

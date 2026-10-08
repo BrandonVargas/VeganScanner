@@ -13,4 +13,5 @@ val databaseModule =
         single { get<VeganScannerDatabase>().productCacheDao() }
         single { get<VeganScannerDatabase>().scanHistoryDao() }
         single { get<VeganScannerDatabase>().labelScanDao() }
+        single { get<VeganScannerDatabase>().ingredientResearchDao() }
     }

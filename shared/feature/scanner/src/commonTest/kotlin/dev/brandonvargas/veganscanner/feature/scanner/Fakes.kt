@@ -1,9 +1,11 @@
 package dev.brandonvargas.veganscanner.feature.scanner
 
 import dev.brandonvargas.veganscanner.core.common.AppResult
+import dev.brandonvargas.veganscanner.core.database.dao.IngredientResearchDao
 import dev.brandonvargas.veganscanner.core.database.dao.ProductCacheDao
 import dev.brandonvargas.veganscanner.core.database.dao.ScanHistoryDao
 import dev.brandonvargas.veganscanner.core.database.entity.CachedProductEntity
+import dev.brandonvargas.veganscanner.core.database.entity.IngredientResearchEntity
 import dev.brandonvargas.veganscanner.core.database.entity.ScanHistoryEntity
 import dev.brandonvargas.veganscanner.core.model.Barcode
 import dev.brandonvargas.veganscanner.core.model.Product
@@ -14,6 +16,9 @@ import dev.brandonvargas.veganscanner.feature.scanner.data.toDomain
 import dev.brandonvargas.veganscanner.feature.scanner.domain.LabelScanRepository
 import dev.brandonvargas.veganscanner.feature.scanner.domain.ProductRepository
 import dev.brandonvargas.veganscanner.feature.scanner.domain.ScanHistoryRepository
+import dev.brandonvargas.veganscanner.feature.scanner.domain.research.IngredientResearchRepository
+import dev.brandonvargas.veganscanner.feature.scanner.domain.research.ResearchOutcome
+import dev.brandonvargas.veganscanner.feature.scanner.domain.research.ResearchedIngredient
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.map
@@ -81,5 +86,47 @@ class FakeLabelScanRepository : LabelScanRepository {
 
     override suspend fun save(barcode: String, ingredientsText: String) {
         labels[barcode] = ingredientsText
+    }
+}
+
+class FakeIngredientResearchRepository(
+    var results: List<ResearchedIngredient> = emptyList(),
+    override val isAvailable: Boolean = true,
+) : IngredientResearchRepository {
+    val requested = mutableListOf<List<String>>()
+    val reported = mutableListOf<String>()
+
+    override suspend fun research(names: List<String>, language: String): AppResult<ResearchOutcome> {
+        requested += names
+        val folded = names.map { it.lowercase() }
+        return AppResult.Success(
+            ResearchOutcome(
+                results.filter {
+                    it.name.lowercase() in folded
+                },
+                pending = emptyList(),
+            ),
+        )
+    }
+
+    override suspend fun report(key: String, reason: String?): AppResult<Unit> {
+        reported += key
+        return AppResult.Success(Unit)
+    }
+}
+
+class FakeIngredientResearchDao : IngredientResearchDao {
+    val rows = mutableMapOf<String, IngredientResearchEntity>()
+
+    override suspend fun get(normalizedNames: List<String>) = normalizedNames.mapNotNull(rows::get)
+
+    override suspend fun upsert(entities: List<IngredientResearchEntity>) =
+        entities.forEach {
+            rows[it.normalizedName] =
+                it
+        }
+
+    override suspend fun delete(normalizedName: String) {
+        rows.remove(normalizedName)
     }
 }

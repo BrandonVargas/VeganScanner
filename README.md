@@ -17,7 +17,9 @@ Product data comes from [Open Food Facts](https://world.openfoodfacts.org), the 
 - **English and Spanish.**
 - `veganscanner://product/{barcode}` deep links.
 
-Coming next: on-device AI for inconclusive products, shared community verdicts, and a local marketplace for vegan products with contact over WhatsApp.
+- **Web research with AI:** ingredients still unrecognized are looked up online (Gemini + Google Search, through a Supabase Edge Function). Each answer is cached once for everyone, shown with its sources and an AI warning, and can be reported by users.
+
+Coming next: on-device AI as an offline fallback, shared community verdicts, and a local marketplace for vegan products with contact over WhatsApp.
 
 ## Architecture
 
@@ -53,7 +55,8 @@ flowchart TB
 
 | | |
 |---|---|
-| Shared | Kotlin 2.4 · Coroutines/Flow · Ktor 3 · kotlinx.serialization · Room KMP · Koin 4 · AndroidX ViewModel · Kermit |
+| Shared | Kotlin 2.4 · Coroutines/Flow · Ktor 3 · kotlinx.serialization · Room KMP · Koin 4 · AndroidX ViewModel · Kermit · supabase-kt |
+| Backend | Supabase (Postgres + RLS, Auth, Edge Functions on Deno) · Gemini 2.5 Flash with Google Search grounding · pgTAP |
 | Android | Jetpack Compose · Material 3 · Navigation 3 · CameraX · ML Kit · Coil 3 |
 | iOS | SwiftUI · Observation · VisionKit · SKIE · XcodeGen |
 | Quality | kotlin.test · Turbine · Ktor MockEngine · Roborazzi · Swift Testing · XCUITest · ktlint + Compose rules · Android Lint · GitHub Actions · Renovate |
@@ -96,7 +99,9 @@ cd VeganScanner
 cd iosApp && xcodegen && open VeganScanner.xcodeproj
 ```
 
-Xcode builds the Kotlin framework automatically in a build phase. To run on a device, set your team in `iosApp/Configuration/Local.xcconfig` (git-ignored): `DEVELOPMENT_TEAM = XXXXXXXXXX`.
+Xcode builds the Kotlin framework automatically in a build phase.
+
+**Online features (optional):** copy `local.properties.example` (Android) and `iosApp/Configuration/Secrets.xcconfig.example` (iOS) to their git-ignored names and add a Supabase project. See [supabase/README.md](supabase/README.md). Without them, the app works fully offline. To run on a device, set your team in `iosApp/Configuration/Local.xcconfig` (git-ignored): `DEVELOPMENT_TEAM = XXXXXXXXXX`.
 
 The simulator has no camera, so type a barcode or open a deep link:
 
@@ -126,8 +131,9 @@ Screenshot baselines live in `androidApp/src/test/screenshots`. Re-record them w
 - [x] **Phase 0:** KMP foundation, CI, docs
 - [x] **Phase 1:** Scanner MVP: barcode → Open Food Facts → explained verdict, offline history, en/es
 - [x] **Phase 2:** Rule engine (en/es ingredient dictionary) + ingredient-label OCR
-- [ ] **Phase 3:** On-device AI for inconclusive products (Gemini Nano / Apple Foundation Models)
-- [ ] **Phase 4:** Supabase + community verdicts (shared AI results, with community reports)
+- [x] **Phase 2b:** Open Food Facts ingredient taxonomy (about 5,000 ingredients)
+- [x] **Phase 3:** Supabase + web research of unknown ingredients with AI (shared cache, reports)
+- [ ] **Phase 4:** On-device AI offline fallback + community verdicts
 - [ ] **Phase 5:** Local marketplace: listings near you, contact over WhatsApp
 - [ ] **Phase 6:** Trust & safety, privacy, accessibility
 - [ ] **Phase 7:** Google Play & App Store release

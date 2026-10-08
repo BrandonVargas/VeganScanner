@@ -24,6 +24,10 @@ final class ResultModel {
         }
     }
 
+    func report(_ researchKey: String) {
+        viewModel.onAction(action: ProductResultActionReportResearched(researchKey: researchKey))
+    }
+
     func retry() {
         viewModel.onAction(action: ProductResultActionRetry.shared)
     }

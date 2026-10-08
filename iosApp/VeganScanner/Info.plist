@@ -3,6 +3,11 @@
 <plist version="1.0">
 <dict>
 	<!-- Merged with the build-setting generated Info.plist (GENERATE_INFOPLIST_FILE). -->
+	<!-- Online features (Supabase), from Configuration/Secrets.xcconfig. Blank values turn them off. -->
+	<key>SupabaseHost</key>
+	<string>$(SUPABASE_HOST)</string>
+	<key>SupabasePublishableKey</key>
+	<string>$(SUPABASE_PUBLISHABLE_KEY)</string>
 	<key>CFBundleURLTypes</key>
 	<array>
 		<dict>

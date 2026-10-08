@@ -681,6 +681,108 @@
         }
       }
     },
+    "research.in_progress" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Researching unrecognized ingredients online…"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Investigando en línea los ingredientes no reconocidos…"
+          }
+        }
+      }
+    },
+    "research.report" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Report as wrong"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reportar como incorrecto"
+          }
+        }
+      }
+    },
+    "research.reported" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reported, thank you"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reportado, gracias"
+          }
+        }
+      }
+    },
+    "research.status_vegan" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "vegan"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "vegano"
+          }
+        }
+      }
+    },
+    "research.title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Researched online with AI"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Investigado en línea con IA"
+          }
+        }
+      }
+    },
+    "research.warning" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "These answers come from web sources and may be wrong. Check the label, and report anything that looks off."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Estas respuestas vienen de fuentes web y pueden estar equivocadas. Revisa la etiqueta y reporta lo que no parezca correcto."
+          }
+        }
+      }
+    },
     "result.disclaimer" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -915,6 +1017,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "No hay suficiente información para decidir"
+          }
+        }
+      }
+    },
+    "source.web_research" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Researched online with AI (Gemini + Google Search)"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Investigado en línea con IA (Gemini + Google Search)"
           }
         }
       }

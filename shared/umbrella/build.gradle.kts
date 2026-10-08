@@ -22,6 +22,7 @@ kotlin {
             api(projects.shared.feature.scanner)
             implementation(projects.shared.core.network)
             implementation(projects.shared.core.database)
+            implementation(projects.shared.core.supabase)
         }
         androidMain.dependencies {
             implementation(libs.koin.android)

@@ -10,14 +10,15 @@ Vegan Scanner is a free, open-source app. It is built to collect as little data 
 - **Barcode lookups:** when you scan, the barcode number is sent to [Open Food Facts](https://world.openfoodfacts.org) to fetch product data. Open Food Facts receives the request like any website visit. See their [privacy policy](https://world.openfoodfacts.org/privacy).
 - **Ingredient-label scans:** the photo is read by on-device text recognition (ML Kit on Android, Apple Vision on iOS) and discarded right away. It is never stored or uploaded. Only the ingredient text you confirm is saved, on your device, to evaluate that product.
 - **Scan history and product cache:** stored only on your device. You can delete entries or clear the history at any time. Uninstalling the app removes them.
-- **No accounts, no ads, no tracking, no analytics.**
+- **Online ingredient research:** when an ingredient isn't recognized, its **name only** (for example "goma gelana") is sent to our server on Supabase. The server looks it up with Google's Gemini AI and Google Search, and saves the answer so everyone benefits. No barcode, photo or personal data is sent. The app uses an anonymous session (a random ID, no email or name) to limit requests and accept reports. Google may use these free-tier requests to improve its products.
+- **No sign-up, no ads, no tracking, no analytics.**
 
 ## Planned features
 
 This document will be updated before these ship:
 
 - **Crash reporting** (Firebase Crashlytics) to fix bugs.
-- **Community verdicts:** when on-device AI decides a product is vegan, the barcode and the verdict will be shared anonymously so other users benefit, and other users can report wrong verdicts.
+- **Community verdicts:** when on-device AI decides a product is vegan, the barcode and the verdict will be shared anonymously so other users benefit, and other users can report wrong verdicts. (Reporting web-researched ingredients already works this way.)
 - **Marketplace:** sellers will choose to publish listings, an approximate location (rounded to about 1 km) and a WhatsApp contact number. Account deletion will remove all of this.
 
 ## Contact

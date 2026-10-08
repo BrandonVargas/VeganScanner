@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.veganscanner.android.application)
     alias(libs.plugins.kotlin.serialization)
@@ -11,6 +13,14 @@ android {
         applicationId = "dev.brandonvargas.veganscanner"
         versionCode = 1
         versionName = "0.1.0"
+
+        // Online features (Supabase). From local.properties or CI environment variables; blank turns them off.
+        buildConfigField("String", "SUPABASE_HOST", "\"${localConfig("supabase.host", "SUPABASE_HOST")}\"")
+        buildConfigField(
+            "String",
+            "SUPABASE_PUBLISHABLE_KEY",
+            "\"${localConfig("supabase.publishableKey", "SUPABASE_PUBLISHABLE_KEY")}\"",
+        )
     }
 
     buildTypes {
@@ -83,4 +93,11 @@ dependencies {
     testImplementation(libs.roborazzi)
     testImplementation(libs.roborazzi.compose)
     testImplementation(libs.compose.ui.test.junit4)
+}
+
+/** Reads a value from the git-ignored local.properties, falling back to an environment variable (CI). */
+fun localConfig(property: String, environmentVariable: String): String {
+    val file = rootProject.layout.projectDirectory.file("local.properties").asFile
+    val properties = Properties().apply { if (file.exists()) file.inputStream().use(::load) }
+    return properties.getProperty(property) ?: providers.environmentVariable(environmentVariable).orNull.orEmpty()
 }

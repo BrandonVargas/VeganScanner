@@ -1,5 +1,6 @@
 package dev.brandonvargas.veganscanner.android.feature.result
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -13,6 +14,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
+import androidx.compose.material.icons.rounded.AutoAwesome
 import androidx.compose.material.icons.rounded.CloudOff
 import androidx.compose.material.icons.rounded.DocumentScanner
 import androidx.compose.material.icons.rounded.Info
@@ -43,6 +45,7 @@ import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.compose.AsyncImage
@@ -51,6 +54,7 @@ import dev.brandonvargas.veganscanner.android.ui.components.labelRes
 import dev.brandonvargas.veganscanner.android.ui.components.messageRes
 import dev.brandonvargas.veganscanner.android.ui.components.style
 import dev.brandonvargas.veganscanner.core.common.AppError
+import dev.brandonvargas.veganscanner.core.model.FlaggedIngredient
 import dev.brandonvargas.veganscanner.core.model.IngredientVeganStatus
 import dev.brandonvargas.veganscanner.core.model.IngredientsSource
 import dev.brandonvargas.veganscanner.core.model.Product
@@ -105,7 +109,11 @@ fun ResultContent(
                 }
 
                 is ProductResultUiState.Found -> {
-                    FoundContent(state.product, state.verdict, onScanLabel)
+                    FoundContent(
+                        state = state,
+                        onScanLabel = onScanLabel,
+                        onReport = { onAction(ProductResultAction.ReportResearched(it)) },
+                    )
                 }
 
                 is ProductResultUiState.NotFound -> {
@@ -125,15 +133,25 @@ fun ResultContent(
 }
 
 @Composable
-private fun FoundContent(product: Product, verdict: VeganVerdict, onScanLabel: () -> Unit) {
+private fun FoundContent(
+    state: ProductResultUiState.Found,
+    onScanLabel: () -> Unit,
+    onReport: (String) -> Unit,
+) {
+    val product = state.product
+    val verdict = state.verdict
     Column(
         Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
         VerdictBanner(verdict)
+        if (state.isResearching) ResearchingIndicator()
         ProductHeader(product)
         if (verdict.flaggedIngredients.isNotEmpty()) FlaggedIngredients(verdict)
-        if (!verdict.isConclusive) {
+        if (verdict.researched.isNotEmpty()) {
+            ResearchedIngredients(verdict.researched, reportedKeys = state.reportedKeys, onReport = onReport)
+        }
+        if (!verdict.isConclusive && !state.isResearching) {
             InconclusiveNotice(
                 fromLabel = product.ingredientsSource == IngredientsSource.LABEL_SCAN,
                 onScanLabel = onScanLabel,
@@ -219,9 +237,89 @@ private fun FlaggedIngredients(verdict: VeganVerdict) {
                     IngredientVeganStatus.UNKNOWN, IngredientVeganStatus.YES -> R.string.ingredient_status_unknown
                 }
             Text("• ${flagged.name} — ${stringResource(reason)}", style = MaterialTheme.typography.bodyLarge)
+            flagged.note?.let {
+                Text(
+                    it,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(start = 12.dp),
+                )
+            }
         }
     }
 }
+
+@Composable
+private fun ResearchingIndicator() {
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        CircularProgressIndicator(Modifier.size(18.dp), strokeWidth = 2.dp)
+        Text(
+            stringResource(R.string.research_in_progress),
+            style = MaterialTheme.typography.bodyMedium,
+            modifier = Modifier.padding(start = 12.dp),
+        )
+    }
+}
+
+/** Ingredients resolved by AI web research: always shown with a warning, reasons, sources and a report option. */
+@Composable
+private fun ResearchedIngredients(
+    researched: List<FlaggedIngredient>,
+    reportedKeys: Set<String>,
+    onReport: (String) -> Unit,
+) {
+    val uriHandler = LocalUriHandler.current
+    Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.tertiaryContainer)) {
+        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(Icons.Rounded.AutoAwesome, contentDescription = null)
+                Text(
+                    stringResource(R.string.research_title),
+                    style = MaterialTheme.typography.titleMedium,
+                    modifier = Modifier.padding(start = 8.dp).semantics { heading() },
+                )
+            }
+            Text(stringResource(R.string.research_warning), style = MaterialTheme.typography.bodySmall)
+            researched.forEach { ingredient ->
+                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                    Text(
+                        "${ingredient.name} — ${stringResource(ingredient.status.researchLabel())}",
+                        style = MaterialTheme.typography.bodyLarge,
+                        fontWeight = FontWeight.SemiBold,
+                    )
+                    ingredient.note?.let { Text(it, style = MaterialTheme.typography.bodyMedium) }
+                    ingredient.sources.take(3).forEach { source ->
+                        Text(
+                            source.title,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.primary,
+                            textDecoration = TextDecoration.Underline,
+                            modifier = Modifier.clickable { uriHandler.openUri(source.url) },
+                        )
+                    }
+                    ingredient.researchKey?.let { key ->
+                        if (key in reportedKeys) {
+                            Text(
+                                stringResource(R.string.research_reported),
+                                style = MaterialTheme.typography.labelMedium,
+                            )
+                        } else {
+                            TextButton(onClick = { onReport(key) }) { Text(stringResource(R.string.research_report)) }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+private fun IngredientVeganStatus.researchLabel(): Int =
+    when (this) {
+        IngredientVeganStatus.YES -> R.string.research_status_vegan
+        IngredientVeganStatus.NO -> R.string.ingredient_status_no
+        IngredientVeganStatus.MAYBE -> R.string.ingredient_status_maybe
+        IngredientVeganStatus.UNKNOWN -> R.string.ingredient_status_unknown
+    }
 
 @Composable
 private fun InconclusiveNotice(fromLabel: Boolean, onScanLabel: () -> Unit) {

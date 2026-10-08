@@ -29,7 +29,15 @@ struct ResultView: View {
             ProgressView()
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
         case .found(let found):
-            FoundContent(product: found.product, verdict: found.verdict, barcode: barcode, onScanLabel: onScanLabel)
+            FoundContent(
+                product: found.product,
+                verdict: found.verdict,
+                barcode: barcode,
+                isResearching: found.isResearching,
+                reportedKeys: found.reportedKeys,
+                onScanLabel: onScanLabel,
+                onReport: model.report
+            )
         case .notFound:
             ContentUnavailableView {
                 Label("not_found.title", systemImage: "magnifyingglass")
@@ -63,17 +71,29 @@ private struct FoundContent: View {
     let product: Product
     let verdict: VeganVerdict
     let barcode: String
+    let isResearching: Bool
+    let reportedKeys: Set<String>
     let onScanLabel: () -> Void
+    let onReport: (String) -> Void
 
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
                 VerdictBanner(verdict: verdict)
+                if isResearching {
+                    HStack(spacing: 12) {
+                        ProgressView()
+                        Text("research.in_progress").font(.callout)
+                    }
+                }
                 header
                 if !verdict.flaggedIngredients.isEmpty {
                     flaggedIngredients
                 }
-                if !verdict.isConclusive {
+                if !verdict.researched.isEmpty {
+                    ResearchedIngredients(ingredients: verdict.researched, reportedKeys: reportedKeys, onReport: onReport)
+                }
+                if !verdict.isConclusive && !isResearching {
                     inconclusiveNotice
                 }
                 if let ingredients = product.ingredientsText {
@@ -145,14 +165,62 @@ private struct FoundContent: View {
                 .font(.headline)
                 .accessibilityAddTraits(.isHeader)
             ForEach(Array(verdict.flaggedIngredients.enumerated()), id: \.offset) { _, flagged in
-                HStack(alignment: .firstTextBaseline) {
-                    Text(verbatim: "•")
-                    Text(flagged.name).fontWeight(.medium)
-                    Text(verbatim: "—")
-                    Text(flagged.status.reason).foregroundStyle(.secondary)
+                VStack(alignment: .leading, spacing: 2) {
+                    HStack(alignment: .firstTextBaseline) {
+                        Text(verbatim: "•")
+                        Text(flagged.name).fontWeight(.medium)
+                        Text(verbatim: "—")
+                        Text(flagged.status.reason).foregroundStyle(.secondary)
+                    }
+                    if let note = flagged.note {
+                        Text(note).font(.callout).foregroundStyle(.secondary).padding(.leading, 14)
+                    }
                 }
             }
         }
+    }
+}
+
+/// Ingredients resolved by AI web research: always shown with a warning, reasons, sources and a report option.
+private struct ResearchedIngredients: View {
+    let ingredients: [FlaggedIngredient]
+    let reportedKeys: Set<String>
+    let onReport: (String) -> Void
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Label("research.title", systemImage: "sparkles")
+                .font(.headline)
+                .accessibilityAddTraits(.isHeader)
+            Text("research.warning").font(.footnote)
+            ForEach(Array(ingredients.enumerated()), id: \.offset) { _, ingredient in
+                VStack(alignment: .leading, spacing: 4) {
+                    HStack(alignment: .firstTextBaseline) {
+                        Text(ingredient.name).fontWeight(.semibold)
+                        Text(verbatim: "—")
+                        Text(ingredient.status == .yes ? "research.status_vegan" : ingredient.status.reason)
+                    }
+                    if let note = ingredient.note {
+                        Text(note).font(.callout)
+                    }
+                    ForEach(Array(ingredient.sources.prefix(3).enumerated()), id: \.offset) { _, source in
+                        if let url = URL(string: source.url) {
+                            Link(source.title, destination: url).font(.footnote)
+                        }
+                    }
+                    if let key = ingredient.researchKey {
+                        if reportedKeys.contains(key) {
+                            Text("research.reported").font(.footnote).foregroundStyle(.secondary)
+                        } else {
+                            Button("research.report") { onReport(key) }.font(.footnote)
+                        }
+                    }
+                }
+            }
+        }
+        .padding()
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(Color.purple.opacity(0.08), in: RoundedRectangle(cornerRadius: 16))
     }
 }
 

@@ -36,6 +36,14 @@ class AppModulesTest {
     fun tearDown() = stopKoin()
 
     @Test
+    fun onlineResearchIsOffWithoutABackend() {
+        val repository =
+            org.koin.mp.KoinPlatform.getKoin()
+                .get<dev.brandonvargas.veganscanner.feature.scanner.domain.research.IngredientResearchRepository>()
+        kotlin.test.assertFalse(repository.isAvailable)
+    }
+
+    @Test
     fun viewModelStoreHolderResolvesAndCachesViewModels() {
         val holder = ViewModelStoreHolder()
 

@@ -83,6 +83,7 @@ fun VerdictSource.labelRes(): Int =
         VerdictSource.OPEN_FOOD_FACTS_INGREDIENTS -> R.string.source_off_ingredients
         VerdictSource.RULE_ENGINE -> R.string.source_rule_engine
         VerdictSource.LABEL_SCAN -> R.string.source_label_scan
+        VerdictSource.WEB_RESEARCH -> R.string.source_web_research
         VerdictSource.UNDETERMINED -> R.string.source_none
     }
 

@@ -14,7 +14,13 @@ struct VeganScannerApp: App {
         #else
         let isDebug = false
         #endif
-        IosEntryPointKt.startVeganKit(versionName: version, isDebug: isDebug)
+        IosEntryPointKt.startVeganKit(
+            versionName: version,
+            isDebug: isDebug,
+            deviceLanguage: Locale.current.language.languageCode?.identifier ?? "en",
+            supabaseHost: Bundle.main.object(forInfoDictionaryKey: "SupabaseHost") as? String,
+            supabasePublishableKey: Bundle.main.object(forInfoDictionaryKey: "SupabasePublishableKey") as? String
+        )
     }
 
     #if DEBUG

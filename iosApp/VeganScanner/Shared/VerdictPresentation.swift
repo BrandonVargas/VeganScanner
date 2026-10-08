@@ -58,6 +58,7 @@ extension VerdictSource {
         case .openFoodFactsIngredients: "source.off_ingredients"
         case .ruleEngine: "source.rule_engine"
         case .labelScan: "source.label_scan"
+        case .webResearch: "source.web_research"
         case .undetermined: "source.undetermined"
         }
     }
