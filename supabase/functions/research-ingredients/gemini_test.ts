@@ -4,7 +4,7 @@ import {
   geminiResearcher,
   parseGeminiResponse,
   RESERVED_SEARCH_QUERIES,
-  SEARCH_SYSTEM_PROMPT,
+  SEARCH_HINT,
   searchQueryCount,
   SYSTEM_PROMPT,
   UpstreamError,
@@ -61,9 +61,21 @@ Deno.test("ignores out-of-range excerpt numbers", () => {
   assertEquals(research.sources, []);
 });
 
+Deno.test("repairs a value the model left out after searching", () => {
+  const research = parseGeminiResponse(answer(
+    '```json\n{\n  "status": "non_vegan",\n  "reason_en": "From egg whites.",\n  "reason_es": "De clara de huevo.",\n' +
+      '  "used_excerpts":\n}\n```',
+  ));
+  assertEquals(research.status, "non_vegan");
+  assertEquals(research.reasonEn, "From egg whites.");
+  assertEquals(research.sources, []);
+  assertEquals(parseGeminiResponse(answer('{"status":"vegan","reason_en":"a","reason_es":"b",}')).status, "vegan");
+});
+
 Deno.test("rejects answers without JSON or with an unexpected status", () => {
   assertThrows(() => parseGeminiResponse(answer("I think it's vegan")));
   assertThrows(() => parseGeminiResponse(answer('{"status":"yes"}')));
+  assertThrows(() => parseGeminiResponse(answer('{"status": vegan}')));
 });
 
 function capture(grounding?: unknown) {
@@ -118,32 +130,38 @@ const grounding = {
   groundingChunks: [{ web: { uri: "https://example.org/e491", title: "example.org" } }],
 };
 
-Deno.test("Google Search mode: search tool, no JSON mode, no Wikipedia, settles the queries Gemini ran", async () => {
+Deno.test("with search: Wikipedia excerpts plus the search tool, settling the queries Gemini ran", async () => {
   const { fetchFn, get } = capture(grounding);
   const { quota, settled } = fakeQuota(10);
-  let retrieved = false;
-  const spyRetriever: Retriever = { retrieve: () => (retrieved = true, Promise.resolve(excerpts)) };
 
-  const research = await geminiResearcher("k", {
-    googleSearch: true,
-    searchQuota: quota,
-    retriever: spyRetriever,
-    fetchFn,
-  })
-    .research("monoestearato de sorbitán", "es");
+  const research = await geminiResearcher("k", { googleSearch: true, searchQuota: quota, retriever, fetchFn })
+    .research("goma gelana", "es");
 
   const body = JSON.parse(get().init.body as string);
   assertEquals(body.tools, [{ google_search: {} }]);
   assertEquals(body.generationConfig.responseMimeType, undefined);
-  assertEquals(body.systemInstruction.parts[0].text, SEARCH_SYSTEM_PROMPT);
-  assertEquals(body.contents[0].parts[0].text, "Ingredient (Spanish label): monoestearato de sorbitán");
-  assertEquals(retrieved, false);
+  assertEquals(body.systemInstruction.parts[0].text, SYSTEM_PROMPT + SEARCH_HINT);
+  assertStringIncludes(body.contents[0].parts[0].text, "[2] Gellan gum (Wikipedia EN)");
   assertEquals(settled, [[RESERVED_SEARCH_QUERIES, 1]]);
-  assertEquals(research.model, `${DEFAULT_GEMINI_MODEL}+google-search`);
-  assertEquals(research.sources, [{ title: "example.org", url: "https://example.org/e491" }]);
+  assertEquals(research.model, `${DEFAULT_GEMINI_MODEL}+wikipedia+google-search`);
+  assertEquals(research.sources, [
+    { title: "Gellan gum (Wikipedia EN)", url: "https://en.wikipedia.org/wiki/Gellan_gum" },
+    { title: "example.org", url: "https://example.org/e491" },
+  ]);
 });
 
-Deno.test("falls back to Wikipedia without billing a search once the quota is used up", async () => {
+Deno.test("when Gemini answers without searching, the reservation is released and the label says so", async () => {
+  const { fetchFn } = capture();
+  const { quota, settled } = fakeQuota(10);
+
+  const research = await geminiResearcher("k", { googleSearch: true, searchQuota: quota, retriever, fetchFn })
+    .research("goma gelana", "es");
+
+  assertEquals(settled, [[RESERVED_SEARCH_QUERIES, 0]]);
+  assertEquals(research.model, `${DEFAULT_GEMINI_MODEL}+wikipedia`);
+});
+
+Deno.test("once the search quota is used up, requests go without the search tool", async () => {
   const { fetchFn, get } = capture();
   const { quota, settled } = fakeQuota(RESERVED_SEARCH_QUERIES - 1);
 

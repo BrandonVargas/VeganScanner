@@ -1,5 +1,5 @@
-// Researches unknown food ingredients on the web (Gemini with capped Google Search grounding, or Wikipedia excerpts)
-// and caches the answers for every user in public.ingredient_knowledge. See docs/adr/0007-cloud-ingredient-research.md.
+// Researches unknown food ingredients on the web (Wikipedia excerpts + Gemini, which may also use Google Search within
+// a cap) and caches the answers for every user in public.ingredient_knowledge. See docs/adr/0007-cloud-ingredient-research.md.
 import { createClient } from "@supabase/supabase-js";
 import { geminiResearcher } from "./gemini.ts";
 import { researchIngredients } from "./handler.ts";
