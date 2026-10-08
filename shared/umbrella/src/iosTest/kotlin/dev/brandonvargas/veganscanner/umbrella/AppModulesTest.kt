@@ -45,6 +45,8 @@ class AppModulesTest {
         val result = holder.productResultViewModel("3017620422003")
         assertNotSame(result, holder.productResultViewModel("7500327047878"))
 
+        holder.labelScanViewModel("3017620422003")
+
         holder.clear()
         assertNotSame(scanner, holder.scannerViewModel())
     }

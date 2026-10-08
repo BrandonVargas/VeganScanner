@@ -9,3 +9,4 @@ Short records of the decisions that shape this codebase, in [Michael Nygard's fo
 | [0003](0003-verdict-pipeline.md) | Vegan verdicts via a chain of resolvers | Accepted |
 | [0004](0004-offline-first-room.md) | Offline-first data with Room KMP | Accepted |
 | [0005](0005-swift-interop.md) | Swift interop: SKIE and shared ViewModels | Accepted |
+| [0006](0006-dictionary-and-label-ocr.md) | Ingredient dictionary as data, OCR in the platform UI | Accepted |

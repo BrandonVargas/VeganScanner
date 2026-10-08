@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModelStore
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import dev.brandonvargas.veganscanner.feature.scanner.presentation.history.HistoryViewModel
+import dev.brandonvargas.veganscanner.feature.scanner.presentation.label.LabelScanViewModel
 import dev.brandonvargas.veganscanner.feature.scanner.presentation.result.ProductResultViewModel
 import dev.brandonvargas.veganscanner.feature.scanner.presentation.scanner.ScannerViewModel
 import org.koin.core.component.KoinComponent
@@ -25,6 +26,9 @@ class ViewModelStoreHolder : KoinComponent {
 
     fun productResultViewModel(barcode: String): ProductResultViewModel =
         provide("result:$barcode") { get { parametersOf(barcode) } }
+
+    fun labelScanViewModel(barcode: String): LabelScanViewModel =
+        provide("label:$barcode") { get { parametersOf(barcode) } }
 
     fun clear() = store.clear()
 

@@ -5,17 +5,19 @@ Vegan Scanner is free, open source, and built with **Kotlin Multiplatform**: the
 
 Product data comes from [Open Food Facts](https://world.openfoodfacts.org), the free, collaborative food database.
 
-> **Status:** early development. Phase 1 (scanner MVP) is done. See the [roadmap](#roadmap).
+> **Status:** early development. Phases 1–2 (scanner, rule engine and label scanning) are done. See the [roadmap](#roadmap).
 
 ## Features
 
 - **Barcode scanning** on-device: CameraX + ML Kit on Android, VisionKit on iOS. Manual entry also works.
-- **Explained verdicts:** *Vegan*, *Not vegan*, *Might not be vegan* or *Unknown*, with the ingredients that caused it and the data source.
+- **Explained verdicts:** *Vegan*, *Not vegan*, *Might not be vegan*, *Probably vegan* or *Unknown*, with the ingredients that caused it and the data source.
+- **Ingredient dictionary:** an English/Spanish list of animal-derived ingredients and additive codes (gelatina/grenetina, carmín/E120, suero de leche, cajeta…). It catches what the database misses and ignores plant-based look-alikes ("leche de coco") and "may contain" warnings. [Contribute terms](shared/feature/scanner/dictionary/README.md).
+- **Ingredient-label scanning:** when a product is missing or inconclusive (or you're offline), photograph the ingredient list. On-device OCR (ML Kit / Vision) reads it, you fix any misreads, and the app checks it. Photos never leave the phone.
 - **Offline-first:** products are cached and scan history works without a connection.
 - **English and Spanish.**
 - `veganscanner://product/{barcode}` deep links.
 
-Coming next: ingredient-label OCR, on-device AI for inconclusive products, shared community verdicts, and a local marketplace for vegan products with contact over WhatsApp.
+Coming next: on-device AI for inconclusive products, shared community verdicts, and a local marketplace for vegan products with contact over WhatsApp.
 
 ## Architecture
 
@@ -123,7 +125,7 @@ Screenshot baselines live in `androidApp/src/test/screenshots`. Re-record them w
 
 - [x] **Phase 0:** KMP foundation, CI, docs
 - [x] **Phase 1:** Scanner MVP: barcode → Open Food Facts → explained verdict, offline history, en/es
-- [ ] **Phase 2:** Rule engine (en/es ingredient dictionary) + ingredient-label OCR
+- [x] **Phase 2:** Rule engine (en/es ingredient dictionary) + ingredient-label OCR
 - [ ] **Phase 3:** On-device AI for inconclusive products (Gemini Nano / Apple Foundation Models)
 - [ ] **Phase 4:** Supabase + community verdicts (shared AI results, with community reports)
 - [ ] **Phase 5:** Local marketplace: listings near you, contact over WhatsApp
@@ -132,7 +134,7 @@ Screenshot baselines live in `androidApp/src/test/screenshots`. Re-record them w
 
 ## Contributing
 
-Contributions are welcome, especially to the ingredient dictionary in phase 2. See [CONTRIBUTING.md](CONTRIBUTING.md).
+Contributions are welcome, especially [ingredient dictionary](shared/feature/scanner/dictionary/README.md) terms for your region. See [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## Data & license
 

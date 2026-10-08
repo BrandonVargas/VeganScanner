@@ -11,6 +11,7 @@ import dev.brandonvargas.veganscanner.core.model.ScanHistoryEntry
 import dev.brandonvargas.veganscanner.core.network.NetworkJson
 import dev.brandonvargas.veganscanner.core.network.off.OffProductResponseDto
 import dev.brandonvargas.veganscanner.feature.scanner.data.toDomain
+import dev.brandonvargas.veganscanner.feature.scanner.domain.LabelScanRepository
 import dev.brandonvargas.veganscanner.feature.scanner.domain.ProductRepository
 import dev.brandonvargas.veganscanner.feature.scanner.domain.ScanHistoryRepository
 import kotlinx.coroutines.flow.Flow
@@ -71,4 +72,14 @@ class FakeScanHistoryRepository : ScanHistoryRepository {
     override suspend fun delete(barcode: String) = entries.update { list -> list.filterNot { it.barcode == barcode } }
 
     override suspend fun clear() = entries.update { emptyList() }
+}
+
+class FakeLabelScanRepository : LabelScanRepository {
+    val labels = mutableMapOf<String, String>()
+
+    override suspend fun get(barcode: String): String? = labels[barcode]
+
+    override suspend fun save(barcode: String, ingredientsText: String) {
+        labels[barcode] = ingredientsText
+    }
 }

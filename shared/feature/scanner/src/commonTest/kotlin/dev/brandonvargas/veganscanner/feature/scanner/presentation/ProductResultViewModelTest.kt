@@ -7,6 +7,7 @@ import dev.brandonvargas.veganscanner.core.model.VeganStatus
 import dev.brandonvargas.veganscanner.core.testing.MainDispatcherOverride
 import dev.brandonvargas.veganscanner.core.testing.OffFixtures
 import dev.brandonvargas.veganscanner.core.testing.TestClock
+import dev.brandonvargas.veganscanner.feature.scanner.FakeLabelScanRepository
 import dev.brandonvargas.veganscanner.feature.scanner.FakeProductRepository
 import dev.brandonvargas.veganscanner.feature.scanner.FakeScanHistoryRepository
 import dev.brandonvargas.veganscanner.feature.scanner.domain.ScanProductUseCase
@@ -29,6 +30,7 @@ class ProductResultViewModelTest {
     private val useCase =
         ScanProductUseCase(
             productRepository = products,
+            labelScanRepository = FakeLabelScanRepository(),
             verdictPipeline = VerdictPipeline(listOf(OffAnalysisResolver())),
             historyRepository = FakeScanHistoryRepository(),
             clock = TestClock(),

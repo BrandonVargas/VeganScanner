@@ -31,6 +31,7 @@ compose-bom = "2026.09.00"
 navigation3 = "1.2.0"
 camerax = "1.6.2"
 mlkit-barcode = "17.3.0"
+mlkit-text = "16.0.1"
 coil = "3.6.3"
 material-icons = "1.7.8"
 robolectric = "4.17"
@@ -82,6 +83,7 @@ camerax-lifecycle = { module = "androidx.camera:camera-lifecycle", version.ref =
 camerax-view = { module = "androidx.camera:camera-view", version.ref = "camerax" }
 camerax-mlkit-vision = { module = "androidx.camera:camera-mlkit-vision", version.ref = "camerax" }
 mlkit-barcode-scanning = { module = "com.google.mlkit:barcode-scanning", version.ref = "mlkit-barcode" }
+mlkit-text-recognition = { module = "com.google.mlkit:text-recognition", version.ref = "mlkit-text" }
 coil-compose = { module = "io.coil-kt.coil3:coil-compose", version.ref = "coil" }
 coil-network-ktor3 = { module = "io.coil-kt.coil3:coil-network-ktor3", version.ref = "coil" }
 junit = { module = "junit:junit", version.ref = "junit" }

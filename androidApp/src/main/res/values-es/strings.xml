@@ -34,7 +34,7 @@
     <string name="ingredient_status_maybe">puede ser de origen animal</string>
     <string name="ingredient_status_unknown">no reconocido</string>
     <string name="ingredients_title">Ingredientes</string>
-    <string name="inconclusive_notice">No pudimos confirmarlo. Revisa la etiqueta o contacta al fabricante. Pronto podrás escanear la etiqueta de ingredientes con IA en el dispositivo.</string>
+    <string name="inconclusive_notice">No pudimos confirmarlo. Escanea la etiqueta de ingredientes abajo, revísala tú o contacta al fabricante.</string>
     <string name="result_disclaimer">Datos de los colaboradores de Open Food Facts (ODbL). Los resultados son solo una guía. Los ingredientes cambian, así que revisa siempre la etiqueta.</string>
 
     <string name="not_found_title">Producto no encontrado</string>
@@ -52,4 +52,26 @@
     <string name="history_clear_title">¿Borrar el historial?</string>
     <string name="history_clear_body">Esto elimina todos los productos de tu historial en este dispositivo.</string>
     <string name="history_delete_entry">Quitar del historial</string>
+
+    <string name="action_scan_label">Escanear etiqueta de ingredientes</string>
+    <string name="action_rescan_label">Escanear la etiqueta de nuevo</string>
+    <string name="action_scan_label_offline">Mejor escanear la etiqueta de ingredientes</string>
+    <string name="verdict_likely">Probablemente vegano</string>
+    <string name="source_rule_engine">Sin ingredientes de origen animal en nuestro diccionario</string>
+    <string name="source_label_scan">Según la etiqueta de ingredientes que escaneaste</string>
+    <string name="flagged_unrecognized">Ingredientes que no pudimos revisar</string>
+    <string name="inconclusive_notice_label">Aún no pudimos confirmarlo con la etiqueta. Consulta los ingredientes dudosos con el fabricante.</string>
+    <string name="label_scan_title">Escanear etiqueta de ingredientes</string>
+    <string name="label_scan_hint">Encuadra toda la lista de ingredientes y toma la foto</string>
+    <string name="label_nothing_recognized">No pudimos leer texto. Acércate, evita reflejos e inténtalo de nuevo.</string>
+    <string name="label_capture">Tomar foto</string>
+    <string name="label_type_instead">Mejor escribir los ingredientes</string>
+    <string name="camera_permission_rationale_label">Permite la cámara para leer la etiqueta de ingredientes, o escríbelos tú.</string>
+    <string name="label_review_title">Revisa los ingredientes</string>
+    <string name="label_review_body">Corrige lo que la foto haya leído mal. Solo importa la lista de ingredientes.</string>
+    <string name="label_review_placeholder">ej. Agua, azúcar, grenetina…</string>
+    <string name="label_text_too_short">Agrega la lista de ingredientes para continuar</string>
+    <string name="label_retake">Tomar otra foto</string>
+    <string name="label_check">Revisar ingredientes</string>
+    <string name="label_privacy_note">La foto se lee en tu teléfono y nunca se sube.</string>
 </resources>

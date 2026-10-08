@@ -4,12 +4,14 @@ import VeganKit
 struct ResultView: View {
     let barcode: String
     let onScanAnother: () -> Void
+    let onScanLabel: () -> Void
 
     @State private var model: ResultModel
 
-    init(barcode: String, onScanAnother: @escaping () -> Void) {
+    init(barcode: String, onScanAnother: @escaping () -> Void, onScanLabel: @escaping () -> Void) {
         self.barcode = barcode
         self.onScanAnother = onScanAnother
+        self.onScanLabel = onScanLabel
         _model = State(initialValue: ResultModel(barcode: barcode))
     }
 
@@ -27,15 +29,17 @@ struct ResultView: View {
             ProgressView()
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
         case .found(let found):
-            FoundContent(product: found.product, verdict: found.verdict, barcode: barcode)
+            FoundContent(product: found.product, verdict: found.verdict, barcode: barcode, onScanLabel: onScanLabel)
         case .notFound:
             ContentUnavailableView {
                 Label("not_found.title", systemImage: "magnifyingglass")
             } description: {
                 Text("not_found.body \(barcode)")
             } actions: {
-                Button("action.scan_another", action: onScanAnother)
+                Button("action.scan_label", systemImage: "doc.text.viewfinder", action: onScanLabel)
                     .buttonStyle(.borderedProminent)
+                Button("action.scan_another", action: onScanAnother)
+                    .buttonStyle(.bordered)
                 if let url = URL(string: "https://world.openfoodfacts.org/product/\(barcode)") {
                     Link("action.open_in_off", destination: url)
                 }
@@ -48,6 +52,8 @@ struct ResultView: View {
             } actions: {
                 Button("action.retry", action: model.retry)
                     .buttonStyle(.borderedProminent)
+                Button("action.scan_label_offline", action: onScanLabel)
+                    .buttonStyle(.bordered)
             }
         }
     }
@@ -57,6 +63,7 @@ private struct FoundContent: View {
     let product: Product
     let verdict: VeganVerdict
     let barcode: String
+    let onScanLabel: () -> Void
 
     var body: some View {
         ScrollView {
@@ -67,11 +74,7 @@ private struct FoundContent: View {
                     flaggedIngredients
                 }
                 if !verdict.isConclusive {
-                    Label("result.inconclusive_notice", systemImage: "info.circle.fill")
-                        .font(.callout)
-                        .padding()
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 16))
+                    inconclusiveNotice
                 }
                 if let ingredients = product.ingredientsText {
                     VStack(alignment: .leading, spacing: 6) {
@@ -85,6 +88,32 @@ private struct FoundContent: View {
                     .foregroundStyle(.secondary)
             }
             .padding()
+        }
+    }
+
+    private var isFromLabel: Bool { product.ingredientsSource == .labelScan }
+
+    private var inconclusiveNotice: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Label(isFromLabel ? "result.inconclusive_notice_label" : "result.inconclusive_notice", systemImage: "info.circle.fill")
+                .font(.callout)
+            Button(action: onScanLabel) {
+                Label(isFromLabel ? "action.rescan_label" : "action.scan_label", systemImage: "doc.text.viewfinder")
+                    .frame(maxWidth: .infinity)
+            }
+            .buttonStyle(.borderedProminent)
+            .accessibilityIdentifier("result.scanLabel")
+        }
+        .padding()
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 16))
+    }
+
+    private var flaggedTitle: LocalizedStringKey {
+        switch verdict.status {
+        case .nonVegan: "result.flagged_non_vegan"
+        case .likelyVegan: "result.flagged_unrecognized"
+        default: "result.flagged_check"
         }
     }
 
@@ -112,14 +141,14 @@ private struct FoundContent: View {
 
     private var flaggedIngredients: some View {
         VStack(alignment: .leading, spacing: 6) {
-            Text(verdict.status == .nonVegan ? "result.flagged_non_vegan" : "result.flagged_check")
+            Text(flaggedTitle)
                 .font(.headline)
                 .accessibilityAddTraits(.isHeader)
             ForEach(Array(verdict.flaggedIngredients.enumerated()), id: \.offset) { _, flagged in
                 HStack(alignment: .firstTextBaseline) {
-                    Text("•")
+                    Text(verbatim: "•")
                     Text(flagged.name).fontWeight(.medium)
-                    Text("—")
+                    Text(verbatim: "—")
                     Text(flagged.status.reason).foregroundStyle(.secondary)
                 }
             }

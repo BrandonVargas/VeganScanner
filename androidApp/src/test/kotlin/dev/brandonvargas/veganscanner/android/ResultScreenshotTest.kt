@@ -10,6 +10,7 @@ import dev.brandonvargas.veganscanner.core.common.AppError
 import dev.brandonvargas.veganscanner.core.model.Barcode
 import dev.brandonvargas.veganscanner.core.model.FlaggedIngredient
 import dev.brandonvargas.veganscanner.core.model.IngredientVeganStatus
+import dev.brandonvargas.veganscanner.core.model.IngredientsSource
 import dev.brandonvargas.veganscanner.core.model.Product
 import dev.brandonvargas.veganscanner.core.model.VeganStatus
 import dev.brandonvargas.veganscanner.core.model.VeganVerdict
@@ -81,6 +82,22 @@ class ResultScreenshotTest {
         )
 
     @Test
+    fun likelyVeganFromLabel() =
+        capture(
+            ProductResultUiState.Found(
+                product.copy(
+                    ingredientsSource = IngredientsSource.LABEL_SCAN,
+                    ingredientsText = "Frijol, agua, sal, colorante rojo 40",
+                ),
+                VeganVerdict(
+                    VeganStatus.LIKELY_VEGAN,
+                    VerdictSource.LABEL_SCAN,
+                    listOf(FlaggedIngredient("colorante rojo 40", IngredientVeganStatus.UNKNOWN)),
+                ),
+            ),
+        )
+
+    @Test
     fun notFound() = capture(ProductResultUiState.NotFound("7501000000012"))
 
     @Test
@@ -89,7 +106,7 @@ class ResultScreenshotTest {
     private fun capture(state: ProductResultUiState) {
         composeRule.setContent {
             VeganScannerTheme {
-                ResultContent(state = state, onBack = {}, onAction = {})
+                ResultContent(state = state, onBack = {}, onScanLabel = {}, onAction = {})
             }
         }
         composeRule.onRoot().captureRoboImage()

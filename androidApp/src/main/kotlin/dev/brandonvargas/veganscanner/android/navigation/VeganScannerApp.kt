@@ -28,6 +28,7 @@ import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
 import dev.brandonvargas.veganscanner.R
 import dev.brandonvargas.veganscanner.android.feature.history.HistoryScreen
+import dev.brandonvargas.veganscanner.android.feature.label.LabelScanScreen
 import dev.brandonvargas.veganscanner.android.feature.result.ResultScreen
 import dev.brandonvargas.veganscanner.android.feature.scanner.ScannerScreen
 
@@ -95,11 +96,30 @@ fun VeganScannerApp(
                         HistoryScreen(onOpenResult = { backStack.add(ResultRoute(it)) })
                     }
                     entry<ResultRoute> { route ->
-                        ResultScreen(barcode = route.barcode, onBack = { backStack.removeLastOrNull() })
+                        ResultScreen(
+                            barcode = route.barcode,
+                            onBack = { backStack.removeLastOrNull() },
+                            onScanLabel = { backStack.add(LabelScanRoute(route.barcode)) },
+                        )
+                    }
+                    entry<LabelScanRoute> { route ->
+                        LabelScanScreen(
+                            barcode = route.barcode,
+                            onBack = { backStack.removeLastOrNull() },
+                            onShowResult = { backStack.showResultAfterLabelScan(it) },
+                        )
                     }
                 },
         )
     }
+}
+
+/** Replaces "result → label scan" with a fresh result entry so the product is re-evaluated with the label. */
+private fun NavBackStack<NavKey>.showResultAfterLabelScan(barcode: String) {
+    if (lastOrNull() is LabelScanRoute) removeLastOrNull()
+    val previous = lastOrNull() as? ResultRoute
+    if (previous?.barcode == barcode) removeLastOrNull()
+    add(ResultRoute(barcode, revision = (previous?.revision ?: 0) + 1))
 }
 
 private fun NavBackStack<NavKey>.selectTopLevel(route: NavKey) {

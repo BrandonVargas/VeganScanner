@@ -33,7 +33,7 @@ class OffAnalysisResolver : VerdictResolver {
                 )
             }
 
-            VeganStatus.MAYBE_VEGAN, VeganStatus.UNKNOWN -> {
+            VeganStatus.MAYBE_VEGAN, VeganStatus.LIKELY_VEGAN, VeganStatus.UNKNOWN -> {
                 ResolverResult.Inconclusive(
                     VeganVerdict(product.sourceAnalysis, VerdictSource.OPEN_FOOD_FACTS),
                 )
