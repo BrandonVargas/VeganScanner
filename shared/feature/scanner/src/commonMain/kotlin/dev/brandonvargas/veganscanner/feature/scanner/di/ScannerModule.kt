@@ -8,12 +8,8 @@ import dev.brandonvargas.veganscanner.feature.scanner.domain.LabelScanRepository
 import dev.brandonvargas.veganscanner.feature.scanner.domain.ProductRepository
 import dev.brandonvargas.veganscanner.feature.scanner.domain.ScanHistoryRepository
 import dev.brandonvargas.veganscanner.feature.scanner.domain.ScanProductUseCase
-import dev.brandonvargas.veganscanner.feature.scanner.domain.rules.IngredientDictionary
-import dev.brandonvargas.veganscanner.feature.scanner.domain.rules.IngredientRuleEngine
-import dev.brandonvargas.veganscanner.feature.scanner.domain.verdict.OffAnalysisResolver
-import dev.brandonvargas.veganscanner.feature.scanner.domain.verdict.OffIngredientsResolver
-import dev.brandonvargas.veganscanner.feature.scanner.domain.verdict.RuleEngineResolver
-import dev.brandonvargas.veganscanner.feature.scanner.domain.verdict.VerdictPipeline
+import dev.brandonvargas.veganscanner.feature.scanner.domain.rules.IngredientKnowledge
+import dev.brandonvargas.veganscanner.feature.scanner.domain.verdict.appVerdictPipeline
 import dev.brandonvargas.veganscanner.feature.scanner.presentation.history.HistoryViewModel
 import dev.brandonvargas.veganscanner.feature.scanner.presentation.label.LabelScanViewModel
 import dev.brandonvargas.veganscanner.feature.scanner.presentation.result.ProductResultViewModel
@@ -30,17 +26,7 @@ val scannerModule =
         }
         single<ScanHistoryRepository> { DefaultScanHistoryRepository(dao = get()) }
         single<LabelScanRepository> { DefaultLabelScanRepository(dao = get(), clock = get()) }
-        single { IngredientRuleEngine(IngredientDictionary.Bundled) }
-        single {
-            VerdictPipeline(
-                resolvers =
-                    listOf(
-                        OffAnalysisResolver(),
-                        OffIngredientsResolver(),
-                        RuleEngineResolver(engine = get()),
-                    ),
-            )
-        }
+        single { appVerdictPipeline(IngredientKnowledge.Bundled) }
         factoryOf(::ScanProductUseCase)
 
         viewModelOf(::ScannerViewModel)

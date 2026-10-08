@@ -1,5 +1,9 @@
 {
-  "version": 1,
+  "version": 2,
+  "overrides": [
+    { "id": "en:sugar", "status": "yes",
+      "reason": "Open Food Facts marks sugar 'maybe' because some cane sugar is filtered with bone char. That is rare (and absent from beet and most Mexican cane sugar), and most vegan guides treat sugar as vegan. Applies to all sugars that inherit from en:sugar." }
+  ],
   "entries": [
     { "id": "milk", "status": "no", "category": "dairy",
       "terms": { "en": ["milk", "whole milk", "skim milk", "skimmed milk", "milk powder", "powdered milk", "condensed milk", "evaporated milk", "milk solids", "milk fat", "milkfat", "milk protein", "dairy"],
@@ -95,7 +99,17 @@
     { "id": "glycine", "status": "maybe", "category": "additive", "eNumbers": ["E640"],
       "terms": { "en": ["glycine"], "es": ["glicina"] } },
     { "id": "pepsin-rennet", "status": "maybe", "category": "additive",
-      "terms": { "en": ["rennet", "pepsin", "animal enzymes"], "es": ["cuajo", "pepsina", "enzimas animales"] } }
+      "terms": { "en": ["rennet", "pepsin", "animal enzymes"], "es": ["cuajo", "pepsina", "enzimas animales"] } },
+
+    { "id": "leavening", "status": "yes", "category": "plant",
+      "terms": { "en": ["yeast", "baker's yeast", "dry yeast", "nutritional yeast", "baking soda", "sodium bicarbonate", "baking powder"],
+                 "es": ["levadura", "levadura seca", "levadura nutricional", "bicarbonato de sodio", "polvo para hornear", "polvo de hornear"] } },
+    { "id": "food-acids", "status": "yes", "category": "plant",
+      "terms": { "en": ["ascorbic acid", "citric acid", "malic acid", "acetic acid", "tartaric acid", "saccharomyces cerevisiae"],
+                 "es": ["acido ascorbico", "acido citrico", "acido malico", "acido acetico", "acido tartarico"] } },
+    { "id": "mx-staples", "status": "yes", "category": "plant",
+      "terms": { "en": ["nixtamalized corn", "corn masa", "xanthan gum", "corn starch", "cornstarch"],
+                 "es": ["maiz nixtamalizado", "masa de maiz", "harina de maiz nixtamalizado", "tortilla de maiz", "goma xantana", "almidon de maiz", "fecula de maiz", "chile", "chiles", "chile guajillo", "chile ancho", "chile chipotle", "nopal", "epazote", "piloncillo", "jamaica", "tamarindo"] } }
   ],
   "plantBasedExceptions": {
     "en": ["coconut milk", "almond milk", "soy milk", "soya milk", "oat milk", "rice milk", "cashew milk", "plant milk", "plant-based milk",

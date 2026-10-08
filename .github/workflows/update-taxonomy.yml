@@ -1,0 +1,37 @@
+name: Update Open Food Facts taxonomy
+
+# Refreshes shared/feature/scanner/dictionary/off-taxonomy.json weekly and opens a PR when the data changed.
+# Requires "Allow GitHub Actions to create and approve pull requests" (Settings → Actions → General).
+on:
+  schedule:
+    - cron: "0 7 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: 21
+      - uses: gradle/actions/setup-gradle@v6
+      - name: Refresh taxonomy and run the dictionary tests
+        run: ./gradlew :shared:feature:scanner:updateOffTaxonomy :shared:feature:scanner:testAndroidHostTest
+      - uses: peter-evans/create-pull-request@v8
+        with:
+          branch: chore/off-taxonomy-update
+          delete-branch: true
+          commit-message: "chore(data): refresh Open Food Facts ingredient taxonomy"
+          title: "chore(data): refresh Open Food Facts ingredient taxonomy"
+          body: |
+            Weekly refresh of `shared/feature/scanner/dictionary/off-taxonomy.json` from the
+            [Open Food Facts ingredient taxonomy](https://static.openfoodfacts.org/data/taxonomies/ingredients.json) (ODbL).
+            The dictionary tests passed on the refreshed data before this PR was opened.
+          add-paths: shared/feature/scanner/dictionary/off-taxonomy.json

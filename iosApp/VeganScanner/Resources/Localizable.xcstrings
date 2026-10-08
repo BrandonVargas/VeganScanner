@@ -891,13 +891,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "No animal-derived ingredients in our dictionary"
+            "value" : "Based on our ingredient database (Open Food Facts + curated dictionary)"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Sin ingredientes de origen animal en nuestro diccionario"
+            "value" : "Según nuestra base de ingredientes (Open Food Facts + diccionario curado)"
           }
         }
       }

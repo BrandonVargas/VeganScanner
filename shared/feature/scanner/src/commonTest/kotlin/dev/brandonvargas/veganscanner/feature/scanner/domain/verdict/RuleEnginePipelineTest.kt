@@ -4,25 +4,18 @@ import dev.brandonvargas.veganscanner.core.model.FlaggedIngredient
 import dev.brandonvargas.veganscanner.core.model.Ingredient
 import dev.brandonvargas.veganscanner.core.model.IngredientVeganStatus
 import dev.brandonvargas.veganscanner.core.model.VeganStatus
+import dev.brandonvargas.veganscanner.core.model.VeganVerdict
 import dev.brandonvargas.veganscanner.core.model.VerdictSource
 import dev.brandonvargas.veganscanner.core.testing.OffFixtures
-import dev.brandonvargas.veganscanner.feature.scanner.domain.rules.IngredientDictionary
-import dev.brandonvargas.veganscanner.feature.scanner.domain.rules.IngredientRuleEngine
+import dev.brandonvargas.veganscanner.feature.scanner.domain.rules.IngredientKnowledge
 import dev.brandonvargas.veganscanner.feature.scanner.productFromFixture
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-/** The full pipeline as wired in the app: OFF analysis → OFF ingredients → rule engine. */
+/** The pipeline exactly as the app wires it: OFF analysis → OFF ingredients (with overrides) → rule engine. */
 class RuleEnginePipelineTest {
-    private val pipeline =
-        VerdictPipeline(
-            listOf(
-                OffAnalysisResolver(),
-                OffIngredientsResolver(),
-                RuleEngineResolver(IngredientRuleEngine(IngredientDictionary.Bundled)),
-            ),
-        )
+    private val pipeline = appVerdictPipeline(IngredientKnowledge.Bundled)
 
     @Test
     fun dictionaryCatchesWhatTheDatabaseDidNotRecognize() =
@@ -39,16 +32,39 @@ class RuleEnginePipelineTest {
         }
 
     @Test
-    fun cleanDictionaryCheckDoesNotHideDatabaseDoubts() =
+    fun everyIngredientRecognizedAsVeganIsConclusive() =
         runTest {
-            // OFF flags sugar and natural flavours as "maybe"; the dictionary's silence must not override that.
+            val product =
+                productFromFixture(OffFixtures.unknownStatusNoIngredients)
+                    .copy(ingredientsText = "Harina de trigo, agua, sal, aceite de girasol, azúcar")
+
+            assertEquals(VeganVerdict(VeganStatus.VEGAN, VerdictSource.RULE_ENGINE), pipeline.evaluate(product))
+        }
+
+    @Test
+    fun sugarOverrideResolvesDatabaseMaybe() =
+        runTest {
+            // OFF flags sugar "maybe"; the curated override makes it vegan, so only the flavouring stays doubtful.
             val verdict = pipeline.evaluate(productFromFixture(OffFixtures.maybeVegan))
 
             assertEquals(VeganStatus.MAYBE_VEGAN, verdict.status)
-            assertEquals(
-                listOf("azúcar", "saborizantes naturales"),
-                verdict.flaggedIngredients.map { it.name },
-            )
+            assertEquals(listOf("saborizantes naturales"), verdict.flaggedIngredients.map { it.name })
+        }
+
+    @Test
+    fun sugarOnlyDoubtIsVegan() =
+        runTest {
+            val product =
+                productFromFixture(OffFixtures.maybeVegan).let { product ->
+                    product.copy(
+                        ingredients = product.ingredients.filterNot { it.id == "en:natural-flavouring" },
+                        ingredientsText = "Harina de avena, azúcar, aceite de girasol",
+                    )
+                }
+
+            val verdict = pipeline.evaluate(product)
+
+            assertEquals(VeganVerdict(VeganStatus.VEGAN, VerdictSource.OPEN_FOOD_FACTS_INGREDIENTS), verdict)
         }
 
     @Test
@@ -56,12 +72,12 @@ class RuleEnginePipelineTest {
         runTest {
             val product =
                 productFromFixture(OffFixtures.unknownStatusNoIngredients).copy(
-                    ingredientsText = "Frijol, agua, colorante rojo 40",
+                    ingredientsText = "Frijol, agua, xantolina",
                     ingredients =
                         listOf(
                             Ingredient("en:bean", "Frijol", IngredientVeganStatus.YES),
                             Ingredient("en:water", "agua", IngredientVeganStatus.YES),
-                            Ingredient(null, "colorante rojo 40", IngredientVeganStatus.UNKNOWN),
+                            Ingredient(null, "xantolina", IngredientVeganStatus.UNKNOWN),
                         ),
                 )
 
@@ -69,7 +85,7 @@ class RuleEnginePipelineTest {
 
             assertEquals(VeganStatus.LIKELY_VEGAN, verdict.status)
             assertEquals(
-                listOf(FlaggedIngredient("colorante rojo 40", IngredientVeganStatus.UNKNOWN)),
+                listOf(FlaggedIngredient("xantolina", IngredientVeganStatus.UNKNOWN)),
                 verdict.flaggedIngredients,
             )
         }
@@ -84,10 +100,7 @@ class RuleEnginePipelineTest {
             val verdict = pipeline.evaluate(product)
 
             assertEquals(VeganStatus.MAYBE_VEGAN, verdict.status)
-            assertEquals(
-                listOf("azúcar", "saborizantes naturales", "E471"),
-                verdict.flaggedIngredients.map { it.name },
-            )
+            assertEquals(listOf("saborizantes naturales", "E471"), verdict.flaggedIngredients.map { it.name })
         }
 
     @Test

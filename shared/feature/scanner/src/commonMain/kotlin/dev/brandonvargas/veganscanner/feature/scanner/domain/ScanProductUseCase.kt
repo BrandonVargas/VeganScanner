@@ -1,6 +1,7 @@
 package dev.brandonvargas.veganscanner.feature.scanner.domain
 
 import dev.brandonvargas.veganscanner.core.common.AppResult
+import dev.brandonvargas.veganscanner.core.common.DispatcherProvider
 import dev.brandonvargas.veganscanner.core.model.Barcode
 import dev.brandonvargas.veganscanner.core.model.IngredientsSource
 import dev.brandonvargas.veganscanner.core.model.Product
@@ -8,6 +9,7 @@ import dev.brandonvargas.veganscanner.core.model.ScanHistoryEntry
 import dev.brandonvargas.veganscanner.core.model.VeganStatus
 import dev.brandonvargas.veganscanner.core.model.VeganVerdict
 import dev.brandonvargas.veganscanner.feature.scanner.domain.verdict.VerdictPipeline
+import kotlinx.coroutines.withContext
 import kotlin.time.Clock
 
 sealed interface ScanOutcome {
@@ -28,6 +30,7 @@ class ScanProductUseCase(
     private val verdictPipeline: VerdictPipeline,
     private val historyRepository: ScanHistoryRepository,
     private val clock: Clock,
+    private val dispatchers: DispatcherProvider,
 ) {
     suspend operator fun invoke(barcode: Barcode): AppResult<ScanOutcome> {
         val labelText = labelScanRepository.get(barcode.value)
@@ -40,7 +43,8 @@ class ScanProductUseCase(
                 ?: labelText?.let { labelOnlyProduct(barcode, it) }
                 ?: return AppResult.Success(ScanOutcome.NotFound(barcode))
 
-        val verdict = verdictPipeline.evaluate(product)
+        // CPU-bound (and the first call loads the ingredient knowledge), so keep it off the main thread.
+        val verdict = withContext(dispatchers.default) { verdictPipeline.evaluate(product) }
         historyRepository.record(
             ScanHistoryEntry(
                 barcode = barcode.value,

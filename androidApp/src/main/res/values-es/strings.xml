@@ -57,7 +57,7 @@
     <string name="action_rescan_label">Escanear la etiqueta de nuevo</string>
     <string name="action_scan_label_offline">Mejor escanear la etiqueta de ingredientes</string>
     <string name="verdict_likely">Probablemente vegano</string>
-    <string name="source_rule_engine">Sin ingredientes de origen animal en nuestro diccionario</string>
+    <string name="source_rule_engine">Según nuestra base de ingredientes (Open Food Facts + diccionario curado)</string>
     <string name="source_label_scan">Según la etiqueta de ingredientes que escaneaste</string>
     <string name="flagged_unrecognized">Ingredientes que no pudimos revisar</string>
     <string name="inconclusive_notice_label">Aún no pudimos confirmarlo con la etiqueta. Consulta los ingredientes dudosos con el fabricante.</string>

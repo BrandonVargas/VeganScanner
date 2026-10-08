@@ -8,15 +8,12 @@ import dev.brandonvargas.veganscanner.core.model.VeganStatus
 import dev.brandonvargas.veganscanner.core.model.VerdictSource
 import dev.brandonvargas.veganscanner.core.testing.OffFixtures
 import dev.brandonvargas.veganscanner.core.testing.TestClock
+import dev.brandonvargas.veganscanner.core.testing.TestDispatcherProvider
 import dev.brandonvargas.veganscanner.feature.scanner.FakeLabelScanRepository
 import dev.brandonvargas.veganscanner.feature.scanner.FakeProductRepository
 import dev.brandonvargas.veganscanner.feature.scanner.FakeScanHistoryRepository
-import dev.brandonvargas.veganscanner.feature.scanner.domain.rules.IngredientDictionary
-import dev.brandonvargas.veganscanner.feature.scanner.domain.rules.IngredientRuleEngine
-import dev.brandonvargas.veganscanner.feature.scanner.domain.verdict.OffAnalysisResolver
-import dev.brandonvargas.veganscanner.feature.scanner.domain.verdict.OffIngredientsResolver
-import dev.brandonvargas.veganscanner.feature.scanner.domain.verdict.RuleEngineResolver
-import dev.brandonvargas.veganscanner.feature.scanner.domain.verdict.VerdictPipeline
+import dev.brandonvargas.veganscanner.feature.scanner.domain.rules.IngredientKnowledge
+import dev.brandonvargas.veganscanner.feature.scanner.domain.verdict.appVerdictPipeline
 import dev.brandonvargas.veganscanner.feature.scanner.productFromFixture
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
@@ -34,16 +31,10 @@ class ScanProductUseCaseTest {
         ScanProductUseCase(
             productRepository = products,
             labelScanRepository = labels,
-            verdictPipeline =
-                VerdictPipeline(
-                    listOf(
-                        OffAnalysisResolver(),
-                        OffIngredientsResolver(),
-                        RuleEngineResolver(IngredientRuleEngine(IngredientDictionary.Bundled)),
-                    ),
-                ),
+            verdictPipeline = appVerdictPipeline(IngredientKnowledge.Bundled),
             historyRepository = history,
             clock = clock,
+            dispatchers = TestDispatcherProvider(),
         )
 
     @Test
@@ -111,7 +102,7 @@ class ScanProductUseCaseTest {
 
             val outcome = assertIs<ScanOutcome.Found>(assertIs<AppResult.Success<ScanOutcome>>(useCase(barcode)).value)
 
-            assertEquals(VeganStatus.LIKELY_VEGAN, outcome.verdict.status)
+            assertEquals(VeganStatus.VEGAN, outcome.verdict.status)
             assertEquals(VerdictSource.LABEL_SCAN, outcome.verdict.source)
         }
 

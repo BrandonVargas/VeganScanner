@@ -1,33 +1,50 @@
-# Ingredient dictionary
+# Ingredient knowledge
 
-`ingredients.json` lists animal-derived and doubtful ingredients in **English and Spanish**. The app's rule engine (`IngredientRuleEngine`) uses it to check ingredient lists from Open Food Facts and from labels users scan. It's compiled into the app at build time, so editing this file is all it takes.
+The rule engine (`IngredientRuleEngine`) checks ingredient lists from Open Food Facts and from labels users scan. It uses two data files. Both are compiled into the app at build time and work offline.
 
-**No Kotlin knowledge needed to contribute. Additions for other regions and languages are very welcome.**
+| File | What it is | Who edits it |
+|---|---|---|
+| `ingredients.json` | **Curated dictionary.** Hand-reviewed English/Spanish terms, Mexican label names, plant-based look-alikes, "may contain" markers and corrections (`overrides`) to Open Food Facts. **Always wins** on conflicts. | Contributors, through pull requests |
+| `off-taxonomy.json` | **Open Food Facts ingredient taxonomy**, trimmed to about 5,000 ingredients with their vegan status and English/Spanish names. © Open Food Facts contributors, [ODbL](https://opendatacommons.org/licenses/odbl/1-0/). | Generated: `./gradlew :shared:feature:scanner:updateOffTaxonomy`, refreshed weekly by CI. **Don't edit by hand.** |
 
-## Structure
+If something is missing or wrong, first check whether it should be fixed upstream in the [Open Food Facts taxonomy](https://github.com/openfoodfacts/openfoodfacts-server/tree/main/taxonomies), so every app benefits. Use `ingredients.json` for regional terms and for decisions that are specific to this app.
+
+**No Kotlin knowledge needed to contribute.**
+
+## How ingredient lists are checked
+
+1. The text is split into items at `, ; ( ) [ ] .`. Text before a `:` ("Emulsificantes:") is treated as a heading.
+2. "May contain / puede contener trazas de…" statements are ignored. Traces aren't ingredients.
+3. In each item, the **longest known phrase** wins. "Leche de coco" (vegan look-alike) beats "leche", and "suero de leche" isn't also reported as "leche".
+4. Each item becomes **not vegan**, **doubtful**, **vegan** or **unrecognized**. Connector and processing words ("de", "y", "orgánico", "en polvo", "integral", quantities) don't count against recognition.
+5. The product is **Vegan** only when *every* item is recognized as vegan. Unrecognized items are listed so you can check them, and they are what the web-research step will look up.
+
+## `ingredients.json` structure
 
 ```jsonc
 {
-  "id": "gelatin",                 // unique, kebab-case
-  "status": "no",                  // "no" = not vegan · "maybe" = often animal-derived, check with the maker
-  "category": "animal-tissue",     // dairy · egg · animal-tissue · seafood · insect · bee · additive · other
-  "terms": {                       // whole words/phrases as printed on labels
-    "en": ["gelatin", "gelatine"],
-    "es": ["gelatina", "grenetina"]
-  },
-  "eNumbers": ["E441"]             // optional; also matches "E-441", "E 441" and "INS 441"
+  "overrides": [            // corrections to Open Food Facts, applied to the whole sub-tree
+    { "id": "en:sugar", "status": "yes", "reason": "Why we disagree with Open Food Facts" }
+  ],
+  "entries": [{
+    "id": "gelatin",                 // unique, kebab-case
+    "status": "no",                  // "no" · "maybe" (often animal-derived) · "yes" (vegan staples Open Food Facts lacks)
+    "category": "animal-tissue",     // dairy · egg · animal-tissue · seafood · insect · bee · additive · plant · other
+    "terms": { "en": ["gelatin", "gelatine"], "es": ["gelatina", "grenetina"] },
+    "eNumbers": ["E441"]             // optional; also matches "E-441", "E 441" and "INS 441"
+  }],
+  "plantBasedExceptions": { "es": ["leche de coco", "manteca de cacao"] },
+  "crossContaminationMarkers": { "es": ["puede contener", "trazas de"] }
 }
 ```
 
 - **Accents and case don't matter.** `"lacteos"` also matches "LÁCTEOS".
-- **Longer phrases win.** If `"suero de leche"` matches, the same words aren't also reported as `"leche"`.
-- **`plantBasedExceptions`** are look-alikes that must never be flagged ("leche de coco", "manteca de cacao", "miel de agave"). Add one whenever a plant ingredient contains a flagged word.
-- **`crossContaminationMarkers`** start allergen warnings ("puede contener trazas de leche"). Everything from the marker to the end of the sentence is ignored, because traces aren't ingredients.
+- **Overrides** never relax an explicit `no` in Open Food Facts. After changing them, run `updateOffTaxonomy` so the change reaches the generated file.
 
 ## Checklist for a pull request
 
 1. Add terms to an existing entry when the meaning is the same; otherwise create a new entry.
 2. Every entry needs at least one `en` and one `es` term.
-3. Don't flag an ingredient as `"no"` unless it is always animal-derived. When in doubt, use `"maybe"`.
+3. Don't mark an ingredient `"no"` unless it is always animal-derived. When in doubt, use `"maybe"`.
 4. Add a test case in `IngredientRuleEngineTest` for anything tricky (look-alikes, regional names).
-5. Run `./gradlew :shared:feature:scanner:testAndroidHostTest`. `IngredientDictionaryTest` validates the file: unique ids and codes, no term owned by two entries, and no exception that is also a flagged term.
+5. Run `./gradlew :shared:feature:scanner:testAndroidHostTest`. `IngredientDictionaryTest` and `OffTaxonomyTest` validate both files.

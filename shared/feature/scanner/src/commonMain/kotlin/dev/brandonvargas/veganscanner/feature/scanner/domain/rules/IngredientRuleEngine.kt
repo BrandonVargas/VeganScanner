@@ -2,7 +2,7 @@ package dev.brandonvargas.veganscanner.feature.scanner.domain.rules
 
 import dev.brandonvargas.veganscanner.core.model.IngredientVeganStatus
 
-/** A dictionary hit, reported with the wording found in the analysed text. */
+/** A known term found in the text, reported with the wording printed on the label. */
 internal data class RuleMatch(
     val entryId: String,
     val text: String,
@@ -10,82 +10,139 @@ internal data class RuleMatch(
     val position: Int,
 )
 
-/**
- * Finds animal-derived ingredients in free text (database ingredient lists or OCR'd labels).
- *
- * 1. Cross-contamination statements ("may contain traces of milk") are ignored: they are not ingredients.
- * 2. Plant-based look-alikes ("coconut milk", "manteca vegetal") are masked out.
- * 3. Terms are matched as whole words, longest first, so "suero de leche" isn't also reported as "leche".
- * 4. Additive codes are matched in any common form: E120, E-120, E 120, INS 120.
- */
-internal class IngredientRuleEngine(dictionary: IngredientDictionary) {
-    private class Term(val entry: IngredientDictionary.Entry, val regex: Regex, val length: Int)
+/** One ingredient of the list (comma/parenthesis separated) and what the engine concluded about it. */
+internal data class AnalyzedItem(
+    val text: String,
+    /** YES only when every meaningful word is a known vegan term; UNKNOWN when some words aren't recognized. */
+    val status: IngredientVeganStatus,
+    val matches: List<RuleMatch>,
+)
 
-    private val terms: List<Term> =
-        dictionary.entries
-            .flatMap { entry ->
-                entry.terms.values.flatten().map(TextFolding::foldTerm).distinct().map { folded ->
-                    Term(entry, TextFolding.termRegex(folded), folded.length)
-                }
-            }
-            .sortedByDescending { it.length }
-
-    private val exceptions: List<Regex> =
-        dictionary.plantBasedExceptions.values.flatten()
-            .map(TextFolding::foldTerm)
-            .distinct()
-            .sortedByDescending { it.length }
-            .map(TextFolding::termRegex)
-
-    private val crossContamination: List<Regex> =
-        dictionary.crossContaminationMarkers.values.flatten()
-            .map { TextFolding.termRegex(TextFolding.foldTerm(it)) }
-
-    private val eNumbers: Map<String, IngredientDictionary.Entry> =
-        dictionary.entries
-            .flatMap { entry -> entry.eNumbers.map { it.lowercase() to entry } }
-            .toMap()
-
-    fun analyze(text: String): List<RuleMatch> {
-        val searchable = TextFolding.fold(text).toCharArray()
-        maskCrossContamination(text, searchable)
-        exceptions.forEach { regex ->
-            regex.findAll(searchable.concatToString()).forEach { searchable.blank(it.range) }
-        }
-
-        val matches = mutableListOf<RuleMatch>()
-        for (term in terms) {
-            for (match in term.regex.findAll(searchable.concatToString())) {
-                matches +=
-                    RuleMatch(
-                        term.entry.id,
-                        text.substring(match.range).trim(),
-                        term.entry.status.ingredientStatus,
-                        match.range.first,
-                    )
-                searchable.blank(match.range)
-            }
-        }
-        for (match in E_NUMBER.findAll(searchable.concatToString())) {
-            val code = "e" + match.groupValues[1] + match.groupValues[2]
-            val entry = eNumbers[code] ?: continue
-            matches +=
-                RuleMatch(
-                    entry.id,
-                    text.substring(match.range).trim(),
-                    entry.status.ingredientStatus,
-                    match.range.first,
-                )
-        }
-
-        return matches
+internal data class IngredientAnalysis(val items: List<AnalyzedItem>) {
+    /** Non-vegan and doubtful terms, once per dictionary entry, in label order. */
+    val flagged: List<RuleMatch> =
+        items.flatMap { it.matches }
+            .filter { it.status == IngredientVeganStatus.NO || it.status == IngredientVeganStatus.MAYBE }
             .sortedBy { it.position }
             .distinctBy { it.entryId }
+
+    val unrecognized: List<AnalyzedItem> = items.filter { it.status == IngredientVeganStatus.UNKNOWN }
+
+    val allVegan: Boolean = items.isNotEmpty() && items.all { it.status == IngredientVeganStatus.YES }
+}
+
+/**
+ * Checks free text (database ingredient lists or OCR'd labels) against [IngredientKnowledge].
+ *
+ * 1. Cross-contamination statements ("may contain traces of milk") are ignored: they are not ingredients.
+ * 2. The text is split into items at `, ; ( ) [ ] .`; text before a `:` is a heading ("Emulsificantes:") and skipped.
+ * 3. Additive codes are matched in any common form: E120, E-120, E 120, INS 120.
+ * 4. Within each item, the longest known phrase wins at every position (hash lookups of word n-grams), so
+ *    "leche de coco" (plant-based) beats "leche", and "suero de leche" isn't also reported as "leche".
+ */
+internal class IngredientRuleEngine(private val knowledge: IngredientKnowledge) {
+    private data class Token(val text: String, val start: Int, val end: Int)
+
+    fun analyze(text: String): IngredientAnalysis {
+        val searchable = TextFolding.fold(text).toCharArray()
+        maskCrossContamination(text, searchable)
+
+        // One pass over the whole text: additive codes first (blanked so their digits aren't words), then words.
+        // Both are later assigned to items by position, keeping the analysis linear in the text length.
+        val codes =
+            E_NUMBER.findAll(searchable.concatToString()).mapNotNull { match ->
+                val known =
+                    knowledge.additiveCodes["e" + match.groupValues[1] + match.groupValues[2]] ?: return@mapNotNull null
+                for (i in match.range) searchable[i] = ' '
+                match(known, text, match.range.first, match.range.last + 1)
+            }.toList()
+        val words =
+            WORD.findAll(searchable.concatToString())
+                .map { Token(it.value, it.range.first, it.range.last + 1) }
+                .toList()
+
+        val items =
+            itemRanges(text).mapNotNull { (range, isHeading) ->
+                if (isHeading) {
+                    null
+                } else {
+                    analyzeItem(
+                        original = text,
+                        range = range,
+                        codes = codes.filter { it.position in range },
+                        tokens = words.filter { it.start in range },
+                    )
+                }
+            }
+        return IngredientAnalysis(items)
+    }
+
+    private fun analyzeItem(
+        original: String,
+        range: IntRange,
+        codes: List<RuleMatch>,
+        tokens: List<Token>,
+    ): AnalyzedItem? {
+        val matches = codes.toMutableList()
+        val covered = BooleanArray(tokens.size)
+        var i = 0
+        while (i < tokens.size) {
+            val longest =
+                (minOf(knowledge.maxWords, tokens.size - i) downTo 1).firstNotNullOfOrNull { n ->
+                    val key = (i until i + n).joinToString(" ") { tokens[it].text }
+                    knowledge.terms[key]?.let { n to it }
+                }
+            if (longest == null) {
+                i++
+                continue
+            }
+            val (n, known) = longest
+            matches += match(known, original, tokens[i].start, tokens[i + n - 1].end)
+            for (k in i until i + n) covered[k] = true
+            i += n
+        }
+
+        val meaningful = tokens.indices.filterNot { covered[it] || isFiller(tokens[it].text) }
+        if (matches.isEmpty() && meaningful.isEmpty()) return null
+
+        val status =
+            when {
+                matches.any { it.status == IngredientVeganStatus.NO } -> IngredientVeganStatus.NO
+                matches.any { it.status == IngredientVeganStatus.MAYBE } -> IngredientVeganStatus.MAYBE
+                meaningful.isNotEmpty() -> IngredientVeganStatus.UNKNOWN
+                else -> IngredientVeganStatus.YES
+            }
+        val itemText =
+            original.substring(range).trim().trim(*TRIM_CHARS).let {
+                if (it.length > MAX_ITEM_LENGTH) it.take(MAX_ITEM_LENGTH).trimEnd() + "…" else it
+            }
+        return AnalyzedItem(itemText, status, matches.sortedBy { it.position })
+    }
+
+    private fun match(known: KnownTerm, original: String, start: Int, end: Int) =
+        RuleMatch(known.entryId, original.substring(start, end).trim(), known.status, start)
+
+    /** Splits at item separators; a range followed by `:` is a heading such as "Ingredientes:" or "Contiene:". */
+    private fun itemRanges(text: String): List<Pair<IntRange, Boolean>> {
+        val ranges = mutableListOf<Pair<IntRange, Boolean>>()
+        var start = 0
+        for (index in 0..text.length) {
+            val char = text.getOrNull(index)
+            val isSeparator = char == null || char in ITEM_SEPARATORS || char == ':'
+            // "7,4 %": a comma between digits is a decimal separator, not an item boundary.
+            val isDecimal =
+                char == ',' && text.getOrNull(index - 1)?.isDigit() == true &&
+                    text.getOrNull(index + 1)?.isDigit() == true
+            if (!isSeparator || isDecimal) continue
+            if (index > start) ranges += (start until index) to (char == ':')
+            start = index + 1
+        }
+        return ranges
     }
 
     /** Blanks each "may contain …" clause up to the end of its sentence. */
     private fun maskCrossContamination(original: String, searchable: CharArray) {
-        crossContamination.forEach { marker ->
+        knowledge.crossContaminationMarkers.forEach { marker ->
             marker.findAll(searchable.concatToString()).forEach { match ->
                 val end =
                     original.indexOfAny(SENTENCE_ENDS, startIndex = match.range.last).let {
@@ -97,19 +154,156 @@ internal class IngredientRuleEngine(dictionary: IngredientDictionary) {
                             it
                         }
                     }
-                searchable.blank(match.range.first until end)
+                for (i in match.range.first until end) searchable[i] = ' '
             }
         }
     }
 
-    private fun CharArray.blank(range: IntRange) {
-        for (i in range) this[i] = ' '
-    }
+    private fun isFiller(word: String) = word in FILLER_WORDS || word.all { it.isDigit() } || word.length == 1
 
     private companion object {
         val SENTENCE_ENDS = charArrayOf('.', ';', '\n')
+        val ITEM_SEPARATORS = setOf(',', ';', '(', ')', '[', ']', '{', '}', '.', '\n', '*')
+        val TRIM_CHARS = charArrayOf('.', ',', ';', ':', '-', '*', '"', '\'')
+        const val MAX_ITEM_LENGTH = 60
+        val WORD = Regex("[a-z0-9]+")
 
         /** `e120`, `e 120`, `ins 471`, `e472e` after folding (hyphens and parentheses are already spaces). */
         val E_NUMBER = Regex("\\b(?:e|ins)\\s*(\\d{3,4})([a-f])?\\b")
+
+        /** Connectors, quantities and processing words that don't change what an ingredient is (folded). */
+        val FILLER_WORDS =
+            setOf(
+                // Spanish
+                "de",
+                "del",
+                "la",
+                "las",
+                "el",
+                "los",
+                "y",
+                "e",
+                "o",
+                "u",
+                "en",
+                "con",
+                "sin",
+                "a",
+                "al",
+                "para",
+                "por",
+                "un",
+                "una",
+                "su",
+                "sus",
+                "que",
+                "como",
+                "otros",
+                "otras",
+                "agregado",
+                "agregada",
+                "adicionado",
+                "adicionada",
+                "organico",
+                "organica",
+                "organicos",
+                "organicas",
+                "natural",
+                "naturales",
+                "refinado",
+                "refinada",
+                "deshidratado",
+                "deshidratada",
+                "deshidratados",
+                "deshidratadas",
+                "polvo",
+                "molido",
+                "molida",
+                "entero",
+                "entera",
+                "enteros",
+                "integral",
+                "fresco",
+                "fresca",
+                "frescos",
+                "concentrado",
+                "concentrada",
+                "pasteurizado",
+                "pasteurizada",
+                "yodada",
+                "yodado",
+                "fortificado",
+                "fortificada",
+                "enriquecido",
+                "enriquecida",
+                "tostado",
+                "tostada",
+                "tostados",
+                "cocido",
+                "cocida",
+                "picado",
+                "picada",
+                "trozos",
+                "hidrogenado",
+                "hidrogenada",
+                "parcialmente",
+                "totalmente",
+                "modificado",
+                "modificada",
+                "extra",
+                "virgen",
+                "puro",
+                "pura",
+                "contiene",
+                "ingredientes",
+                "ingrediente",
+                // English
+                "of",
+                "and",
+                "or",
+                "the",
+                "an",
+                "with",
+                "in",
+                "from",
+                "for",
+                "added",
+                "organic",
+                "refined",
+                "dried",
+                "dehydrated",
+                "powder",
+                "powdered",
+                "ground",
+                "whole",
+                "fresh",
+                "concentrate",
+                "concentrated",
+                "pasteurized",
+                "iodized",
+                "enriched",
+                "fortified",
+                "roasted",
+                "toasted",
+                "cooked",
+                "chopped",
+                "sliced",
+                "pieces",
+                "hydrogenated",
+                "partially",
+                "fully",
+                "modified",
+                "virgin",
+                "pure",
+                "contains",
+                "ingredients",
+                // Units
+                "g",
+                "mg",
+                "kg",
+                "ml",
+                "l",
+                "oz",
+            )
     }
 }

@@ -11,12 +11,16 @@ import dev.brandonvargas.veganscanner.core.model.VerdictSource
 /**
  * Step 2: evaluate Open Food Facts' per-ingredient flags ourselves, including nested ingredients.
  * Catches cases the product-level analysis leaves open, and lists the doubtful ingredients otherwise.
+ *
+ * [overrides] applies the app's curated corrections by Open Food Facts ingredient id (e.g. `en:sugar` → vegan).
  */
-class OffIngredientsResolver : VerdictResolver {
+class OffIngredientsResolver(
+    private val overrides: (taxonomyId: String?) -> IngredientVeganStatus? = { null },
+) : VerdictResolver {
     override suspend fun resolve(product: Product): ResolverResult {
         if (product.ingredients.isEmpty()) return ResolverResult.Inconclusive()
 
-        val evaluated = IngredientVeganEvaluator.evaluate(product.ingredients)
+        val evaluated = IngredientVeganEvaluator.evaluate(product.ingredients, overrides)
         val nonVegan = evaluated.filter { (_, status) -> status == IngredientVeganStatus.NO }
         val doubtful =
             evaluated.filter { (_, status) ->

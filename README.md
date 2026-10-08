@@ -11,7 +11,7 @@ Product data comes from [Open Food Facts](https://world.openfoodfacts.org), the 
 
 - **Barcode scanning** on-device: CameraX + ML Kit on Android, VisionKit on iOS. Manual entry also works.
 - **Explained verdicts:** *Vegan*, *Not vegan*, *Might not be vegan*, *Probably vegan* or *Unknown*, with the ingredients that caused it and the data source.
-- **Ingredient dictionary:** an English/Spanish list of animal-derived ingredients and additive codes (gelatina/grenetina, carmín/E120, suero de leche, cajeta…). It catches what the database misses and ignores plant-based look-alikes ("leche de coco") and "may contain" warnings. [Contribute terms](shared/feature/scanner/dictionary/README.md).
+- **Ingredient knowledge:** about 5,000 ingredients from the [Open Food Facts taxonomy](https://static.openfoodfacts.org/data/taxonomies/ingredients.json) (refreshed weekly), plus a curated English/Spanish dictionary for Mexican label terms (grenetina, cajeta, carmín/E120…). It catches what the database misses, ignores plant-based look-alikes ("leche de coco") and "may contain" warnings, and says **Vegan** only when every ingredient is recognized. [Contribute terms](shared/feature/scanner/dictionary/README.md).
 - **Ingredient-label scanning:** when a product is missing or inconclusive (or you're offline), photograph the ingredient list. On-device OCR (ML Kit / Vision) reads it, you fix any misreads, and the app checks it. Photos never leave the phone.
 - **Offline-first:** products are cached and scan history works without a connection.
 - **English and Spanish.**

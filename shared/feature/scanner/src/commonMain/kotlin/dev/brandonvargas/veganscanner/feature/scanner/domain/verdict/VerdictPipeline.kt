@@ -38,7 +38,11 @@ class VerdictPipeline(private val resolvers: List<VerdictResolver>) {
                 current.flaggedIngredients.all { it.status == IngredientVeganStatus.UNKNOWN }
         return when {
             onlyUnrecognized && candidate.status == VeganStatus.LIKELY_VEGAN -> {
-                candidate.copy(flaggedIngredients = current.flaggedIngredients + candidate.flaggedIngredients)
+                candidate.copy(
+                    flaggedIngredients =
+                        (current.flaggedIngredients + candidate.flaggedIngredients)
+                            .distinctBy { it.name.lowercase() },
+                )
             }
 
             rank(candidate) > rank(current) -> {
