@@ -1,0 +1,21 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": ["config:recommended", ":dependencyDashboard"],
+  "schedule": ["before 6am on monday"],
+  "packageRules": [
+    {
+      "description": "Kotlin, KSP, SKIE and Compose compiler must move together",
+      "matchPackageNames": ["org.jetbrains.kotlin**", "com.google.devtools.ksp**", "co.touchlab.skie**"],
+      "groupName": "kotlin toolchain"
+    },
+    {
+      "matchPackageNames": ["androidx.compose**"],
+      "groupName": "compose"
+    },
+    {
+      "matchUpdateTypes": ["patch"],
+      "matchCurrentVersion": "!/^0/",
+      "automerge": true
+    }
+  ]
+}

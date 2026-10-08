@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Vegan Scanner</string>
+
+    <string name="tab_scan">Scan</string>
+    <string name="tab_history">History</string>
+
+    <string name="action_back">Back</string>
+    <string name="action_retry">Try again</string>
+    <string name="action_cancel">Cancel</string>
+    <string name="action_scan_another">Scan another product</string>
+    <string name="action_add_to_off">Open in Open Food Facts</string>
+
+    <string name="scanner_hint">Point the camera at a barcode</string>
+    <string name="camera_permission_rationale">Vegan Scanner needs the camera to read barcodes. You can also type the number below.</string>
+    <string name="camera_permission_grant">Allow camera</string>
+    <string name="manual_entry_title">Or type the barcode</string>
+    <string name="manual_entry_placeholder">e.g. 7501234567893</string>
+    <string name="manual_entry_invalid">That doesn\'t look like a valid barcode</string>
+    <string name="manual_entry_submit">Look up</string>
+
+    <string name="result_title">Result</string>
+    <string name="verdict_vegan">Vegan</string>
+    <string name="verdict_non_vegan">Not vegan</string>
+    <string name="verdict_maybe">Might not be vegan</string>
+    <string name="verdict_unknown">Unknown</string>
+    <string name="source_off_analysis">Based on Open Food Facts\' analysis</string>
+    <string name="source_off_ingredients">Based on Open Food Facts ingredient data</string>
+    <string name="source_none">Not enough information to decide</string>
+    <string name="product_unnamed">Unnamed product</string>
+    <string name="flagged_non_vegan">Non-vegan ingredients</string>
+    <string name="flagged_check">Ingredients to double-check</string>
+    <string name="ingredient_status_no">not vegan</string>
+    <string name="ingredient_status_maybe">may come from animals</string>
+    <string name="ingredient_status_unknown">not recognized</string>
+    <string name="ingredients_title">Ingredients</string>
+    <string name="inconclusive_notice">We couldn\'t confirm this one. Check the label yourself or contact the manufacturer. Scanning the ingredient label with on-device AI is coming soon.</string>
+    <string name="result_disclaimer">Data from Open Food Facts contributors (ODbL). Verdicts are a guide only. Ingredients change, so always check the label.</string>
+
+    <string name="not_found_title">Product not found</string>
+    <string name="not_found_body">Barcode %1$s isn\'t in Open Food Facts yet. You can add it so everyone benefits.</string>
+
+    <string name="error_title">Something went wrong</string>
+    <string name="error_network">Check your internet connection and try again.</string>
+    <string name="error_service_unavailable">Open Food Facts is busy right now. Try again in a moment.</string>
+    <string name="error_rate_limited">Too many lookups in a short time. Wait a minute and try again.</string>
+    <string name="error_unexpected">An unexpected error happened. Try again.</string>
+
+    <string name="history_empty_title">No scans yet</string>
+    <string name="history_empty_body">Products you scan will appear here, even offline.</string>
+    <string name="history_clear">Clear history</string>
+    <string name="history_clear_title">Clear scan history?</string>
+    <string name="history_clear_body">This removes every product from your history on this device.</string>
+    <string name="history_delete_entry">Remove from history</string>
+</resources>

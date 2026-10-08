@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Vegan Scanner</string>
+
+    <string name="tab_scan">Escanear</string>
+    <string name="tab_history">Historial</string>
+
+    <string name="action_back">Atrás</string>
+    <string name="action_retry">Reintentar</string>
+    <string name="action_cancel">Cancelar</string>
+    <string name="action_scan_another">Escanear otro producto</string>
+    <string name="action_add_to_off">Abrir en Open Food Facts</string>
+
+    <string name="scanner_hint">Apunta la cámara a un código de barras</string>
+    <string name="camera_permission_rationale">Vegan Scanner necesita la cámara para leer códigos de barras. También puedes escribir el número abajo.</string>
+    <string name="camera_permission_grant">Permitir cámara</string>
+    <string name="manual_entry_title">O escribe el código de barras</string>
+    <string name="manual_entry_placeholder">ej. 7501234567893</string>
+    <string name="manual_entry_invalid">Ese no parece un código de barras válido</string>
+    <string name="manual_entry_submit">Buscar</string>
+
+    <string name="result_title">Resultado</string>
+    <string name="verdict_vegan">Vegano</string>
+    <string name="verdict_non_vegan">No vegano</string>
+    <string name="verdict_maybe">Podría no ser vegano</string>
+    <string name="verdict_unknown">Desconocido</string>
+    <string name="source_off_analysis">Según el análisis de Open Food Facts</string>
+    <string name="source_off_ingredients">Según los ingredientes en Open Food Facts</string>
+    <string name="source_none">No hay suficiente información para decidir</string>
+    <string name="product_unnamed">Producto sin nombre</string>
+    <string name="flagged_non_vegan">Ingredientes no veganos</string>
+    <string name="flagged_check">Ingredientes a revisar</string>
+    <string name="ingredient_status_no">no vegano</string>
+    <string name="ingredient_status_maybe">puede ser de origen animal</string>
+    <string name="ingredient_status_unknown">no reconocido</string>
+    <string name="ingredients_title">Ingredientes</string>
+    <string name="inconclusive_notice">No pudimos confirmarlo. Revisa la etiqueta o contacta al fabricante. Pronto podrás escanear la etiqueta de ingredientes con IA en el dispositivo.</string>
+    <string name="result_disclaimer">Datos de los colaboradores de Open Food Facts (ODbL). Los resultados son solo una guía. Los ingredientes cambian, así que revisa siempre la etiqueta.</string>
+
+    <string name="not_found_title">Producto no encontrado</string>
+    <string name="not_found_body">El código %1$s aún no está en Open Food Facts. Puedes agregarlo para que todos se beneficien.</string>
+
+    <string name="error_title">Algo salió mal</string>
+    <string name="error_network">Revisa tu conexión a internet e inténtalo de nuevo.</string>
+    <string name="error_service_unavailable">Open Food Facts está ocupado. Inténtalo en un momento.</string>
+    <string name="error_rate_limited">Demasiadas búsquedas en poco tiempo. Espera un minuto e inténtalo de nuevo.</string>
+    <string name="error_unexpected">Ocurrió un error inesperado. Inténtalo de nuevo.</string>
+
+    <string name="history_empty_title">Aún no hay escaneos</string>
+    <string name="history_empty_body">Los productos que escanees aparecerán aquí, incluso sin conexión.</string>
+    <string name="history_clear">Borrar historial</string>
+    <string name="history_clear_title">¿Borrar el historial?</string>
+    <string name="history_clear_body">Esto elimina todos los productos de tu historial en este dispositivo.</string>
+    <string name="history_delete_entry">Quitar del historial</string>
+</resources>

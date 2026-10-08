@@ -1,15 +1,32 @@
-*.iml
-.gradle
-/local.properties
-/.idea/caches
-/.idea/libraries
-/.idea/modules.xml
-/.idea/workspace.xml
-/.idea/navEditor.xml
-/.idea/assetWizardSettings.xml
-.DS_Store
-/build
-/captures
-.externalNativeBuild
-.cxx
+# Gradle / Kotlin
+.gradle/
+build/
+.kotlin/
+*.hprof
+captures/
+.externalNativeBuild/
+.cxx/
+
+# Local configuration & secrets (never commit)
 local.properties
+iosApp/Configuration/Local.xcconfig
+*.keystore
+*.jks
+google-services.json
+GoogleService-Info.plist
+
+# IDEs
+.idea/
+*.iml
+.vscode/
+.fleet/
+
+# Xcode
+iosApp/build/
+DerivedData/
+xcuserdata/
+*.xcuserstate
+*.xcresult
+
+# macOS
+.DS_Store
