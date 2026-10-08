@@ -35,6 +35,8 @@ struct ResultView: View {
                 barcode: barcode,
                 isResearching: found.isResearching,
                 reportedKeys: found.reportedKeys,
+                researchIssue: found.researchIssue,
+                unresearchedCount: Int(found.unresearchedCount),
                 onScanLabel: onScanLabel,
                 onReport: model.report
             )
@@ -73,6 +75,8 @@ private struct FoundContent: View {
     let barcode: String
     let isResearching: Bool
     let reportedKeys: Set<String>
+    let researchIssue: ResearchIssue?
+    let unresearchedCount: Int
     let onScanLabel: () -> Void
     let onReport: (String) -> Void
 
@@ -85,6 +89,12 @@ private struct FoundContent: View {
                         ProgressView()
                         Text("research.in_progress").font(.callout)
                     }
+                }
+                if let researchIssue, unresearchedCount > 0 {
+                    // Research didn't happen for some ingredients: say so instead of failing silently.
+                    Label(researchIssue.message(count: unresearchedCount), systemImage: researchIssue.systemImage)
+                        .font(.callout)
+                        .foregroundStyle(.secondary)
                 }
                 header
                 if !verdict.flaggedIngredients.isEmpty {

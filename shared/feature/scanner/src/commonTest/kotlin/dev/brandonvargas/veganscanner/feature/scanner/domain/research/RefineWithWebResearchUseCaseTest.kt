@@ -1,5 +1,6 @@
 package dev.brandonvargas.veganscanner.feature.scanner.domain.research
 
+import dev.brandonvargas.veganscanner.core.common.AppError
 import dev.brandonvargas.veganscanner.core.model.FlaggedIngredient
 import dev.brandonvargas.veganscanner.core.model.IngredientVeganStatus
 import dev.brandonvargas.veganscanner.core.model.IngredientVeganStatus.MAYBE
@@ -50,7 +51,7 @@ class RefineWithWebResearchUseCaseTest {
         runTest {
             repository.results = listOf(researched("Xantolina", YES), researched("Gelana", YES))
 
-            val refined = useCase(product, likely("Xantolina", "Gelana"))!!
+            val refined = useCase(product, likely("Xantolina", "Gelana")).verdict!!
 
             assertEquals(VeganStatus.VEGAN, refined.status)
             assertEquals(VerdictSource.WEB_RESEARCH, refined.source)
@@ -66,7 +67,7 @@ class RefineWithWebResearchUseCaseTest {
         runTest {
             repository.results = listOf(researched("Xantolina", YES), researched("Isinglás", NO))
 
-            val refined = useCase(product, likely("Xantolina", "Isinglás"))!!
+            val refined = useCase(product, likely("Xantolina", "Isinglás")).verdict!!
 
             assertEquals(VeganStatus.NON_VEGAN, refined.status)
             assertEquals(listOf("Isinglás"), refined.flaggedIngredients.map { it.name })
@@ -77,7 +78,7 @@ class RefineWithWebResearchUseCaseTest {
         runTest {
             repository.results = listOf(researched("Xantolina", MAYBE))
 
-            val refined = useCase(product, likely("Xantolina", "Ruido OCR"))!!
+            val refined = useCase(product, likely("Xantolina", "Ruido OCR")).verdict!!
 
             assertEquals(VeganStatus.MAYBE_VEGAN, refined.status)
             assertEquals(listOf(MAYBE, UNKNOWN), refined.flaggedIngredients.map { it.status })
@@ -94,7 +95,7 @@ class RefineWithWebResearchUseCaseTest {
                     listOf(FlaggedIngredient("saborizantes naturales", MAYBE), FlaggedIngredient("Xantolina", UNKNOWN)),
                 )
 
-            val refined = useCase(product, verdict)!!
+            val refined = useCase(product, verdict).verdict!!
 
             assertEquals(listOf(listOf("Xantolina")), repository.requested)
             assertEquals(VeganStatus.MAYBE_VEGAN, refined.status)
@@ -105,7 +106,10 @@ class RefineWithWebResearchUseCaseTest {
     fun conclusiveVerdictsAndUnavailableResearchAreLeftAlone() =
         runTest {
             assertFalse(useCase.shouldResearch(VeganVerdict(VeganStatus.VEGAN, VerdictSource.RULE_ENGINE)))
-            assertNull(useCase(product, VeganVerdict(VeganStatus.NON_VEGAN, VerdictSource.RULE_ENGINE)))
+            assertEquals(
+                ResearchRefinement.Unchanged,
+                useCase(product, VeganVerdict(VeganStatus.NON_VEGAN, VerdictSource.RULE_ENGINE)),
+            )
 
             val offline =
                 RefineWithWebResearchUseCase(
@@ -120,7 +124,7 @@ class RefineWithWebResearchUseCaseTest {
     @Test
     fun noResultsMeansNoChange() =
         runTest {
-            assertNull(useCase(product, likely("Xantolina")))
+            assertNull(useCase(product, likely("Xantolina")).verdict)
             assertTrue(history.entries.value.isEmpty())
         }
 
@@ -131,4 +135,42 @@ class RefineWithWebResearchUseCaseTest {
 
             assertEquals(5, repository.requested.single().size)
         }
+
+    @Test
+    fun offlineIsReportedWithTheNumberOfIngredientsNotLookedUp() =
+        runTest {
+            repository.failure = AppError.Network
+
+            val refinement = useCase(product, likely("Xantolina", "Gelana"))
+
+            assertEquals(
+                ResearchRefinement(verdict = null, unresearchedCount = 2, issue = ResearchIssue.OFFLINE),
+                refinement,
+            )
+        }
+
+    @Test
+    fun partialResearchRefinesWhatItCanAndReportsTheRest() =
+        runTest {
+            repository.results = listOf(researched("Xantolina", YES))
+            repository.pendingIssue = ResearchIssue.BUSY
+
+            val refinement = useCase(product, likely("Xantolina", "Gelana"))
+
+            assertEquals(VeganStatus.LIKELY_VEGAN, refinement.verdict?.status)
+            assertEquals(listOf("Xantolina"), refinement.verdict?.researched?.map { it.name })
+            assertEquals(1, refinement.unresearchedCount)
+            assertEquals(ResearchIssue.BUSY, refinement.issue)
+        }
+
+    @Test
+    fun serverReasonCodesMapToActionableIssues() {
+        assertEquals(null, ResearchIssue.fromServerReasons(emptyList()))
+        assertEquals(ResearchIssue.BUSY, ResearchIssue.fromServerReasons(listOf("timeout", "budget")))
+        assertEquals(ResearchIssue.BUSY, ResearchIssue.fromServerReasons(listOf("upstream_429")))
+        assertEquals(
+            ResearchIssue.UNAVAILABLE,
+            ResearchIssue.fromServerReasons(listOf("upstream_404", "invalid_answer")),
+        )
+    }
 }

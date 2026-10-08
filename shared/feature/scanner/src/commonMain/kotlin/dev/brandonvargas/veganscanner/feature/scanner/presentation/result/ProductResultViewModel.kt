@@ -11,6 +11,7 @@ import dev.brandonvargas.veganscanner.feature.scanner.domain.ScanOutcome
 import dev.brandonvargas.veganscanner.feature.scanner.domain.ScanProductUseCase
 import dev.brandonvargas.veganscanner.feature.scanner.domain.research.IngredientResearchRepository
 import dev.brandonvargas.veganscanner.feature.scanner.domain.research.RefineWithWebResearchUseCase
+import dev.brandonvargas.veganscanner.feature.scanner.domain.research.ResearchIssue
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -28,6 +29,9 @@ sealed interface ProductResultUiState {
         val isResearching: Boolean = false,
         /** Research keys the user has reported as wrong in this screen. */
         val reportedKeys: Set<String> = emptySet(),
+        /** Ingredients that couldn't be researched online this time (retried on the next visit), and why. */
+        val unresearchedCount: Int = 0,
+        val researchIssue: ResearchIssue? = null,
     ) : ProductResultUiState
 
     data class NotFound(val barcode: String) : ProductResultUiState
@@ -97,10 +101,15 @@ class ProductResultViewModel(
         val shouldResearch = refineWithWebResearch.shouldResearch(outcome.verdict)
         _state.value = ProductResultUiState.Found(outcome.product, outcome.verdict, isResearching = shouldResearch)
         if (!shouldResearch) return
-        val refined = refineWithWebResearch(outcome.product, outcome.verdict)
+        val refinement = refineWithWebResearch(outcome.product, outcome.verdict)
         _state.update { current ->
             if (current is ProductResultUiState.Found) {
-                current.copy(verdict = refined ?: current.verdict, isResearching = false)
+                current.copy(
+                    verdict = refinement.verdict ?: current.verdict,
+                    isResearching = false,
+                    unresearchedCount = refinement.unresearchedCount,
+                    researchIssue = refinement.issue,
+                )
             } else {
                 current
             }

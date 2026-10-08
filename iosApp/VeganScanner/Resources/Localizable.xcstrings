@@ -698,6 +698,129 @@
         }
       }
     },
+    "research.issue_busy %lld" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Online lookups reached today's limit. We'll look up %lld ingredient next time; try again tomorrow."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Online lookups reached today's limit. We'll look up %lld ingredients next time; try again tomorrow."
+                }
+              }
+            }
+          }
+        },
+        "es" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Las búsquedas en línea llegaron al límite de hoy. Buscaremos %lld ingrediente la próxima vez; inténtalo mañana."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Las búsquedas en línea llegaron al límite de hoy. Buscaremos %lld ingredientes la próxima vez; inténtalo mañana."
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "research.issue_offline %lld" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Couldn't look up %lld ingredient online. Connect to the internet and open this product again."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Couldn't look up %lld ingredients online. Connect to the internet and open this product again."
+                }
+              }
+            }
+          }
+        },
+        "es" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "No pudimos buscar %lld ingrediente en línea. Conéctate a internet y abre este producto de nuevo."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "No pudimos buscar %lld ingredientes en línea. Conéctate a internet y abre este producto de nuevo."
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "research.issue_unavailable %lld" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Online lookup isn't working right now. We'll try %lld ingredient again next time you open this product."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Online lookup isn't working right now. We'll try %lld ingredients again next time you open this product."
+                }
+              }
+            }
+          }
+        },
+        "es" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "La búsqueda en línea no está funcionando ahora. Volveremos a intentar %lld ingrediente la próxima vez que abras este producto."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "La búsqueda en línea no está funcionando ahora. Volveremos a intentar %lld ingredientes la próxima vez que abras este producto."
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "research.report" : {
       "extractionState" : "manual",
       "localizations" : {

@@ -81,4 +81,19 @@
     <string name="research_status_vegan">vegano</string>
     <string name="research_report">Reportar como incorrecto</string>
     <string name="research_reported">Reportado, gracias</string>
+    <plurals name="research_issue_offline">
+        <item quantity="one">No pudimos buscar %d ingrediente en línea. Conéctate a internet y abre este producto de nuevo.</item>
+        <item quantity="many">No pudimos buscar %d ingredientes en línea. Conéctate a internet y abre este producto de nuevo.</item>
+        <item quantity="other">No pudimos buscar %d ingredientes en línea. Conéctate a internet y abre este producto de nuevo.</item>
+    </plurals>
+    <plurals name="research_issue_busy">
+        <item quantity="one">Las búsquedas en línea llegaron al límite de hoy. Buscaremos %d ingrediente la próxima vez; inténtalo mañana.</item>
+        <item quantity="many">Las búsquedas en línea llegaron al límite de hoy. Buscaremos %d ingredientes la próxima vez; inténtalo mañana.</item>
+        <item quantity="other">Las búsquedas en línea llegaron al límite de hoy. Buscaremos %d ingredientes la próxima vez; inténtalo mañana.</item>
+    </plurals>
+    <plurals name="research_issue_unavailable">
+        <item quantity="one">La búsqueda en línea no está funcionando ahora. Volveremos a intentar %d ingrediente la próxima vez que abras este producto.</item>
+        <item quantity="many">La búsqueda en línea no está funcionando ahora. Volveremos a intentar %d ingredientes la próxima vez que abras este producto.</item>
+        <item quantity="other">La búsqueda en línea no está funcionando ahora. Volveremos a intentar %d ingredientes la próxima vez que abras este producto.</item>
+    </plurals>
 </resources>

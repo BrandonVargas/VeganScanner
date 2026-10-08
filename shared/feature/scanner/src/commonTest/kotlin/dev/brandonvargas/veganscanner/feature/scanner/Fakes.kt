@@ -1,5 +1,6 @@
 package dev.brandonvargas.veganscanner.feature.scanner
 
+import dev.brandonvargas.veganscanner.core.common.AppError
 import dev.brandonvargas.veganscanner.core.common.AppResult
 import dev.brandonvargas.veganscanner.core.database.dao.IngredientResearchDao
 import dev.brandonvargas.veganscanner.core.database.dao.ProductCacheDao
@@ -17,6 +18,7 @@ import dev.brandonvargas.veganscanner.feature.scanner.domain.LabelScanRepository
 import dev.brandonvargas.veganscanner.feature.scanner.domain.ProductRepository
 import dev.brandonvargas.veganscanner.feature.scanner.domain.ScanHistoryRepository
 import dev.brandonvargas.veganscanner.feature.scanner.domain.research.IngredientResearchRepository
+import dev.brandonvargas.veganscanner.feature.scanner.domain.research.ResearchIssue
 import dev.brandonvargas.veganscanner.feature.scanner.domain.research.ResearchOutcome
 import dev.brandonvargas.veganscanner.feature.scanner.domain.research.ResearchedIngredient
 import kotlinx.coroutines.flow.Flow
@@ -92,21 +94,23 @@ class FakeLabelScanRepository : LabelScanRepository {
 class FakeIngredientResearchRepository(
     var results: List<ResearchedIngredient> = emptyList(),
     override val isAvailable: Boolean = true,
+    /** Names answered as pending (not researched), with this issue. */
+    var pendingIssue: ResearchIssue? = null,
+    /** When set, research fails entirely with this error. */
+    var failure: AppError? = null,
 ) : IngredientResearchRepository {
     val requested = mutableListOf<List<String>>()
     val reported = mutableListOf<String>()
 
     override suspend fun research(names: List<String>, language: String): AppResult<ResearchOutcome> {
         requested += names
-        val folded = names.map { it.lowercase() }
-        return AppResult.Success(
-            ResearchOutcome(
-                results.filter {
-                    it.name.lowercase() in folded
-                },
-                pending = emptyList(),
-            ),
-        )
+        failure?.let { return AppResult.Failure(it) }
+        val found = results.filter { result -> names.any { it.equals(result.name, ignoreCase = true) } }
+        val pending =
+            names.filterNot { name -> found.any { it.name.equals(name, ignoreCase = true) } }
+                .takeIf { pendingIssue != null }
+                .orEmpty()
+        return AppResult.Success(ResearchOutcome(found, pending, pendingIssue.takeIf { pending.isNotEmpty() }))
     }
 
     override suspend fun report(key: String, reason: String?): AppResult<Unit> {

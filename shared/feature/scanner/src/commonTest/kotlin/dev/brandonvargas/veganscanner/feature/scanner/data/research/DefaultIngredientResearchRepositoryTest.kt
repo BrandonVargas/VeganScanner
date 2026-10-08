@@ -6,6 +6,7 @@ import dev.brandonvargas.veganscanner.core.model.IngredientVeganStatus
 import dev.brandonvargas.veganscanner.core.network.NetworkJson
 import dev.brandonvargas.veganscanner.core.testing.TestClock
 import dev.brandonvargas.veganscanner.feature.scanner.FakeIngredientResearchDao
+import dev.brandonvargas.veganscanner.feature.scanner.domain.research.ResearchIssue
 import dev.brandonvargas.veganscanner.feature.scanner.domain.research.ResearchOutcome
 import kotlinx.coroutines.test.runTest
 import kotlinx.io.IOException
@@ -50,7 +51,12 @@ class DefaultIngredientResearchRepositoryTest {
     @Test
     fun mapsServerResultsAndCachesThemLocally() =
         runTest {
-            remote.response = ResearchResponseDto(results = listOf(goma), deferred = listOf("Ruido"))
+            remote.response =
+                ResearchResponseDto(
+                    results = listOf(goma),
+                    deferred = listOf("Ruido"),
+                    deferredReasons = mapOf("Ruido" to "budget"),
+                )
 
             val outcome =
                 assertIs<AppResult.Success<ResearchOutcome>>(
@@ -63,6 +69,7 @@ class DefaultIngredientResearchRepositoryTest {
             assertEquals("Se obtiene por fermentación bacteriana.", researched.reason("es"))
             assertEquals("wikipedia.org", researched.sources.single().title)
             assertEquals(listOf("Ruido"), outcome.pending)
+            assertEquals(ResearchIssue.BUSY, outcome.issue)
             assertEquals("vegan", dao.rows["goma gelana"]?.status)
         }
 
@@ -111,6 +118,7 @@ class DefaultIngredientResearchRepositoryTest {
                 ).value
             assertEquals(listOf("Goma gelana"), outcome.results.map { it.name })
             assertEquals(listOf("Otra"), outcome.pending)
+            assertEquals(ResearchIssue.OFFLINE, outcome.issue)
         }
 
     @Test

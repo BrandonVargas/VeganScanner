@@ -8,9 +8,12 @@ import dev.brandonvargas.veganscanner.core.database.entity.IngredientResearchEnt
 import dev.brandonvargas.veganscanner.core.model.IngredientVeganStatus
 import dev.brandonvargas.veganscanner.core.model.SourceLink
 import dev.brandonvargas.veganscanner.feature.scanner.domain.research.IngredientResearchRepository
+import dev.brandonvargas.veganscanner.feature.scanner.domain.research.ResearchIssue
 import dev.brandonvargas.veganscanner.feature.scanner.domain.research.ResearchOutcome
 import dev.brandonvargas.veganscanner.feature.scanner.domain.research.ResearchedIngredient
+import dev.brandonvargas.veganscanner.feature.scanner.domain.research.toResearchIssue
 import dev.brandonvargas.veganscanner.feature.scanner.domain.rules.TextFolding
+import io.github.jan.supabase.exceptions.RestException
 import kotlinx.coroutines.CancellationException
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.json.Json
@@ -50,6 +53,10 @@ internal class DefaultIngredientResearchRepository(
                 ResearchOutcome(
                     results = fromCache + response.results.map { it.toDomain() },
                     pending = response.deferred,
+                    issue =
+                        ResearchIssue.fromServerReasons(
+                            response.deferred.map { response.deferredReasons[it] ?: "error" },
+                        ),
                 ),
             )
         } catch (e: CancellationException) {
@@ -58,12 +65,11 @@ internal class DefaultIngredientResearchRepository(
             @Suppress("TooGenericExceptionCaught") e: Exception,
         ) {
             log.w(e) { "Research failed for $misses" }
+            val error = if (e is RestException) AppError.ServiceUnavailable else AppError.Network
             if (fromCache.isEmpty()) {
-                AppResult.Failure(
-                    AppError.Network,
-                )
+                AppResult.Failure(error)
             } else {
-                AppResult.Success(ResearchOutcome(fromCache, misses))
+                AppResult.Success(ResearchOutcome(fromCache, misses, issue = error.toResearchIssue()))
             }
         }
     }

@@ -17,7 +17,9 @@ import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.rounded.AutoAwesome
 import androidx.compose.material.icons.rounded.CloudOff
 import androidx.compose.material.icons.rounded.DocumentScanner
+import androidx.compose.material.icons.rounded.ErrorOutline
 import androidx.compose.material.icons.rounded.Info
+import androidx.compose.material.icons.rounded.Schedule
 import androidx.compose.material.icons.rounded.SearchOff
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -40,6 +42,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
@@ -60,6 +63,7 @@ import dev.brandonvargas.veganscanner.core.model.IngredientsSource
 import dev.brandonvargas.veganscanner.core.model.Product
 import dev.brandonvargas.veganscanner.core.model.VeganStatus
 import dev.brandonvargas.veganscanner.core.model.VeganVerdict
+import dev.brandonvargas.veganscanner.feature.scanner.domain.research.ResearchIssue
 import dev.brandonvargas.veganscanner.feature.scanner.presentation.result.ProductResultAction
 import dev.brandonvargas.veganscanner.feature.scanner.presentation.result.ProductResultUiState
 import dev.brandonvargas.veganscanner.feature.scanner.presentation.result.ProductResultViewModel
@@ -146,6 +150,7 @@ private fun FoundContent(
     ) {
         VerdictBanner(verdict)
         if (state.isResearching) ResearchingIndicator()
+        state.researchIssue?.let { if (state.unresearchedCount > 0) ResearchIssueNote(it, state.unresearchedCount) }
         ProductHeader(product)
         if (verdict.flaggedIngredients.isNotEmpty()) FlaggedIngredients(verdict)
         if (verdict.researched.isNotEmpty()) {
@@ -246,6 +251,31 @@ private fun FlaggedIngredients(verdict: VeganVerdict) {
                 )
             }
         }
+    }
+}
+
+/** Research didn't happen for some ingredients: say so (and what the user can do) instead of failing silently. */
+@Composable
+private fun ResearchIssueNote(issue: ResearchIssue, count: Int) {
+    val (icon, message) =
+        when (issue) {
+            ResearchIssue.OFFLINE -> Icons.Rounded.CloudOff to R.plurals.research_issue_offline
+            ResearchIssue.BUSY -> Icons.Rounded.Schedule to R.plurals.research_issue_busy
+            ResearchIssue.UNAVAILABLE -> Icons.Rounded.ErrorOutline to R.plurals.research_issue_unavailable
+        }
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Icon(
+            icon,
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.size(18.dp),
+        )
+        Text(
+            pluralStringResource(message, count, count),
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.padding(start = 12.dp),
+        )
     }
 }
 

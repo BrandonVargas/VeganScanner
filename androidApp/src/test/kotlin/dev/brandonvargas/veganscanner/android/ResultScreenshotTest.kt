@@ -15,6 +15,7 @@ import dev.brandonvargas.veganscanner.core.model.Product
 import dev.brandonvargas.veganscanner.core.model.VeganStatus
 import dev.brandonvargas.veganscanner.core.model.VeganVerdict
 import dev.brandonvargas.veganscanner.core.model.VerdictSource
+import dev.brandonvargas.veganscanner.feature.scanner.domain.research.ResearchIssue
 import dev.brandonvargas.veganscanner.feature.scanner.presentation.result.ProductResultUiState
 import org.junit.Rule
 import org.junit.Test
@@ -94,6 +95,24 @@ class ResultScreenshotTest {
                     VerdictSource.LABEL_SCAN,
                     listOf(FlaggedIngredient("colorante rojo 40", IngredientVeganStatus.UNKNOWN)),
                 ),
+            ),
+        )
+
+    @Test
+    fun researchOffline() =
+        capture(
+            ProductResultUiState.Found(
+                product.copy(
+                    ingredientsSource = IngredientsSource.LABEL_SCAN,
+                    ingredientsText = "Agua, goma gelana, sal",
+                ),
+                VeganVerdict(
+                    VeganStatus.LIKELY_VEGAN,
+                    VerdictSource.LABEL_SCAN,
+                    listOf(FlaggedIngredient("goma gelana", IngredientVeganStatus.UNKNOWN)),
+                ),
+                unresearchedCount = 1,
+                researchIssue = ResearchIssue.OFFLINE,
             ),
         )
 

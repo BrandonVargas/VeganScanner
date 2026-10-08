@@ -23,6 +23,8 @@ internal data class ResearchRequestDto(val ingredients: List<String>, val langua
 internal data class ResearchResponseDto(
     val results: List<ResearchedIngredientDto> = emptyList(),
     val deferred: List<String> = emptyList(),
+    /** Non-sensitive reason code per deferred name: `budget`, `timeout`, `upstream_<status>`, `invalid_answer`. */
+    val deferredReasons: Map<String, String> = emptyMap(),
     val disputed: List<String> = emptyList(),
     val rejected: List<String> = emptyList(),
 )

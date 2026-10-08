@@ -74,6 +74,24 @@ extension IngredientVeganStatus {
     }
 }
 
+extension ResearchIssue {
+    var systemImage: String {
+        switch self {
+        case .offline: "wifi.slash"
+        case .busy: "clock"
+        case .unavailable: "exclamationmark.circle"
+        }
+    }
+
+    func message(count: Int) -> LocalizedStringKey {
+        switch self {
+        case .offline: "research.issue_offline \(count)"
+        case .busy: "research.issue_busy \(count)"
+        case .unavailable: "research.issue_unavailable \(count)"
+        }
+    }
+}
+
 func errorMessage(_ error: AppError) -> LocalizedStringKey {
     switch onEnum(of: error) {
     case .network: "error.network"

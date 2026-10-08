@@ -16,6 +16,7 @@ import dev.brandonvargas.veganscanner.feature.scanner.FakeProductRepository
 import dev.brandonvargas.veganscanner.feature.scanner.FakeScanHistoryRepository
 import dev.brandonvargas.veganscanner.feature.scanner.domain.ScanProductUseCase
 import dev.brandonvargas.veganscanner.feature.scanner.domain.research.RefineWithWebResearchUseCase
+import dev.brandonvargas.veganscanner.feature.scanner.domain.research.ResearchIssue
 import dev.brandonvargas.veganscanner.feature.scanner.domain.research.ResearchedIngredient
 import dev.brandonvargas.veganscanner.feature.scanner.domain.rules.IngredientKnowledge
 import dev.brandonvargas.veganscanner.feature.scanner.domain.verdict.OffAnalysisResolver
@@ -165,5 +166,32 @@ class ProductResultViewModelTest {
             val found = assertIs<ProductResultUiState.Found>(viewModel.state.value)
             assertEquals(setOf("xantolina"), found.reportedKeys)
             assertEquals(listOf("xantolina"), research.reported)
+        }
+
+    @Test
+    fun researchProblemsAreShownInsteadOfFailingSilently() =
+        runTest(main.dispatcher) {
+            val product = productFromFixture(OffFixtures.unknownStatusNoIngredients)
+            products.result = AppResult.Success(product.copy(ingredientsText = "Agua, xantolina"))
+            research.failure = AppError.Network
+            val pipelineUseCase =
+                ScanProductUseCase(
+                    productRepository = products,
+                    labelScanRepository = FakeLabelScanRepository(),
+                    verdictPipeline = appVerdictPipeline(IngredientKnowledge.Bundled),
+                    historyRepository = FakeScanHistoryRepository(),
+                    clock = TestClock(),
+                    dispatchers = TestDispatcherProvider(),
+                )
+
+            val viewModel =
+                ProductResultViewModel(OffFixtures.UNKNOWN_STATUS_BARCODE, pipelineUseCase, refine, research)
+            advanceUntilIdle()
+
+            val found = assertIs<ProductResultUiState.Found>(viewModel.state.value)
+            assertEquals(VeganStatus.LIKELY_VEGAN, found.verdict.status)
+            assertFalse(found.isResearching)
+            assertEquals(1, found.unresearchedCount)
+            assertEquals(ResearchIssue.OFFLINE, found.researchIssue)
         }
 }

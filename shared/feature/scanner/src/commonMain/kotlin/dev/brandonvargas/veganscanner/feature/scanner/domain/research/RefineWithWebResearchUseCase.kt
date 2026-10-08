@@ -13,6 +13,17 @@ import dev.brandonvargas.veganscanner.feature.scanner.domain.rules.LabelLanguage
 import dev.brandonvargas.veganscanner.feature.scanner.domain.rules.TextFolding
 import kotlin.time.Clock
 
+/** What web research changed: a new verdict, and/or ingredients it couldn't look up (and why). */
+data class ResearchRefinement(
+    val verdict: VeganVerdict?,
+    val unresearchedCount: Int,
+    val issue: ResearchIssue?,
+) {
+    companion object {
+        val Unchanged = ResearchRefinement(verdict = null, unresearchedCount = 0, issue = null)
+    }
+}
+
 /**
  * Looks up the ingredients the offline steps couldn't recognize on the web (Wikipedia + Gemini) and refines the
  * verdict. Runs after the result is shown, because a lookup can take several seconds.
@@ -29,19 +40,26 @@ class RefineWithWebResearchUseCase(
     fun shouldResearch(verdict: VeganVerdict): Boolean =
         repository.isAvailable && !verdict.isConclusive && unrecognized(verdict).isNotEmpty()
 
-    /** Returns the refined verdict, or `null` when research wasn't possible or didn't change anything. */
-    suspend operator fun invoke(product: Product, verdict: VeganVerdict): VeganVerdict? {
-        if (!shouldResearch(verdict)) return null
+    /**
+     * Researches the unrecognized ingredients. The result carries the refined verdict (if anything was learned) and,
+     * when some ingredients couldn't be researched, how many and why, so the UI can say so instead of failing silently.
+     */
+    suspend operator fun invoke(product: Product, verdict: VeganVerdict): ResearchRefinement {
+        if (!shouldResearch(verdict)) return ResearchRefinement.Unchanged
         val names = unrecognized(verdict).map { it.name }.take(MAX_NAMES)
         val outcome =
-            (repository.research(names, LabelLanguage.guess(product.ingredientsText)) as? AppResult.Success)
-                ?.value
-                ?.takeIf { it.results.isNotEmpty() }
-                ?: return null
+            when (val result = repository.research(names, LabelLanguage.guess(product.ingredientsText))) {
+                is AppResult.Failure -> return ResearchRefinement(null, names.size, result.error.toResearchIssue())
+                is AppResult.Success -> result.value
+            }
 
-        val refined = apply(verdict, outcome.results)
-        history.record(product.historyEntry(refined, clock.now()))
-        return refined
+        val refined = outcome.results.takeIf { it.isNotEmpty() }?.let { apply(verdict, it) }
+        refined?.let { history.record(product.historyEntry(it, clock.now())) }
+        return ResearchRefinement(
+            verdict = refined,
+            unresearchedCount = outcome.pending.size,
+            issue = outcome.issue.takeIf { outcome.pending.isNotEmpty() },
+        )
     }
 
     internal fun apply(verdict: VeganVerdict, results: List<ResearchedIngredient>): VeganVerdict {
