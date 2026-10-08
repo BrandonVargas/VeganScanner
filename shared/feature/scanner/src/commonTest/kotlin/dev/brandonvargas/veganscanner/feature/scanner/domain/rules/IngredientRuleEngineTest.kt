@@ -120,7 +120,10 @@ class IngredientRecognitionTest {
               {"id":"en:sugar","status":"yes","overridden":true,"en":["sugar"],"es":["azúcar"]},
               {"id":"en:cocoa","status":"yes","en":["cocoa"],"es":["cacao"]},
               {"id":"en:egg-white","status":"no","en":["egg white"],"es":["clara"]},
-              {"id":"en:e330","status":"yes","en":["citric acid"],"e":"E330"}
+              {"id":"en:e330","status":"yes","en":["citric acid"],"e":"E330"},
+              {"id":"en:oat-base","status":"maybe","en":["oat base"],"es":["base de avena"]},
+              {"id":"en:oat","status":"yes","en":["oat"],"es":["avena"]},
+              {"id":"en:vitamin-a","status":"maybe","en":["vitamin A"],"es":["vitamina A"]}
             ]}
             """.trimIndent(),
         )
@@ -155,6 +158,44 @@ class IngredientRecognitionTest {
     fun curatedPlantBasedLookAlikesCountAsRecognizedVegan() {
         assertEquals(listOf(NO), engine.analyze("clara de huevo").flagged.map { it.status })
         assertEquals(YES, engine.analyze("leche de coco").items.single().status)
+    }
+
+    @Test
+    fun compoundIsJudgedByItsListedComposition() {
+        val analysis = engine.analyze("BASE DE AVENA (AGUA FILTRADA, 7.12% AVENA), SAL")
+
+        assertEquals(emptyList(), analysis.flagged, analysis.items.toString())
+        assertEquals(listOf("AGUA FILTRADA", "7.12% AVENA", "SAL"), analysis.items.map { it.text })
+        assertEquals(listOf("AGUA FILTRADA"), analysis.unrecognized.map { it.text })
+    }
+
+    @Test
+    fun doubtfulCompoundWithoutCompositionStaysDoubtful() {
+        assertEquals(
+            listOf("base de avena" to MAYBE),
+            engine.analyze("base de avena, sal").flagged.map {
+                it.text to
+                    it.status
+            },
+        )
+        assertEquals(listOf(MAYBE), engine.analyze("base de avena ( ), sal").flagged.map { it.status })
+    }
+
+    @Test
+    fun compositionCanStillMakeACompoundNonVegan() {
+        assertEquals(listOf(NO), engine.analyze("base de avena (avena, clara)").flagged.map { it.status })
+        assertEquals(
+            listOf("clara" to NO),
+            engine.analyze("clara (agua)").flagged.map { it.text to it.status },
+            "a non-vegan name stays flagged whatever it lists",
+        )
+    }
+
+    @Test
+    fun nestedCompositionAndLaterItemsAreIndependent() {
+        val analysis = engine.analyze("base de avena (agua, avena), PALMITATO DE VITAMINA A")
+
+        assertEquals(listOf("VITAMINA A" to MAYBE), analysis.flagged.map { it.text to it.status })
     }
 
     @Test

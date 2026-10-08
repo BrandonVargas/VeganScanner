@@ -129,11 +129,22 @@ class RefineWithWebResearchUseCaseTest {
         }
 
     @Test
-    fun researchesAtMostFiveIngredients() =
+    fun researchesEveryUnrecognizedIngredientInBatchesOfFive() =
         runTest {
-            useCase(product, likely("a1", "b2", "c3", "d4", "e5", "f6", "g7"))
+            repository.results = listOf(researched("f6", YES))
 
-            assertEquals(5, repository.requested.single().size)
+            val refinement = useCase(product, likely("a1", "b2", "c3", "d4", "e5", "f6", "g7"))
+
+            assertEquals(listOf(5, 2), repository.requested.map { it.size })
+            assertEquals(listOf("f6"), refinement.verdict?.researched?.map { it.name })
+        }
+
+    @Test
+    fun researchesAtMostFifteenIngredientsPerScan() =
+        runTest {
+            useCase(product, likely(*Array(20) { "item$it" }))
+
+            assertEquals(15, repository.requested.flatten().size)
         }
 
     @Test

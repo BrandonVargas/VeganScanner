@@ -1150,13 +1150,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Researched online with AI (Gemini + Wikipedia)"
+            "value" : "Researched online with AI (Gemini + web search)"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Investigado en línea con IA (Gemini + Wikipedia)"
+            "value" : "Investigado en línea con IA (Gemini + búsqueda web)"
           }
         }
       }

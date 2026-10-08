@@ -11,6 +11,9 @@ import dev.brandonvargas.veganscanner.feature.scanner.domain.ScanHistoryReposito
 import dev.brandonvargas.veganscanner.feature.scanner.domain.historyEntry
 import dev.brandonvargas.veganscanner.feature.scanner.domain.rules.LabelLanguage
 import dev.brandonvargas.veganscanner.feature.scanner.domain.rules.TextFolding
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
 import kotlin.time.Clock
 
 /** What web research changed: a new verdict, and/or ingredients it couldn't look up (and why). */
@@ -47,11 +50,7 @@ class RefineWithWebResearchUseCase(
     suspend operator fun invoke(product: Product, verdict: VeganVerdict): ResearchRefinement {
         if (!shouldResearch(verdict)) return ResearchRefinement.Unchanged
         val names = unrecognized(verdict).map { it.name }.take(MAX_NAMES)
-        val outcome =
-            when (val result = repository.research(names, LabelLanguage.guess(product.ingredientsText))) {
-                is AppResult.Failure -> return ResearchRefinement(null, names.size, result.error.toResearchIssue())
-                is AppResult.Success -> result.value
-            }
+        val outcome = researchInBatches(names, LabelLanguage.guess(product.ingredientsText))
 
         val refined = outcome.results.takeIf { it.isNotEmpty() }?.let { apply(verdict, it) }
         refined?.let { history.record(product.historyEntry(it, clock.now())) }
@@ -61,6 +60,26 @@ class RefineWithWebResearchUseCase(
             issue = outcome.issue.takeIf { outcome.pending.isNotEmpty() },
         )
     }
+
+    /** The server takes [BATCH_SIZE] names per request; batches run in parallel and failures become pending names. */
+    private suspend fun researchInBatches(names: List<String>, language: String): ResearchOutcome =
+        coroutineScope {
+            val outcomes =
+                names.chunked(BATCH_SIZE).map { batch ->
+                    async {
+                        when (val result = repository.research(batch, language)) {
+                            is AppResult.Success -> result.value
+                            is AppResult.Failure -> ResearchOutcome(emptyList(), batch, result.error.toResearchIssue())
+                        }
+                    }
+                }.awaitAll()
+            ResearchOutcome(
+                results = outcomes.flatMap { it.results },
+                pending = outcomes.flatMap { it.pending },
+                // The most actionable one: offline first, then busy, then unavailable.
+                issue = outcomes.mapNotNull { it.issue }.minOrNull(),
+            )
+        }
 
     internal fun apply(verdict: VeganVerdict, results: List<ResearchedIngredient>): VeganVerdict {
         val byName = results.associateBy { TextFolding.foldTerm(it.name) }
@@ -109,6 +128,9 @@ class RefineWithWebResearchUseCase(
 
     private companion object {
         /** Matches the Edge Function's per-request limit. */
-        const val MAX_NAMES = 5
+        const val BATCH_SIZE = 5
+
+        /** Bounds one scan's share of the per-user daily research limit. */
+        const val MAX_NAMES = 15
     }
 }

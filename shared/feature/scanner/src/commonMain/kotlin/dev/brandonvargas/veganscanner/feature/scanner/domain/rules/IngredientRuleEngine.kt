@@ -39,9 +39,13 @@ internal data class IngredientAnalysis(val items: List<AnalyzedItem>) {
  * 3. Additive codes are matched in any common form: E120, E-120, E 120, INS 120.
  * 4. Within each item, the longest known phrase wins at every position (hash lookups of word n-grams), so
  *    "leche de coco" (plant-based) beats "leche", and "suero de leche" isn't also reported as "leche".
+ * 5. A doubtful or unknown compound followed by its composition, like "base de avena (agua, avena)", is judged by
+ *    the listed sub-ingredients instead of its generic name. A non-vegan name stays flagged.
  */
 internal class IngredientRuleEngine(private val knowledge: IngredientKnowledge) {
     private data class Token(val text: String, val start: Int, val end: Int)
+
+    private data class ItemRange(val range: IntRange, val isHeading: Boolean, val depth: Int, val opensGroup: Boolean)
 
     fun analyze(text: String): IngredientAnalysis {
         val searchable = TextFolding.fold(text).toCharArray()
@@ -61,8 +65,9 @@ internal class IngredientRuleEngine(private val knowledge: IngredientKnowledge) 
                 .map { Token(it.value, it.range.first, it.range.last + 1) }
                 .toList()
 
-        val items =
-            itemRanges(text).mapNotNull { (range, isHeading) ->
+        val ranges = itemRanges(text)
+        val analyzed =
+            ranges.map { (range, isHeading) ->
                 if (isHeading) {
                     null
                 } else {
@@ -74,7 +79,21 @@ internal class IngredientRuleEngine(private val knowledge: IngredientKnowledge) 
                     )
                 }
             }
-        return IngredientAnalysis(items)
+        val items =
+            analyzed.filterIndexed { index, item ->
+                item != null && !(item.status in DEFERS_TO_COMPOSITION && hasComposition(ranges, analyzed, index))
+            }
+        return IngredientAnalysis(items.filterNotNull())
+    }
+
+    /** Whether the item at [index] is followed by a parenthesized list with at least one ingredient in it. */
+    private fun hasComposition(ranges: List<ItemRange>, analyzed: List<AnalyzedItem?>, index: Int): Boolean {
+        if (!ranges[index].opensGroup) return false
+        val depth = ranges[index].depth
+        return (index + 1 until ranges.size)
+            .asSequence()
+            .takeWhile { ranges[it].depth > depth }
+            .any { analyzed[it] != null }
     }
 
     private fun analyzeItem(
@@ -122,19 +141,30 @@ internal class IngredientRuleEngine(private val knowledge: IngredientKnowledge) 
     private fun match(known: KnownTerm, original: String, start: Int, end: Int) =
         RuleMatch(known.entryId, original.substring(start, end).trim(), known.status, start)
 
-    /** Splits at item separators; a range followed by `:` is a heading such as "Ingredientes:" or "Contiene:". */
-    private fun itemRanges(text: String): List<Pair<IntRange, Boolean>> {
-        val ranges = mutableListOf<Pair<IntRange, Boolean>>()
+    /**
+     * Splits at item separators; a range followed by `:` is a heading such as "Ingredientes:" or "Contiene:".
+     * Each range records its bracket nesting depth and whether a bracket opens right after it.
+     */
+    private fun itemRanges(text: String): List<ItemRange> {
+        val ranges = mutableListOf<ItemRange>()
         var start = 0
+        var depth = 0
         for (index in 0..text.length) {
             val char = text.getOrNull(index)
             val isSeparator = char == null || char in ITEM_SEPARATORS || char == ':'
-            // "7,4 %": a comma between digits is a decimal separator, not an item boundary.
+            // "7,4 %" / "7.12%": a comma or point between digits is a decimal separator, not an item boundary.
             val isDecimal =
-                char == ',' && text.getOrNull(index - 1)?.isDigit() == true &&
+                (char == ',' || char == '.') && text.getOrNull(index - 1)?.isDigit() == true &&
                     text.getOrNull(index + 1)?.isDigit() == true
             if (!isSeparator || isDecimal) continue
-            if (index > start) ranges += (start until index) to (char == ':')
+            val opensGroup = char in GROUP_OPENERS
+            if (index > start && text.substring(start, index).isNotBlank()) {
+                ranges += ItemRange(start until index, char == ':', depth, opensGroup)
+            }
+            if (opensGroup) depth++
+            if (char in GROUP_CLOSERS) depth = maxOf(0, depth - 1)
+            // A heading ("Contiene 2% o menos de:") ends at the next sentence, not inside brackets.
+            if (char == '.' || char == '\n') depth = 0
             start = index + 1
         }
         return ranges
@@ -164,6 +194,11 @@ internal class IngredientRuleEngine(private val knowledge: IngredientKnowledge) 
     private companion object {
         val SENTENCE_ENDS = charArrayOf('.', ';', '\n')
         val ITEM_SEPARATORS = setOf(',', ';', '(', ')', '[', ']', '{', '}', '.', '\n', '*')
+        val GROUP_OPENERS = setOf('(', '[', '{')
+
+        /** A non-vegan name stays flagged, and a vegan one ("levadura (Saccharomyces…)") needs no help. */
+        val DEFERS_TO_COMPOSITION = setOf(IngredientVeganStatus.MAYBE, IngredientVeganStatus.UNKNOWN)
+        val GROUP_CLOSERS = setOf(')', ']', '}')
         val TRIM_CHARS = charArrayOf('.', ',', ';', ':', '-', '*', '"', '\'')
         const val MAX_ITEM_LENGTH = 60
         val WORD = Regex("[a-z0-9]+")

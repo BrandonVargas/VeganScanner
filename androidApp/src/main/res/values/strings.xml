@@ -74,7 +74,7 @@
     <string name="label_retake">Retake photo</string>
     <string name="label_check">Check ingredients</string>
     <string name="label_privacy_note">The photo is read on your phone and never uploaded.</string>
-    <string name="source_web_research">Researched online with AI (Gemini + Wikipedia)</string>
+    <string name="source_web_research">Researched online with AI (Gemini + web search)</string>
     <string name="research_in_progress">Researching unrecognized ingredients online…</string>
     <string name="research_title">Researched online with AI</string>
     <string name="research_warning">These answers come from web sources and may be wrong. Check the label, and report anything that looks off.</string>
