@@ -35,6 +35,14 @@ export interface KnowledgeStore {
   reserveCall(userId: string): Promise<boolean>;
 }
 
+/** Budget for Google Search grounding queries, which are billed per query beyond the monthly free allowance. */
+export interface SearchQuota {
+  /** Reserves [queries] queries; false when the daily or monthly cap would be exceeded. */
+  reserve(queries: number): Promise<boolean>;
+  /** Replaces a reservation of [reserved] queries with the [used] count Gemini reported. */
+  settle(reserved: number, used: number): Promise<void>;
+}
+
 export interface Researcher {
   research(name: string, language: Language): Promise<Research>;
 }

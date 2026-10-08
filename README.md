@@ -17,7 +17,7 @@ Product data comes from [Open Food Facts](https://world.openfoodfacts.org), the 
 - **English and Spanish.**
 - `veganscanner://product/{barcode}` deep links.
 
-- **Web research with AI:** ingredients still unrecognized are looked up online (Wikipedia + Gemini, through a Supabase Edge Function). Each answer is cached once for everyone, shown with its sources and an AI warning, and can be reported by users.
+- **Web research with AI:** ingredients still unrecognized are looked up online (Gemini with Google Search, capped to the free allowance, or Wikipedia; through a Supabase Edge Function). Each answer is cached once for everyone, shown with its sources and an AI warning, and can be reported by users.
 
 Coming next: on-device AI as an offline fallback, shared community verdicts, and a local marketplace for vegan products with contact over WhatsApp.
 
@@ -56,7 +56,7 @@ flowchart TB
 | | |
 |---|---|
 | Shared | Kotlin 2.4 · Coroutines/Flow · Ktor 3 · kotlinx.serialization · Room KMP · Koin 4 · AndroidX ViewModel · Kermit · supabase-kt |
-| Backend | Supabase (Postgres + RLS, Auth, Edge Functions on Deno) · Gemini 3.5 Flash-Lite + Wikipedia (Google Search grounding optional) · pgTAP |
+| Backend | Supabase (Postgres + RLS, Auth, Edge Functions on Deno) · Gemini 3.5 Flash-Lite + Google Search grounding (capped) / Wikipedia · pgTAP |
 | Android | Jetpack Compose · Material 3 · Navigation 3 · CameraX · ML Kit · Coil 3 |
 | iOS | SwiftUI · Observation · VisionKit · SKIE · XcodeGen |
 | Quality | kotlin.test · Turbine · Ktor MockEngine · Roborazzi · Swift Testing · XCUITest · ktlint + Compose rules · Android Lint · GitHub Actions · Renovate |

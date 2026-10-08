@@ -8,7 +8,7 @@ create extension if not exists pgtap with schema extensions;
 create temp table tap (n serial, line text);
 grant all on tap to public;
 grant usage on sequence tap_n_seq to public;
-insert into tap (line) select plan(11);
+insert into tap (line) select plan(16);
 
 -- Fixtures (as the service role / migration owner).
 insert into auth.users (id, email) values
@@ -27,6 +27,9 @@ insert into tap (line) select throws_ok($$ insert into public.ingredient_knowled
 insert into tap (line) select is_empty($$ select * from public.research_budget $$, 'anon cannot see the research budget');
 insert into tap (line) select throws_ok($$ select public.reserve_research_call('00000000-0000-0000-0000-00000000000a', 5, 5) $$,
   '42501', null, 'anon cannot reserve research calls');
+insert into tap (line) select is_empty($$ select * from public.search_usage $$, 'anon cannot see search usage');
+insert into tap (line) select throws_ok($$ select public.reserve_search_queries(1, 10, 10) $$,
+  '42501', null, 'anon cannot reserve search queries');
 reset role;
 
 -- Authenticated users can report as themselves only, once per ingredient.
@@ -52,6 +55,7 @@ insert into tap (line) select is_empty($$ select * from public.ingredient_knowle
 reset role;
 
 -- The service role reserves calls up to the per-user and global limits.
+delete from public.research_budget where day = current_date; -- live projects already have usage (rolled back)
 insert into tap (line) select results_eq($$ select public.reserve_research_call('00000000-0000-0000-0000-00000000000a', 2, 3)
   union all select public.reserve_research_call('00000000-0000-0000-0000-00000000000a', 2, 3)
   union all select public.reserve_research_call('00000000-0000-0000-0000-00000000000a', 2, 3) $$,
@@ -59,6 +63,22 @@ insert into tap (line) select results_eq($$ select public.reserve_research_call(
 insert into tap (line) select results_eq($$ select public.reserve_research_call('00000000-0000-0000-0000-00000000000b', 5, 3)
   union all select public.reserve_research_call('00000000-0000-0000-0000-00000000000b', 5, 3) $$,
   $$ values (true), (false) $$, 'global limit is enforced');
+
+-- Google Search queries: reservations respect the daily and monthly caps and settle to the real count.
+delete from public.search_usage; -- rolled back
+insert into public.search_usage (day, queries) values
+  (date_trunc('month', current_date)::date - 1, 1000), -- last month: not counted
+  (current_date - 1, 6)
+  on conflict (day) do update set queries = excluded.queries; -- on the 1st, "yesterday" is last month's row
+insert into tap (line) select results_eq($$ select public.reserve_search_queries(3, 5, 100)
+  union all select public.reserve_search_queries(3, 5, 100) $$,
+  $$ values (true), (false) $$, 'daily search cap is enforced');
+select public.settle_search_queries(3, 1);
+insert into tap (line) select results_eq($$ select queries from public.search_usage where day = current_date $$,
+  $$ values (1) $$, 'settling replaces the reservation with the queries actually run');
+insert into tap (line) select results_eq($$ select public.reserve_search_queries(3, 100,
+  (select sum(queries)::integer from public.search_usage where day >= date_trunc('month', current_date)::date) + 2) $$,
+  $$ values (false) $$, 'monthly search cap counts every day of the current month only');
 
 insert into tap (line) select * from finish();
 select string_agg(line, E'\n' order by n) as tap from tap;

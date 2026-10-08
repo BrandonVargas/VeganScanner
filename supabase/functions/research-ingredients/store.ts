@@ -1,9 +1,17 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
-import type { KnowledgeRow, KnowledgeStore } from "./types.ts";
+import type { KnowledgeRow, KnowledgeStore, SearchQuota } from "./types.ts";
 
 export const PER_USER_DAILY_CALLS = 25;
-/** Below the Gemini free tier's 500 grounded requests per day. */
+/** Gemini requests per day for everyone, whatever the web source. */
 export const GLOBAL_DAILY_CALLS = 450;
+/**
+ * Google Search grounding queries per calendar month: below the 5,000 free queries of Gemini 3 (shared by every
+ * Gemini 3 model on the project), after which each query is billed. Leaves headroom for reservation overshoot and
+ * UTC-vs-Pacific month boundaries.
+ */
+export const MONTHLY_SEARCH_QUERIES = 4_500;
+/** Spreads the monthly allowance so one busy day can't use it up. */
+export const DAILY_SEARCH_QUERIES = 150;
 
 /** Postgres-backed store; [admin] must use the service role (tables have no client write policies). */
 export function supabaseStore(admin: SupabaseClient): KnowledgeStore {
@@ -32,6 +40,27 @@ export function supabaseStore(admin: SupabaseClient): KnowledgeStore {
       });
       if (error) throw error;
       return data === true;
+    },
+  };
+}
+
+/** Postgres-backed Google Search quota (see migration 20261009000000_search_quota.sql). */
+export function supabaseSearchQuota(admin: SupabaseClient): SearchQuota {
+  return {
+    async reserve(queries) {
+      const { data, error } = await admin.rpc("reserve_search_queries", {
+        p_reserve: queries,
+        p_daily_limit: DAILY_SEARCH_QUERIES,
+        p_monthly_limit: MONTHLY_SEARCH_QUERIES,
+      });
+      if (error) throw error;
+      return data === true;
+    },
+    async settle(reserved, used) {
+      if (reserved === used) return;
+      const { error } = await admin.rpc("settle_search_queries", { p_reserved: reserved, p_used: used });
+      // Logged only: the answer is already paid for, and a missed settlement only over-counts.
+      if (error) console.error("Could not settle search queries:", error);
     },
   };
 }

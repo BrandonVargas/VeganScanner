@@ -11,7 +11,7 @@ After the dictionary and the Open Food Facts taxonomy (ADR 0006), some ingredien
   1. **Wikipedia retrieval:** a keyless search of the MediaWiki Action API in the label's language and the other supported language, returning intro excerpts.
   2. **Gemini 3.5 Flash-Lite** (free tier) answers in JSON mode from the excerpts plus its general knowledge, and reports which excerpts it used. Those become the cited sources.
   - The API key is a Supabase secret and never ships in the apps.
-  - **Why not Google Search grounding:** the free tier no longer includes it. `gemini-2.5-flash` (which had 500 free grounded requests per day) is closed to new API keys, and the 3.x models' grounding is paid-tier only (5,000 free searches/month, then $14 per 1,000). It stays available as a switch: set `GEMINI_GOOGLE_SEARCH=true` (and optionally `GEMINI_MODEL`) once the key has billing enabled.
+  - **Google Search grounding, capped:** the free tier no longer includes it. `gemini-2.5-flash` (which had 500 free grounded requests per day) is closed to new API keys, and the 3.x models' grounding is paid-tier only (5,000 free search queries/month across all Gemini 3 models, then $14 per 1,000). With a billing-enabled key and `GEMINI_GOOGLE_SEARCH=true`, the function grounds answers in Google Search, but only within its own quota (`reserve_search_queries()`): **4,500 queries per calendar month and 150 per day**. Gemini decides how many searches a request runs, so each request reserves 3 and settles the real count from `groundingMetadata.webSearchQueries`. Once the quota is used up, research falls back to the Wikipedia excerpts, so searches are never billed. Tokens are still billed at paid-tier rates (fractions of a cent per ingredient).
 - **Shared cache** `public.ingredient_knowledge`:
   - Each ingredient is researched **once for all users**, with its sources (grounding metadata) and an English and a Spanish reason.
   - RLS: anyone can read active rows; only the function (service role) writes.
@@ -31,11 +31,11 @@ After the dictionary and the Open Food Facts taxonomy (ADR 0006), some ingredien
 
 ## Alternatives considered
 - **On-device only:** private and offline, but no web access, recent phones only, and weaker on regional ingredients. It stays planned as the offline fallback.
-- **Google Search grounding by default:** the best evidence, but it needs billing, so it's opt-in.
+- **Uncapped Google Search grounding:** the best evidence, but every query beyond the free allowance is billed, and a burst of new ingredients could run up a bill. It's opt-in and capped instead.
 - **One request for a batch of ingredients:** cheaper on quota, but one injected name could influence the others in the batch.
 
 ## Consequences
 - Each unknown ingredient is researched once for everyone, so the free tier goes a long way.
 - Answers are AI-generated and can be wrong. The UI always labels them, shows sources, and lets users report them. Disputed answers disappear until reviewed.
-- Google may use free-tier requests to improve its products. Only ingredient names are sent (to Wikipedia and Gemini); this is disclosed in PRIVACY.md.
+- Only ingredient names are sent (to Wikipedia and Gemini); this is disclosed in PRIVACY.md. On the free tier Google may use requests to improve its products; the project's key is on the paid tier, where it doesn't.
 - Misspelled or very regional names may find no Wikipedia article. The model then answers from general knowledge and shows no sources, so users can see that difference.
