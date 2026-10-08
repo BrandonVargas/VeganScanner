@@ -3,33 +3,31 @@ plugins {
     alias(libs.plugins.kotlin.serialization)
 }
 
-/**
- * Embeds `dictionary/ingredients.json` as a Kotlin string so the same data ships on Android and iOS
- * without platform resource loading. Contributors only ever edit the JSON.
- */
-val generateIngredientDictionary by tasks.registering {
-    val input = layout.projectDirectory.file("dictionary/ingredients.json")
-    val outputDir = layout.buildDirectory.dir("generated/dictionary/kotlin")
-    inputs.file(input)
-    outputs.dir(outputDir)
-    doLast {
-        val json = input.asFile.readText()
-        require("\"\"\"" !in json) { "ingredients.json must not contain triple quotes" }
-        val packageDir = "dev/brandonvargas/veganscanner/feature/scanner/domain/rules"
-        val file = outputDir.get().file("$packageDir/IngredientDictionaryJson.kt").asFile
-        file.parentFile.mkdirs()
-        file.writeText(
-            buildString {
-                appendLine("// Generated from shared/feature/scanner/dictionary/ingredients.json. Do not edit.")
-                appendLine("package dev.brandonvargas.veganscanner.feature.scanner.domain.rules")
-                appendLine()
-                append("internal val INGREDIENT_DICTIONARY_JSON: String = \"\"\"")
-                append(json.replace("$", "\${'$'}"))
-                appendLine("\"\"\"")
+// Refreshes `dictionary/off-taxonomy.json`. Run manually or by the weekly `update-taxonomy` workflow.
+tasks.register<UpdateOffTaxonomyTask>("updateOffTaxonomy") {
+    sourceUrl.set("https://static.openfoodfacts.org/data/taxonomies/ingredients.json")
+    curatedDictionary.set(layout.projectDirectory.file("dictionary/ingredients.json"))
+    outputFile.set(layout.projectDirectory.file("dictionary/off-taxonomy.json"))
+}
+
+// Embeds the dictionary JSON files into commonMain (see GenerateDictionarySourceTask in build-logic).
+val generateIngredientDictionary =
+    tasks.register<GenerateDictionarySourceTask>("generateIngredientDictionary") {
+        packageName.set("dev.brandonvargas.veganscanner.feature.scanner.domain.rules")
+        outputDir.set(layout.buildDirectory.dir("generated/dictionary/kotlin"))
+        embedded.add(
+            objects.newInstance<GenerateDictionarySourceTask.Embedded>().apply {
+                propertyName.set("INGREDIENT_DICTIONARY_JSON")
+                file.set(layout.projectDirectory.file("dictionary/ingredients.json"))
+            },
+        )
+        embedded.add(
+            objects.newInstance<GenerateDictionarySourceTask.Embedded>().apply {
+                propertyName.set("OFF_TAXONOMY_JSON")
+                file.set(layout.projectDirectory.file("dictionary/off-taxonomy.json"))
             },
         )
     }
-}
 
 kotlin {
     sourceSets {

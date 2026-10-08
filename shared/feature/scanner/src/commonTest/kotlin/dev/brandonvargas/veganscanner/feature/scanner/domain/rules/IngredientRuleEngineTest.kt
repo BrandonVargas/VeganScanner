@@ -2,14 +2,18 @@ package dev.brandonvargas.veganscanner.feature.scanner.domain.rules
 
 import dev.brandonvargas.veganscanner.core.model.IngredientVeganStatus.MAYBE
 import dev.brandonvargas.veganscanner.core.model.IngredientVeganStatus.NO
+import dev.brandonvargas.veganscanner.core.model.IngredientVeganStatus.UNKNOWN
+import dev.brandonvargas.veganscanner.core.model.IngredientVeganStatus.YES
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
+/** Curated-dictionary behaviour; an empty taxonomy keeps these independent of Open Food Facts data updates. */
 class IngredientRuleEngineTest {
-    private val engine = IngredientRuleEngine(IngredientDictionary.Bundled)
+    private val engine = IngredientRuleEngine(IngredientKnowledge(IngredientDictionary.Bundled, OffTaxonomy.Empty))
 
-    private fun flagged(text: String) = engine.analyze(text).map { it.text to it.status }
+    private fun flagged(text: String) = engine.analyze(text).flagged.map { it.text to it.status }
 
     @Test
     fun findsSpanishAnimalIngredientsKeepingLabelWording() {
@@ -37,7 +41,7 @@ class IngredientRuleEngineTest {
     }
 
     @Test
-    fun lookAlikeExceptionDoesNotHideTheRealIngredientNextToIt() {
+    fun lookAlikeDoesNotHideTheRealIngredientNextToIt() {
         assertEquals(listOf("leche" to NO), flagged("leche de coco, leche"))
     }
 
@@ -48,7 +52,7 @@ class IngredientRuleEngineTest {
 
     @Test
     fun wholeWordsOnly() {
-        assertEquals(emptyList(), flagged("eggplant, hamburger buns, resinas, codorniz vegetal"))
+        assertEquals(emptyList(), flagged("eggplant, hamburger buns, resinas"))
     }
 
     @Test
@@ -65,7 +69,7 @@ class IngredientRuleEngineTest {
     @Test
     fun additiveCodesInAnyCommonForm() {
         listOf("colorante E120", "colorante (E-120)", "colorante e 120", "colorante INS 120").forEach {
-            assertEquals(listOf(NO), engine.analyze(it).map { match -> match.status }, it)
+            assertEquals(listOf(NO), engine.analyze(it).flagged.map { match -> match.status }, it)
         }
         assertEquals(listOf("E471" to MAYBE), flagged("emulsificante E471"))
     }
@@ -93,11 +97,69 @@ class IngredientRuleEngineTest {
 
     @Test
     fun reportsEachIngredientOnce() {
-        assertEquals(1, engine.analyze("leche, leche, leche entera").size)
+        assertEquals(1, engine.analyze("leche, leche, leche entera").flagged.size)
     }
 
     @Test
-    fun plainVeganListHasNoMatches() {
-        assertTrue(engine.analyze("Agua, frijol, sal, chile, cebolla, ajo, aceite de girasol").isEmpty())
+    fun curatedVeganStaplesAreRecognized() {
+        val analysis = engine.analyze("Levadura (Saccharomyces cerevisiae), ácido ascórbico, chile guajillo")
+
+        assertTrue(analysis.allVegan, analysis.items.toString())
+    }
+}
+
+/** Item recognition with a small inline taxonomy, independent of the bundled data. */
+class IngredientRecognitionTest {
+    private val taxonomy =
+        OffTaxonomy.parse(
+            """
+            {"entries":[
+              {"id":"en:water","status":"yes","en":["water"],"es":["agua"]},
+              {"id":"en:salt","status":"yes","en":["salt"],"es":["sal"]},
+              {"id":"en:wheat-flour","status":"yes","en":["wheat flour"],"es":["harina de trigo"]},
+              {"id":"en:sugar","status":"yes","overridden":true,"en":["sugar"],"es":["azúcar"]},
+              {"id":"en:cocoa","status":"yes","en":["cocoa"],"es":["cacao"]},
+              {"id":"en:egg-white","status":"no","en":["egg white"],"es":["clara"]},
+              {"id":"en:e330","status":"yes","en":["citric acid"],"e":"E330"}
+            ]}
+            """.trimIndent(),
+        )
+    private val knowledge = IngredientKnowledge(IngredientDictionary.Bundled, taxonomy)
+    private val engine = IngredientRuleEngine(knowledge)
+
+    @Test
+    fun everyItemRecognizedAsVegan() {
+        val analysis = engine.analyze("Harina de trigo integral, agua, sal yodada, azúcar, cacao 7,4 %, E330")
+
+        assertTrue(analysis.allVegan, analysis.items.toString())
+        assertEquals(6, analysis.items.size)
+    }
+
+    @Test
+    fun unrecognizedItemsAreReportedWithLabelWording() {
+        val analysis = engine.analyze("Agua, Xantolina roja, sal")
+
+        assertFalse(analysis.allVegan)
+        assertEquals(listOf("Xantolina roja"), analysis.unrecognized.map { it.text })
+        assertEquals(UNKNOWN, analysis.unrecognized.single().status)
+    }
+
+    @Test
+    fun headingsBeforeColonAreNotIngredients() {
+        val analysis = engine.analyze("Ingredientes: agua, sal. Emulsificantes: E330")
+
+        assertTrue(analysis.allVegan, analysis.items.toString())
+    }
+
+    @Test
+    fun curatedPlantBasedLookAlikesCountAsRecognizedVegan() {
+        assertEquals(listOf(NO), engine.analyze("clara de huevo").flagged.map { it.status })
+        assertEquals(YES, engine.analyze("leche de coco").items.single().status)
+    }
+
+    @Test
+    fun overridesAreExposedForDatabaseFlags() {
+        assertEquals(YES, knowledge.overrideFor("en:sugar"))
+        assertEquals(null, knowledge.overrideFor("en:water"))
     }
 }

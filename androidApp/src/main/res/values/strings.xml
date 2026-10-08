@@ -57,7 +57,7 @@
     <string name="action_rescan_label">Scan the label again</string>
     <string name="action_scan_label_offline">Scan the ingredient label instead</string>
     <string name="verdict_likely">Probably vegan</string>
-    <string name="source_rule_engine">No animal-derived ingredients in our dictionary</string>
+    <string name="source_rule_engine">Based on our ingredient database (Open Food Facts + curated dictionary)</string>
     <string name="source_label_scan">Based on the ingredient label you scanned</string>
     <string name="flagged_unrecognized">Ingredients we couldn\'t check</string>
     <string name="inconclusive_notice_label">We still couldn\'t confirm this one from the label. Check unclear ingredients with the manufacturer.</string>

@@ -15,9 +15,13 @@ object IngredientVeganEvaluator {
      * - Otherwise the ingredient's own flag; children without a flag (functional labels like
      *   "preservative") don't downgrade a parent that is already `yes`.
      */
-    fun effectiveStatus(ingredient: Ingredient): IngredientVeganStatus {
-        val own = ingredient.vegan
-        val children = ingredient.subIngredients.map(::effectiveStatus)
+    fun effectiveStatus(
+        ingredient: Ingredient,
+        overrides: (taxonomyId: String?) -> IngredientVeganStatus? = { null },
+    ): IngredientVeganStatus {
+        // A curated correction (e.g. sugar is vegan) replaces Open Food Facts' flag, but never relaxes a `no`.
+        val own = overrides(ingredient.id)?.takeIf { ingredient.vegan != NO } ?: ingredient.vegan
+        val children = ingredient.subIngredients.map { effectiveStatus(it, overrides) }
         return when {
             own == NO || NO in children -> NO
             children.isEmpty() -> own
@@ -29,6 +33,8 @@ object IngredientVeganEvaluator {
     }
 
     /** Top-level ingredients paired with their effective status. */
-    fun evaluate(ingredients: List<Ingredient>): List<Pair<Ingredient, IngredientVeganStatus>> =
-        ingredients.map { it to effectiveStatus(it) }
+    fun evaluate(
+        ingredients: List<Ingredient>,
+        overrides: (taxonomyId: String?) -> IngredientVeganStatus? = { null },
+    ): List<Pair<Ingredient, IngredientVeganStatus>> = ingredients.map { it to effectiveStatus(it, overrides) }
 }

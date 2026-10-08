@@ -6,13 +6,16 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 
 /**
- * Animal-derived ingredients in English and Spanish, maintained as data in
+ * The curated, hand-reviewed ingredient dictionary in English and Spanish, maintained as data in
  * `shared/feature/scanner/dictionary/ingredients.json` and compiled into the app at build time.
+ * It takes precedence over the Open Food Facts taxonomy ([OffTaxonomy]).
  */
 @Serializable
 internal data class IngredientDictionary(
     val version: Int,
     val entries: List<Entry>,
+    /** Corrections to the Open Food Facts taxonomy, applied by the `updateOffTaxonomy` build task. */
+    val overrides: List<Override> = emptyList(),
     /** Plant-based phrases that contain a flagged word, e.g. "leche de coco" or "manteca de cacao". */
     val plantBasedExceptions: Map<String, List<String>> = emptyMap(),
     /** Phrases introducing allergen cross-contamination warnings ("puede contener trazas de…"), not ingredients. */
@@ -28,7 +31,13 @@ internal data class IngredientDictionary(
     )
 
     @Serializable
+    data class Override(val id: String, val status: String, val reason: String)
+
+    @Serializable
     enum class Status(val ingredientStatus: IngredientVeganStatus) {
+        @SerialName("yes")
+        YES(IngredientVeganStatus.YES),
+
         @SerialName("no")
         NO(IngredientVeganStatus.NO),
 

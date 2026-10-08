@@ -5,6 +5,7 @@ plugins {
 kotlin {
     sourceSets {
         commonMain.dependencies {
+            implementation(projects.shared.core.common)
             implementation(libs.kotlinx.coroutines.test)
         }
     }
