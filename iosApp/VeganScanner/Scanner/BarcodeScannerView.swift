@@ -1,8 +1,14 @@
+import OSLog
 import SwiftUI
 import VisionKit
 
 /// Live camera barcode scanner backed by VisionKit's `DataScannerViewController` (on-device).
+///
+/// `DataScannerViewController` stops scanning when its view disappears (for example, when a result is pushed on
+/// top of it) and doesn't resume by itself. `isActive` drives `startScanning()`/`stopScanning()` explicitly so
+/// the scanner restarts every time the screen becomes visible again.
 struct BarcodeScannerView: UIViewControllerRepresentable {
+    let isActive: Bool
     let onBarcodeDetected: (String) -> Void
 
     /// False on the Simulator, on unsupported hardware, or when camera access was denied.
@@ -24,8 +30,15 @@ struct BarcodeScannerView: UIViewControllerRepresentable {
 
     func updateUIViewController(_ controller: DataScannerViewController, context: Context) {
         context.coordinator.onBarcodeDetected = onBarcodeDetected
-        if !controller.isScanning {
-            try? controller.startScanning()
+        if isActive, !controller.isScanning {
+            do {
+                try controller.startScanning()
+            } catch {
+                Logger.scanner.error("Could not start scanning: \(error.localizedDescription)")
+            }
+        } else if !isActive, controller.isScanning {
+            // Stopping also clears recognized items, so the same product can be scanned again later.
+            controller.stopScanning()
         }
     }
 
@@ -55,5 +68,13 @@ struct BarcodeScannerView: UIViewControllerRepresentable {
                 }
             }
         }
+
+        func dataScanner(_ dataScanner: DataScannerViewController, becameUnavailableWithError error: DataScannerViewController.ScanningUnavailable) {
+            Logger.scanner.error("Scanner became unavailable: \(String(describing: error))")
+        }
     }
+}
+
+private extension Logger {
+    static let scanner = Logger(subsystem: "dev.brandonvargas.veganscanner", category: "Scanner")
 }

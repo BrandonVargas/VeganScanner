@@ -6,15 +6,18 @@ struct ScannerView: View {
 
     @State private var model = ScannerModel()
     @State private var manualEntry = ""
+    @State private var isVisible = false
     @FocusState private var isManualEntryFocused: Bool
     @Environment(\.openURL) private var openURL
+    @Environment(\.scenePhase) private var scenePhase
 
     var body: some View {
         ZStack {
             Color.black.ignoresSafeArea()
 
             if BarcodeScannerView.isAvailable {
-                BarcodeScannerView(onBarcodeDetected: model.barcodeDetected)
+                // Scan only while this screen is on top and the app is in the foreground.
+                BarcodeScannerView(isActive: isVisible && scenePhase == .active, onBarcodeDetected: model.barcodeDetected)
                     .ignoresSafeArea()
             } else {
                 cameraUnavailable
@@ -34,6 +37,8 @@ struct ScannerView: View {
             .padding()
         }
         .toolbar(.hidden, for: .navigationBar)
+        .onAppear { isVisible = true }
+        .onDisappear { isVisible = false }
         .task { await model.observeState() }
         .task {
             for await barcode in model.resultsToOpen() {

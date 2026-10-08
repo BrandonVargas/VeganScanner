@@ -30,6 +30,16 @@ final class ScanFlowUITests: XCTestCase {
         attachScreenshot(named: "history")
     }
 
+    /// Live: the scanner must keep opening results after returning from one (regression test).
+    func testConsecutiveLookups() {
+        enterBarcode("3017620422003")
+        XCTAssertTrue(app.staticTexts["Not vegan"].waitForExistence(timeout: 20))
+        app.navigationBars.buttons.element(boundBy: 0).tap()
+
+        enterBarcode("7500327047878")
+        XCTAssertTrue(app.staticTexts["Vegan"].waitForExistence(timeout: 20))
+    }
+
     private func enterBarcode(_ barcode: String) {
         let field = app.textFields["e.g. 7501234567893"]
         XCTAssertTrue(field.waitForExistence(timeout: 10))
