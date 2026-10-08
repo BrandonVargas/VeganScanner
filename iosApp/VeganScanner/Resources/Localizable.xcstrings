@@ -681,6 +681,248 @@
         }
       }
     },
+    "research.explanation_hint" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "AI explanation from web sources. It may be wrong."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Explicación de IA basada en fuentes web. Puede estar equivocada."
+          }
+        }
+      }
+    },
+    "research.in_progress" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Researching unrecognized ingredients online…"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Investigando en línea los ingredientes no reconocidos…"
+          }
+        }
+      }
+    },
+    "research.issue_busy %lld" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Online lookups reached today's limit. We'll look up %lld ingredient next time; try again tomorrow."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Online lookups reached today's limit. We'll look up %lld ingredients next time; try again tomorrow."
+                }
+              }
+            }
+          }
+        },
+        "es" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Las búsquedas en línea llegaron al límite de hoy. Buscaremos %lld ingrediente la próxima vez; inténtalo mañana."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Las búsquedas en línea llegaron al límite de hoy. Buscaremos %lld ingredientes la próxima vez; inténtalo mañana."
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "research.issue_offline %lld" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Couldn't look up %lld ingredient online. Connect to the internet and open this product again."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Couldn't look up %lld ingredients online. Connect to the internet and open this product again."
+                }
+              }
+            }
+          }
+        },
+        "es" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "No pudimos buscar %lld ingrediente en línea. Conéctate a internet y abre este producto de nuevo."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "No pudimos buscar %lld ingredientes en línea. Conéctate a internet y abre este producto de nuevo."
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "research.issue_unavailable %lld" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Online lookup isn't working right now. We'll try %lld ingredient again next time you open this product."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Online lookup isn't working right now. We'll try %lld ingredients again next time you open this product."
+                }
+              }
+            }
+          }
+        },
+        "es" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "La búsqueda en línea no está funcionando ahora. Volveremos a intentar %lld ingrediente la próxima vez que abras este producto."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "La búsqueda en línea no está funcionando ahora. Volveremos a intentar %lld ingredientes la próxima vez que abras este producto."
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "research.report" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Report as wrong"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reportar como incorrecto"
+          }
+        }
+      }
+    },
+    "research.reported" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reported, thank you"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reportado, gracias"
+          }
+        }
+      }
+    },
+    "research.status_vegan" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "vegan"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "vegano"
+          }
+        }
+      }
+    },
+    "research.title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Researched online with AI"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Investigado en línea con IA"
+          }
+        }
+      }
+    },
+    "research.warning" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "These answers come from web sources and may be wrong. Check the label, and report anything that looks off."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Estas respuestas vienen de fuentes web y pueden estar equivocadas. Revisa la etiqueta y reporta lo que no parezca correcto."
+          }
+        }
+      }
+    },
     "result.disclaimer" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -915,6 +1157,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "No hay suficiente información para decidir"
+          }
+        }
+      }
+    },
+    "source.web_research" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Researched online with AI (Gemini + web search)"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Investigado en línea con IA (Gemini + búsqueda web)"
           }
         }
       }

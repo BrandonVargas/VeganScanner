@@ -53,6 +53,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalInspectionMode
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -80,10 +81,14 @@ fun LabelScanScreen(
     val reviewText = rememberTextFieldState()
     val currentOnShowResult by rememberUpdatedState(onShowResult)
 
+    val keyboard = LocalSoftwareKeyboardController.current
     LaunchedEffect(viewModel) {
         viewModel.effects.collect { effect ->
             when (effect) {
-                is LabelScanEffect.ShowResult -> currentOnShowResult(effect.barcode)
+                is LabelScanEffect.ShowResult -> {
+                    keyboard?.hide()
+                    currentOnShowResult(effect.barcode)
+                }
             }
         }
     }

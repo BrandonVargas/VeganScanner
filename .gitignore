@@ -10,6 +10,7 @@ captures/
 # Local configuration & secrets (never commit)
 local.properties
 iosApp/Configuration/Local.xcconfig
+iosApp/Configuration/Secrets.xcconfig
 *.keystore
 *.jks
 google-services.json

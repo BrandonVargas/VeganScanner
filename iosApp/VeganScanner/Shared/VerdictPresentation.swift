@@ -58,6 +58,7 @@ extension VerdictSource {
         case .openFoodFactsIngredients: "source.off_ingredients"
         case .ruleEngine: "source.rule_engine"
         case .labelScan: "source.label_scan"
+        case .webResearch: "source.web_research"
         case .undetermined: "source.undetermined"
         }
     }
@@ -69,6 +70,24 @@ extension IngredientVeganStatus {
         case .no: "ingredient_status.no"
         case .maybe: "ingredient_status.maybe"
         case .unknown, .yes: "ingredient_status.unknown"
+        }
+    }
+}
+
+extension ResearchIssue {
+    var systemImage: String {
+        switch self {
+        case .offline: "wifi.slash"
+        case .busy: "clock"
+        case .unavailable: "exclamationmark.circle"
+        }
+    }
+
+    func message(count: Int) -> LocalizedStringKey {
+        switch self {
+        case .offline: "research.issue_offline \(count)"
+        case .busy: "research.issue_busy \(count)"
+        case .unavailable: "research.issue_unavailable \(count)"
         }
     }
 }

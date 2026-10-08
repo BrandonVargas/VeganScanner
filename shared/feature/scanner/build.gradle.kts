@@ -38,6 +38,7 @@ kotlin {
                 api(projects.shared.core.common)
                 implementation(projects.shared.core.network)
                 implementation(projects.shared.core.database)
+                implementation(projects.shared.core.supabase)
                 implementation(libs.kotlinx.serialization.json)
                 api(libs.androidx.lifecycle.viewmodel)
                 implementation(libs.koin.core.viewmodel)

@@ -1,0 +1,4 @@
+# Copy the supabase.* lines into local.properties (git-ignored) to enable online features.
+# The publishable key is safe to ship in apps: database access is enforced by Row Level Security.
+supabase.host=your-project-ref.supabase.co
+supabase.publishableKey=sb_publishable_xxx

@@ -17,7 +17,8 @@ If something is missing or wrong, first check whether it should be fixed upstrea
 2. "May contain / puede contener trazas de…" statements are ignored. Traces aren't ingredients.
 3. In each item, the **longest known phrase** wins. "Leche de coco" (vegan look-alike) beats "leche", and "suero de leche" isn't also reported as "leche".
 4. Each item becomes **not vegan**, **doubtful**, **vegan** or **unrecognized**. Connector and processing words ("de", "y", "orgánico", "en polvo", "integral", quantities) don't count against recognition.
-5. The product is **Vegan** only when *every* item is recognized as vegan. Unrecognized items are listed so you can check them, and they are what the web-research step will look up.
+5. A doubtful or unrecognized compound followed by its composition, like "base de avena (agua, avena)", is judged by the listed sub-ingredients instead of its generic name. A non-vegan name ("clara (agua)") stays flagged.
+6. The product is **Vegan** only when *every* item is recognized as vegan. Unrecognized items are listed so you can check them, and they are what the web-research step will look up.
 
 ## `ingredients.json` structure
 

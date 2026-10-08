@@ -74,4 +74,24 @@
     <string name="label_retake">Retake photo</string>
     <string name="label_check">Check ingredients</string>
     <string name="label_privacy_note">The photo is read on your phone and never uploaded.</string>
+    <string name="research_explanation_hint">AI explanation from web sources. It may be wrong.</string>
+    <string name="source_web_research">Researched online with AI (Gemini + web search)</string>
+    <string name="research_in_progress">Researching unrecognized ingredients online…</string>
+    <string name="research_title">Researched online with AI</string>
+    <string name="research_warning">These answers come from web sources and may be wrong. Check the label, and report anything that looks off.</string>
+    <string name="research_status_vegan">vegan</string>
+    <string name="research_report">Report as wrong</string>
+    <string name="research_reported">Reported, thank you</string>
+    <plurals name="research_issue_offline">
+        <item quantity="one">Couldn\'t look up %d ingredient online. Connect to the internet and open this product again.</item>
+        <item quantity="other">Couldn\'t look up %d ingredients online. Connect to the internet and open this product again.</item>
+    </plurals>
+    <plurals name="research_issue_busy">
+        <item quantity="one">Online lookups reached today\'s limit. We\'ll look up %d ingredient next time; try again tomorrow.</item>
+        <item quantity="other">Online lookups reached today\'s limit. We\'ll look up %d ingredients next time; try again tomorrow.</item>
+    </plurals>
+    <plurals name="research_issue_unavailable">
+        <item quantity="one">Online lookup isn\'t working right now. We\'ll try %d ingredient again next time you open this product.</item>
+        <item quantity="other">Online lookup isn\'t working right now. We\'ll try %d ingredients again next time you open this product.</item>
+    </plurals>
 </resources>

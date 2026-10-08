@@ -5,7 +5,6 @@ import dev.brandonvargas.veganscanner.core.common.DispatcherProvider
 import dev.brandonvargas.veganscanner.core.model.Barcode
 import dev.brandonvargas.veganscanner.core.model.IngredientsSource
 import dev.brandonvargas.veganscanner.core.model.Product
-import dev.brandonvargas.veganscanner.core.model.ScanHistoryEntry
 import dev.brandonvargas.veganscanner.core.model.VeganStatus
 import dev.brandonvargas.veganscanner.core.model.VeganVerdict
 import dev.brandonvargas.veganscanner.feature.scanner.domain.verdict.VerdictPipeline
@@ -45,17 +44,7 @@ class ScanProductUseCase(
 
         // CPU-bound (and the first call loads the ingredient knowledge), so keep it off the main thread.
         val verdict = withContext(dispatchers.default) { verdictPipeline.evaluate(product) }
-        historyRepository.record(
-            ScanHistoryEntry(
-                barcode = barcode.value,
-                productName = product.name,
-                brands = product.brands,
-                imageUrl = product.imageUrl,
-                status = verdict.status,
-                source = verdict.source,
-                scannedAt = clock.now(),
-            ),
-        )
+        historyRepository.record(product.historyEntry(verdict, clock.now()))
         return AppResult.Success(ScanOutcome.Found(product, verdict))
     }
 

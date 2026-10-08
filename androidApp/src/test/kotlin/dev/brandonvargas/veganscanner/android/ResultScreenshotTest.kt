@@ -12,9 +12,11 @@ import dev.brandonvargas.veganscanner.core.model.FlaggedIngredient
 import dev.brandonvargas.veganscanner.core.model.IngredientVeganStatus
 import dev.brandonvargas.veganscanner.core.model.IngredientsSource
 import dev.brandonvargas.veganscanner.core.model.Product
+import dev.brandonvargas.veganscanner.core.model.SourceLink
 import dev.brandonvargas.veganscanner.core.model.VeganStatus
 import dev.brandonvargas.veganscanner.core.model.VeganVerdict
 import dev.brandonvargas.veganscanner.core.model.VerdictSource
+import dev.brandonvargas.veganscanner.feature.scanner.domain.research.ResearchIssue
 import dev.brandonvargas.veganscanner.feature.scanner.presentation.result.ProductResultUiState
 import org.junit.Rule
 import org.junit.Test
@@ -93,6 +95,45 @@ class ResultScreenshotTest {
                     VeganStatus.LIKELY_VEGAN,
                     VerdictSource.LABEL_SCAN,
                     listOf(FlaggedIngredient("colorante rojo 40", IngredientVeganStatus.UNKNOWN)),
+                ),
+            ),
+        )
+
+    @Test
+    fun researchOffline() =
+        capture(
+            ProductResultUiState.Found(
+                product.copy(
+                    ingredientsSource = IngredientsSource.LABEL_SCAN,
+                    ingredientsText = "Agua, goma gelana, sal",
+                ),
+                VeganVerdict(
+                    VeganStatus.LIKELY_VEGAN,
+                    VerdictSource.LABEL_SCAN,
+                    listOf(FlaggedIngredient("goma gelana", IngredientVeganStatus.UNKNOWN)),
+                ),
+                unresearchedCount = 1,
+                researchIssue = ResearchIssue.OFFLINE,
+            ),
+        )
+
+    @Test
+    fun maybeVeganExplained() =
+        capture(
+            ProductResultUiState.Found(
+                product.copy(ingredientsText = "Base de avena (agua, avena), palmitato de vitamina A, sal"),
+                VeganVerdict(
+                    VeganStatus.MAYBE_VEGAN,
+                    VerdictSource.RULE_ENGINE,
+                    listOf(
+                        FlaggedIngredient(
+                            "vitamina A",
+                            IngredientVeganStatus.MAYBE,
+                            note = "Suele ser sintética, pero puede obtenerse de aceite de pescado o lanolina.",
+                            sources = listOf(SourceLink("Vitamina A (Wikipedia ES)", "https://es.wikipedia.org")),
+                            researchKey = "vitamina a",
+                        ),
+                    ),
                 ),
             ),
         )
