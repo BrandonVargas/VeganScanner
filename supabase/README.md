@@ -6,7 +6,7 @@ Used for online features. The app works fully without it: forks and CI builds si
 |---|---|
 | `migrations/` | Database schema, Row Level Security and functions |
 | `tests/` | pgTAP tests for RLS and rate limits |
-| `functions/research-ingredients/` | Edge Function: web research of unknown ingredients (Gemini + Google Search), shared cache. See [ADR 0007](../docs/adr/0007-cloud-ingredient-research.md) |
+| `functions/research-ingredients/` | Edge Function: web research of unknown ingredients (Wikipedia excerpts + Gemini; Google Search grounding optional), shared cache. See [ADR 0007](../docs/adr/0007-cloud-ingredient-research.md) |
 
 ## Setup for your own project
 
@@ -17,6 +17,8 @@ supabase db push --linked
 supabase secrets set GEMINI_API_KEY=<key from aistudio.google.com>
 supabase functions deploy research-ingredients --use-api
 ```
+
+Optional secrets: `GEMINI_MODEL` (default `gemini-3.5-flash-lite`) and `GEMINI_GOOGLE_SEARCH=true` to add Google Search grounding (needs a billing-enabled Gemini key).
 
 Then enable **Authentication → Sign In / Providers → Allow anonymous sign-ins** in the dashboard. Copy `local.properties.example` and `iosApp/Configuration/Secrets.xcconfig.example` to their git-ignored names and fill in your project host and **publishable** key.
 

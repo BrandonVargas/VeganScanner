@@ -1,4 +1,5 @@
 import { isAcceptableIngredientName, normalizeIngredientName } from "./normalize.ts";
+import { InvalidAnswerError, UpstreamError } from "./gemini.ts";
 import type { KnowledgeStore, Language, ResearchedIngredient, Researcher, ResearchResponse } from "./types.ts";
 
 export const MAX_INGREDIENTS_PER_REQUEST = 5;
@@ -20,7 +21,7 @@ export async function researchIngredients(
   const request = parseRequest(input);
   if (typeof request === "string") return { status: 400, body: { error: request } };
 
-  const response: ResearchResponse = { results: [], deferred: [], disputed: [], rejected: [] };
+  const response: ResearchResponse = { results: [], deferred: [], deferredReasons: {}, disputed: [], rejected: [] };
   const accepted = new Map<string, string>(); // normalized → display name, de-duplicated
   for (const name of request.ingredients) {
     if (!isAcceptableIngredientName(name)) {
@@ -53,7 +54,7 @@ export async function researchIngredients(
   }
 
   const researched = await Promise.all(misses.map(async ([normalized, name]) => {
-    if (!(await deps.store.reserveCall(userId))) return { name, result: null };
+    if (!(await deps.store.reserveCall(userId))) return { name, result: null, reason: "budget" };
     try {
       const research = await deps.researcher.research(name, request.language);
       await deps.store.save({
@@ -76,15 +77,19 @@ export async function researchIngredients(
         sources: research.sources,
         cached: false,
       };
-      return { name, result };
+      return { name, result, reason: null };
     } catch (error) {
       console.error(`Research failed for "${name}":`, error);
-      return { name, result: null };
+      return { name, result: null, reason: failureReason(error) };
     }
   }));
-  for (const { name, result } of researched) {
-    if (result) response.results.push(result);
-    else response.deferred.push(name);
+  for (const { name, result, reason } of researched) {
+    if (result) {
+      response.results.push(result);
+    } else {
+      response.deferred.push(name);
+      response.deferredReasons[name] = reason ?? "error";
+    }
   }
 
   return { status: 200, body: response };
@@ -100,4 +105,12 @@ function parseRequest(input: unknown): { ingredients: string[]; language: Langua
   }
   if (!ingredients.every((it) => typeof it === "string")) return "ingredients must be strings";
   return { ingredients: ingredients as string[], language };
+}
+
+/** A short, non-sensitive reason code for clients; details stay in the function logs. */
+function failureReason(error: unknown): string {
+  if (error instanceof UpstreamError) return `upstream_${error.status}`;
+  if (error instanceof InvalidAnswerError) return "invalid_answer";
+  if (error instanceof DOMException && error.name === "TimeoutError") return "timeout";
+  return "error";
 }

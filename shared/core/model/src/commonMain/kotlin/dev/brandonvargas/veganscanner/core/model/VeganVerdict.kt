@@ -24,7 +24,7 @@ enum class VerdictSource {
     /** The ingredient dictionary applied to text the user scanned from the product label. */
     LABEL_SCAN,
 
-    /** Unrecognized ingredients were researched on the web by AI (Gemini + Google Search). Show with a warning. */
+    /** Unrecognized ingredients were researched on the web by AI (Wikipedia + Gemini). Show with a warning. */
     WEB_RESEARCH,
 
     /** Nothing could decide; the verdict is a best-effort partial result. */

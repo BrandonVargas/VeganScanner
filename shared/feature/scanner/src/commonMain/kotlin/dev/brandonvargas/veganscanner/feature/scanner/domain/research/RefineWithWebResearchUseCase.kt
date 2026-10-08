@@ -14,7 +14,7 @@ import dev.brandonvargas.veganscanner.feature.scanner.domain.rules.TextFolding
 import kotlin.time.Clock
 
 /**
- * Looks up the ingredients the offline steps couldn't recognize on the web (AI + Google Search) and refines the
+ * Looks up the ingredients the offline steps couldn't recognize on the web (Wikipedia + Gemini) and refines the
  * verdict. Runs after the result is shown, because a lookup can take several seconds.
  *
  * Safety: research can only resolve *unrecognized* ingredients. It never touches an ingredient the dictionaries

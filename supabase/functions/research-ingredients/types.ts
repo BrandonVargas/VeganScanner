@@ -53,6 +53,8 @@ export interface ResearchResponse {
   results: ResearchedIngredient[];
   /** Not researched now (daily budget reached or the search failed); the client may retry later. */
   deferred: string[];
+  /** Why each deferred name wasn't researched: `budget`, `timeout`, `upstream_<HTTP status>`, `invalid_answer`, `error`. */
+  deferredReasons: Record<string, string>;
   /** Reported as wrong by users; not served until reviewed. */
   disputed: string[];
   /** Not accepted as ingredient names (too long, unexpected characters…). */

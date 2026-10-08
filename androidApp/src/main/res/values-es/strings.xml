@@ -74,7 +74,7 @@
     <string name="label_retake">Tomar otra foto</string>
     <string name="label_check">Revisar ingredientes</string>
     <string name="label_privacy_note">La foto se lee en tu teléfono y nunca se sube.</string>
-    <string name="source_web_research">Investigado en línea con IA (Gemini + Google Search)</string>
+    <string name="source_web_research">Investigado en línea con IA (Gemini + Wikipedia)</string>
     <string name="research_in_progress">Investigando en línea los ingredientes no reconocidos…</string>
     <string name="research_title">Investigado en línea con IA</string>
     <string name="research_warning">Estas respuestas vienen de fuentes web y pueden estar equivocadas. Revisa la etiqueta y reporta lo que no parezca correcto.</string>

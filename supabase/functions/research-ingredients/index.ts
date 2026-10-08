@@ -1,9 +1,11 @@
-// Researches unknown food ingredients on the web (Gemini + Grounding with Google Search) and caches the answers
+// Researches unknown food ingredients on the web (Wikipedia excerpts + Gemini; Google Search grounding optional) and
+// caches the answers
 // for every user in public.ingredient_knowledge. See docs/adr/0007-cloud-ingredient-research.md.
 import { createClient } from "@supabase/supabase-js";
 import { geminiResearcher } from "./gemini.ts";
 import { researchIngredients } from "./handler.ts";
 import { supabaseStore } from "./store.ts";
+import { wikipediaRetriever } from "./wikipedia.ts";
 
 const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), { status, headers: { "content-type": "application/json" } });
@@ -27,7 +29,11 @@ Deno.serve(async (request) => {
   const body = await request.json().catch(() => null);
   const result = await researchIngredients(body, user.id, {
     store: supabaseStore(admin),
-    researcher: geminiResearcher(geminiKey),
+    researcher: geminiResearcher(geminiKey, {
+      model: Deno.env.get("GEMINI_MODEL") || undefined,
+      googleSearch: Deno.env.get("GEMINI_GOOGLE_SEARCH") === "true",
+      retriever: wikipediaRetriever(),
+    }),
   });
   return json(result.body, result.status);
 });

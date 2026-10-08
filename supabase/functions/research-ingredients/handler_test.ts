@@ -75,7 +75,9 @@ Deno.test("defers when the daily budget is exhausted and when research fails", a
   if (result.status === 200 && failing.status === 200) {
     assertEquals(result.body.results.length + result.body.deferred.length, 2);
     assertEquals(result.body.deferred.length, 1);
+    assertEquals(Object.values(result.body.deferredReasons), ["budget"]);
     assertEquals(failing.body.deferred, ["tres"]);
+    assertEquals(failing.body.deferredReasons, { tres: "error" });
   }
 });
 

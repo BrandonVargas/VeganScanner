@@ -1027,13 +1027,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Researched online with AI (Gemini + Google Search)"
+            "value" : "Researched online with AI (Gemini + Wikipedia)"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Investigado en línea con IA (Gemini + Google Search)"
+            "value" : "Investigado en línea con IA (Gemini + Wikipedia)"
           }
         }
       }
