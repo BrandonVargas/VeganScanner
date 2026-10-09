@@ -12,10 +12,17 @@ internal data class KnownTerm(
 /**
  * Everything the rule engine can look up, merged from the curated dictionary and the Open Food Facts taxonomy.
  *
- * Precedence: curated non-vegan/doubtful terms → curated plant-based look-alikes and vegan staples → taxonomy.
+ * Precedence: curated non-vegan/doubtful terms → curated plant-based look-alikes and vegan staples → taxonomy →
+ * translated Spanish names of English-only taxonomy entries, which never replace a name from the sources before them.
+ * Translated names of non-vegan or doubtful entries are only used when they have several words: single words are
+ * often ambiguous on labels ("burro" is a donkey and a tortilla, "gallo" is in "pico de gallo") or mistranslated.
  * All terms are stored folded ([TextFolding.foldTerm]) for O(1) lookup of word n-grams.
  */
-internal class IngredientKnowledge(dictionary: IngredientDictionary, taxonomy: OffTaxonomy) {
+internal class IngredientKnowledge(
+    dictionary: IngredientDictionary,
+    taxonomy: OffTaxonomy,
+    translations: OffTaxonomyTranslations = OffTaxonomyTranslations.Empty,
+) {
     val terms: Map<String, KnownTerm>
     val additiveCodes: Map<String, KnownTerm>
     val crossContaminationMarkers: List<Regex>
@@ -52,6 +59,12 @@ internal class IngredientKnowledge(dictionary: IngredientDictionary, taxonomy: O
                 add(it, KnownTerm(entry.id, entry.status.ingredientStatus, curated = false))
             }
         }
+        taxonomy.entries.forEach { entry ->
+            val status = entry.status.ingredientStatus
+            translations.spanish(entry.id)
+                .filter { status == IngredientVeganStatus.YES || TextFolding.foldTerm(it).contains(' ') }
+                .forEach { add(it, KnownTerm(entry.id, status, curated = false)) }
+        }
         this.terms = terms
 
         val codes = LinkedHashMap<String, KnownTerm>()
@@ -79,7 +92,7 @@ internal class IngredientKnowledge(dictionary: IngredientDictionary, taxonomy: O
 
     companion object {
         val Bundled: IngredientKnowledge by lazy {
-            IngredientKnowledge(IngredientDictionary.Bundled, OffTaxonomy.Bundled)
+            IngredientKnowledge(IngredientDictionary.Bundled, OffTaxonomy.Bundled, OffTaxonomyTranslations.Bundled)
         }
     }
 }

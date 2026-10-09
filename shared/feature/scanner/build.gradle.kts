@@ -10,6 +10,15 @@ tasks.register<UpdateOffTaxonomyTask>("updateOffTaxonomy") {
     outputFile.set(layout.projectDirectory.file("dictionary/off-taxonomy.json"))
 }
 
+// Adds Spanish names to English-only taxonomy entries (`dictionary/off-taxonomy-es.json`): Wikidata, then Gemini
+// when GEMINI_API_KEY is set. Incremental; run after updateOffTaxonomy.
+tasks.register<TranslateOffTaxonomyTask>("translateOffTaxonomy") {
+    sourceUrl.set("https://static.openfoodfacts.org/data/taxonomies/ingredients.json")
+    taxonomyFile.set(layout.projectDirectory.file("dictionary/off-taxonomy.json"))
+    translationsFile.set(layout.projectDirectory.file("dictionary/off-taxonomy-es.json"))
+    geminiModel.set("gemini-3.5-flash-lite")
+}
+
 // Embeds the dictionary JSON files into commonMain (see GenerateDictionarySourceTask in build-logic).
 val generateIngredientDictionary =
     tasks.register<GenerateDictionarySourceTask>("generateIngredientDictionary") {
@@ -25,6 +34,12 @@ val generateIngredientDictionary =
             objects.newInstance<GenerateDictionarySourceTask.Embedded>().apply {
                 propertyName.set("OFF_TAXONOMY_JSON")
                 file.set(layout.projectDirectory.file("dictionary/off-taxonomy.json"))
+            },
+        )
+        embedded.add(
+            objects.newInstance<GenerateDictionarySourceTask.Embedded>().apply {
+                propertyName.set("OFF_TAXONOMY_ES_JSON")
+                file.set(layout.projectDirectory.file("dictionary/off-taxonomy-es.json"))
             },
         )
     }

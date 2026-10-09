@@ -22,8 +22,13 @@ jobs:
           distribution: temurin
           java-version: 21
       - uses: gradle/actions/setup-gradle@v6
-      - name: Refresh taxonomy and run the dictionary tests
-        run: ./gradlew :shared:feature:scanner:updateOffTaxonomy :shared:feature:scanner:testAndroidHostTest
+      - name: Refresh taxonomy, add Spanish names and run the dictionary tests
+        # Without the optional GEMINI_API_KEY secret, new ingredients get Wikidata names only.
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        run: >-
+          ./gradlew :shared:feature:scanner:updateOffTaxonomy :shared:feature:scanner:translateOffTaxonomy
+          :shared:feature:scanner:testAndroidHostTest
       - uses: peter-evans/create-pull-request@v8
         with:
           branch: chore/off-taxonomy-update
@@ -34,4 +39,6 @@ jobs:
             Weekly refresh of `shared/feature/scanner/dictionary/off-taxonomy.json` from the
             [Open Food Facts ingredient taxonomy](https://static.openfoodfacts.org/data/taxonomies/ingredients.json) (ODbL).
             The dictionary tests passed on the refreshed data before this PR was opened.
-          add-paths: shared/feature/scanner/dictionary/off-taxonomy.json
+          add-paths: |
+            shared/feature/scanner/dictionary/off-taxonomy.json
+            shared/feature/scanner/dictionary/off-taxonomy-es.json
