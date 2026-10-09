@@ -3,6 +3,7 @@ package dev.brandonvargas.veganscanner.feature.scanner.presentation
 import app.cash.turbine.test
 import dev.brandonvargas.veganscanner.core.testing.MainDispatcherOverride
 import dev.brandonvargas.veganscanner.feature.scanner.FakeLabelScanRepository
+import dev.brandonvargas.veganscanner.feature.scanner.domain.rules.OcrLine
 import dev.brandonvargas.veganscanner.feature.scanner.presentation.label.LabelDraft
 import dev.brandonvargas.veganscanner.feature.scanner.presentation.label.LabelScanAction
 import dev.brandonvargas.veganscanner.feature.scanner.presentation.label.LabelScanEffect
@@ -37,7 +38,7 @@ class LabelScanViewModelTest {
         viewModel.onAction(LabelScanAction.CaptureStarted)
         assertTrue(viewModel.state.value.isRecognizing)
 
-        viewModel.onAction(LabelScanAction.TextRecognized("Ingredientes: agua, sal.\nHecho en México"))
+        viewModel.onAction(LabelScanAction.TextRecognized(stackedLines("Ingredientes: agua, sal.", "Hecho en México")))
 
         val state = viewModel.state.value
         assertEquals(LabelScanStep.REVIEW, state.step)
@@ -47,7 +48,7 @@ class LabelScanViewModelTest {
 
     @Test
     fun unreadablePhotoStaysOnCaptureWithError() {
-        viewModel.onAction(LabelScanAction.TextRecognized("  12 g  "))
+        viewModel.onAction(LabelScanAction.TextRecognized(stackedLines("  12 g  ")))
 
         assertEquals(LabelScanStep.CAPTURE, viewModel.state.value.step)
         assertEquals(LabelScanError.NOTHING_RECOGNIZED, viewModel.state.value.error)
@@ -80,4 +81,8 @@ class LabelScanViewModelTest {
             }
             assertEquals("agua, azúcar, grenetina", repository.labels["7501000000012"])
         }
+
+    /** Lines printed one under another in a single column. */
+    private fun stackedLines(vararg text: String) =
+        text.mapIndexed { index, line -> OcrLine(line, 0.1f, 0.1f + index * 0.05f, 0.9f, 0.14f + index * 0.05f) }
 }

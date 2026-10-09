@@ -16,8 +16,10 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.google.mlkit.vision.common.InputImage
+import com.google.mlkit.vision.text.Text
 import com.google.mlkit.vision.text.TextRecognition
 import com.google.mlkit.vision.text.latin.TextRecognizerOptions
+import dev.brandonvargas.veganscanner.feature.scanner.domain.rules.OcrLine
 
 /**
  * Takes a photo with CameraX and reads it with ML Kit's on-device Latin text recognizer.
@@ -27,19 +29,27 @@ class LabelCamera(private val context: Context) {
     val controller =
         LifecycleCameraController(context).apply {
             setEnabledUseCases(CameraController.IMAGE_CAPTURE)
+            // Small print needs the sharpest photo; the extra capture time is fine for a single shot.
+            imageCaptureMode = ImageCapture.CAPTURE_MODE_MAXIMIZE_QUALITY
         }
     private val recognizer = TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS)
 
-    fun capture(onText: (String) -> Unit, onFailure: () -> Unit) {
+    /** Recognized lines are positioned on the upright photo so shared code can follow the ingredient column. */
+    fun capture(onText: (List<OcrLine>) -> Unit, onFailure: () -> Unit) {
         val executor = ContextCompat.getMainExecutor(context)
         controller.takePicture(
             executor,
             object : ImageCapture.OnImageCapturedCallback() {
                 override fun onCaptureSuccess(image: ImageProxy) {
-                    val input = InputImage.fromBitmap(image.toBitmap(), image.imageInfo.rotationDegrees)
+                    val rotation = image.imageInfo.rotationDegrees
+                    val input = InputImage.fromBitmap(image.toBitmap(), rotation)
                     image.close()
+                    // ML Kit reports boxes on the rotated (upright) image.
+                    val sideways = rotation % 180 != 0
+                    val width = if (sideways) input.height else input.width
+                    val height = if (sideways) input.width else input.height
                     recognizer.process(input)
-                        .addOnSuccessListener { onText(it.text) }
+                        .addOnSuccessListener { onText(it.lines(width.toFloat(), height.toFloat())) }
                         .addOnFailureListener { onFailure() }
                 }
 
@@ -49,6 +59,12 @@ class LabelCamera(private val context: Context) {
     }
 
     fun close() = recognizer.close()
+
+    private fun Text.lines(width: Float, height: Float): List<OcrLine> =
+        textBlocks.flatMap { it.lines }.mapNotNull { line ->
+            val box = line.boundingBox ?: return@mapNotNull null
+            OcrLine(line.text, box.left / width, box.top / height, box.right / width, box.bottom / height)
+        }
 }
 
 @Composable

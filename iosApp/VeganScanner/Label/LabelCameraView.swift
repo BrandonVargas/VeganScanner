@@ -1,5 +1,6 @@
 import OSLog
 import SwiftUI
+import VeganKit
 import VisionKit
 
 /// Lets SwiftUI ask the live camera for a still photo, or for the text it is already tracking.
@@ -25,16 +26,21 @@ final class LabelCamera {
         return try await scanner.capturePhoto()
     }
 
-    /// Text VisionKit is highlighting in the live preview, top to bottom. Fallback when the photo can't be read.
-    func liveText() -> String {
-        liveItems
-            .compactMap { item -> (CGPoint, String)? in
-                guard case .text(let text) = item else { return nil }
-                return (text.bounds.topLeft, text.transcript)
-            }
-            .sorted { $0.0.y == $1.0.y ? $0.0.x < $1.0.x : $0.0.y < $1.0.y }
-            .map(\.1)
-            .joined(separator: "\n")
+    /// Lines VisionKit is highlighting in the live preview, positioned on the preview. Fallback when the photo
+    /// can't be read.
+    func liveLines() -> [OcrLine] {
+        guard let size = scanner?.view.bounds.size, size.width > 0, size.height > 0 else { return [] }
+        return liveItems.compactMap { item -> OcrLine? in
+            guard case .text(let text) = item else { return nil }
+            let corners = [text.bounds.topLeft, text.bounds.topRight, text.bounds.bottomLeft, text.bounds.bottomRight]
+            return OcrLine(
+                text: text.transcript,
+                left: Float((corners.map(\.x).min() ?? 0) / size.width),
+                top: Float((corners.map(\.y).min() ?? 0) / size.height),
+                right: Float((corners.map(\.x).max() ?? 0) / size.width),
+                bottom: Float((corners.map(\.y).max() ?? 0) / size.height)
+            )
+        }
     }
 }
 

@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dev.brandonvargas.veganscanner.feature.scanner.domain.LabelScanRepository
 import dev.brandonvargas.veganscanner.feature.scanner.domain.rules.IngredientLabelText
+import dev.brandonvargas.veganscanner.feature.scanner.domain.rules.OcrLine
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -41,7 +42,8 @@ sealed interface LabelScanAction {
     /** The platform started on-device text recognition on a captured photo. */
     data object CaptureStarted : LabelScanAction
 
-    data class TextRecognized(val rawText: String) : LabelScanAction
+    /** OCR finished: every recognized line with its position on the photo (see [OcrLine]). */
+    data class TextRecognized(val lines: List<OcrLine>) : LabelScanAction
 
     data object RecognitionFailed : LabelScanAction
 
@@ -80,7 +82,7 @@ class LabelScanViewModel(
             }
 
             is LabelScanAction.TextRecognized -> {
-                onTextRecognized(action.rawText)
+                onTextRecognized(action.lines)
             }
 
             LabelScanAction.RecognitionFailed -> {
@@ -109,8 +111,8 @@ class LabelScanViewModel(
         }
     }
 
-    private fun onTextRecognized(rawText: String) {
-        val ingredients = IngredientLabelText.extract(rawText)
+    private fun onTextRecognized(lines: List<OcrLine>) {
+        val ingredients = IngredientLabelText.extract(lines)
         if (ingredients.count(Char::isLetter) < MIN_LETTERS) {
             _state.update { it.copy(isRecognizing = false, error = LabelScanError.NOTHING_RECOGNIZED) }
         } else {

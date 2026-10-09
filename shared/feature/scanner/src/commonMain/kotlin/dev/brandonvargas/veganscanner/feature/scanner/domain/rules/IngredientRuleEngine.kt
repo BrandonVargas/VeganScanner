@@ -191,7 +191,7 @@ internal class IngredientRuleEngine(private val knowledge: IngredientKnowledge) 
 
     private fun isFiller(word: String) = word in FILLER_WORDS || word.all { it.isDigit() } || word.length == 1
 
-    private companion object {
+    internal companion object {
         val SENTENCE_ENDS = charArrayOf('.', ';', '\n')
         val ITEM_SEPARATORS = setOf(',', ';', '(', ')', '[', ']', '{', '}', '.', '\n', '*')
         val GROUP_OPENERS = setOf('(', '[', '{')
