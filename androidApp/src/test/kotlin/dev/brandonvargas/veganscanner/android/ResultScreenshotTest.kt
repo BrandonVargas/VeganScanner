@@ -164,6 +164,23 @@ class ResultScreenshotTest {
         )
 
     @Test
+    fun communityVerdict() =
+        capture(
+            ProductResultUiState.Found(
+                product.copy(name = null, brands = null, ingredientsText = null),
+                VeganVerdict(
+                    VeganStatus.VEGAN,
+                    VerdictSource.COMMUNITY,
+                    researched =
+                        listOf(
+                            FlaggedIngredient("goma gelana", IngredientVeganStatus.YES, note = "Hecha por bacterias."),
+                        ),
+                ),
+                communityIngredients = "Agua, goma gelana, sal",
+            ),
+        )
+
+    @Test
     fun notFound() = capture(ProductResultUiState.NotFound("7501000000012"))
 
     @Test

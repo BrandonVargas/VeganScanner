@@ -3,6 +3,7 @@ package dev.brandonvargas.veganscanner.feature.scanner.presentation
 import app.cash.turbine.test
 import dev.brandonvargas.veganscanner.core.common.AppError
 import dev.brandonvargas.veganscanner.core.common.AppResult
+import dev.brandonvargas.veganscanner.core.model.FlaggedIngredient
 import dev.brandonvargas.veganscanner.core.model.IngredientVeganStatus
 import dev.brandonvargas.veganscanner.core.model.VeganStatus
 import dev.brandonvargas.veganscanner.core.model.VerdictSource
@@ -10,11 +11,15 @@ import dev.brandonvargas.veganscanner.core.testing.MainDispatcherOverride
 import dev.brandonvargas.veganscanner.core.testing.OffFixtures
 import dev.brandonvargas.veganscanner.core.testing.TestClock
 import dev.brandonvargas.veganscanner.core.testing.TestDispatcherProvider
+import dev.brandonvargas.veganscanner.feature.scanner.FakeCommunityVerdictRepository
 import dev.brandonvargas.veganscanner.feature.scanner.FakeIngredientResearchRepository
 import dev.brandonvargas.veganscanner.feature.scanner.FakeLabelScanRepository
 import dev.brandonvargas.veganscanner.feature.scanner.FakeProductRepository
 import dev.brandonvargas.veganscanner.feature.scanner.FakeScanHistoryRepository
 import dev.brandonvargas.veganscanner.feature.scanner.domain.ScanProductUseCase
+import dev.brandonvargas.veganscanner.feature.scanner.domain.community.CommunityVerdict
+import dev.brandonvargas.veganscanner.feature.scanner.domain.community.CommunityVerdictsUseCase
+import dev.brandonvargas.veganscanner.feature.scanner.domain.community.IngredientsHash
 import dev.brandonvargas.veganscanner.feature.scanner.domain.research.RefineWithWebResearchUseCase
 import dev.brandonvargas.veganscanner.feature.scanner.domain.research.ResearchIssue
 import dev.brandonvargas.veganscanner.feature.scanner.domain.research.ResearchedIngredient
@@ -52,7 +57,10 @@ class ProductResultViewModelTest {
     private val refine =
         RefineWithWebResearchUseCase(research, FakeScanHistoryRepository(), TestClock(), deviceLanguage = "en")
 
-    private fun viewModel(barcode: String) = ProductResultViewModel(barcode, useCase, refine, research)
+    private val communityRepository = FakeCommunityVerdictRepository()
+    private val community = CommunityVerdictsUseCase(communityRepository, FakeScanHistoryRepository(), TestClock())
+
+    private fun viewModel(barcode: String) = ProductResultViewModel(barcode, useCase, refine, research, community)
 
     @BeforeTest
     fun setUp() = main.install()
@@ -138,7 +146,7 @@ class ProductResultViewModelTest {
                 )
 
             val viewModel =
-                ProductResultViewModel(OffFixtures.UNKNOWN_STATUS_BARCODE, pipelineUseCase, refine, research)
+                ProductResultViewModel(OffFixtures.UNKNOWN_STATUS_BARCODE, pipelineUseCase, refine, research, community)
             viewModel.state.test {
                 assertEquals(ProductResultUiState.Loading, awaitItem())
                 val offline = assertIs<ProductResultUiState.Found>(awaitItem())
@@ -185,7 +193,7 @@ class ProductResultViewModelTest {
                 )
 
             val viewModel =
-                ProductResultViewModel(OffFixtures.UNKNOWN_STATUS_BARCODE, pipelineUseCase, refine, research)
+                ProductResultViewModel(OffFixtures.UNKNOWN_STATUS_BARCODE, pipelineUseCase, refine, research, community)
             advanceUntilIdle()
 
             val found = assertIs<ProductResultUiState.Found>(viewModel.state.value)
@@ -194,4 +202,142 @@ class ProductResultViewModelTest {
             assertEquals(1, found.unresearchedCount)
             assertEquals(ResearchIssue.OFFLINE, found.researchIssue)
         }
+
+    private fun pipelineUseCase() =
+        ScanProductUseCase(
+            productRepository = products,
+            labelScanRepository = FakeLabelScanRepository(),
+            verdictPipeline = appVerdictPipeline(IngredientKnowledge.Bundled),
+            historyRepository = FakeScanHistoryRepository(),
+            clock = TestClock(),
+            dispatchers = TestDispatcherProvider(),
+        )
+
+    private fun sharedVegan(ingredients: String) =
+        CommunityVerdict(
+            barcode = OffFixtures.UNKNOWN_STATUS_BARCODE,
+            status = VeganStatus.VEGAN,
+            concludedBy = VerdictSource.WEB_RESEARCH,
+            ingredientsText = ingredients,
+            ingredientsHash = IngredientsHash.of(ingredients),
+            researched = listOf(FlaggedIngredient("xantolina", IngredientVeganStatus.YES, note = "A plant.")),
+        )
+
+    @Test
+    fun aMatchingCommunityVerdictIsUsedInsteadOfResearch() =
+        runTest(main.dispatcher) {
+            val product = productFromFixture(OffFixtures.unknownStatusNoIngredients)
+            products.result = AppResult.Success(product.copy(ingredientsText = "Agua, XANTOLINA."))
+            communityRepository.verdict = sharedVegan("agua, xantolina")
+
+            val viewModel =
+                ProductResultViewModel(
+                    OffFixtures.UNKNOWN_STATUS_BARCODE,
+                    pipelineUseCase(),
+                    refine,
+                    research,
+                    community,
+                )
+            advanceUntilIdle()
+
+            val found = assertIs<ProductResultUiState.Found>(viewModel.state.value)
+            assertEquals(VeganStatus.VEGAN, found.verdict.status)
+            assertEquals(VerdictSource.COMMUNITY, found.verdict.source)
+            assertEquals(null, found.communityIngredients, "the product already has its own ingredients")
+            assertEquals(emptyList(), research.requested)
+        }
+
+    @Test
+    fun productsWithoutIngredientsGetTheSharedList() =
+        runTest(main.dispatcher) {
+            products.result = AppResult.Success(productFromFixture(OffFixtures.unknownStatusNoIngredients))
+            communityRepository.verdict = sharedVegan("agua, xantolina")
+
+            val viewModel =
+                ProductResultViewModel(
+                    OffFixtures.UNKNOWN_STATUS_BARCODE,
+                    pipelineUseCase(),
+                    refine,
+                    research,
+                    community,
+                )
+            advanceUntilIdle()
+
+            val found = assertIs<ProductResultUiState.Found>(viewModel.state.value)
+            assertEquals(VerdictSource.COMMUNITY, found.verdict.source)
+            assertEquals("agua, xantolina", found.communityIngredients)
+        }
+
+    @Test
+    fun aVerdictForDifferentIngredientsIsIgnoredAndResearchedResultsAreShared() =
+        runTest(main.dispatcher) {
+            val product = productFromFixture(OffFixtures.unknownStatusNoIngredients)
+            products.result = AppResult.Success(product.copy(ingredientsText = "Agua, xantolina"))
+            communityRepository.verdict = sharedVegan("agua, xantolina, leche")
+            research.results = listOf(researchedVegan("xantolina"))
+
+            val viewModel =
+                ProductResultViewModel(
+                    OffFixtures.UNKNOWN_STATUS_BARCODE,
+                    pipelineUseCase(),
+                    refine,
+                    research,
+                    community,
+                )
+            advanceUntilIdle()
+
+            val found = assertIs<ProductResultUiState.Found>(viewModel.state.value)
+            assertEquals(VerdictSource.WEB_RESEARCH, found.verdict.source)
+            val shared = communityRepository.shared.single()
+            assertEquals("Agua, xantolina", shared.ingredientsText)
+            assertEquals(IngredientsHash.of("agua xantolina"), shared.ingredientsHash)
+            assertEquals(listOf("xantolina"), shared.researched.map { it.name })
+        }
+
+    @Test
+    fun productsMissingFromOpenFoodFactsCanComeFromTheCommunity() =
+        runTest(main.dispatcher) {
+            products.result = AppResult.Success(null)
+            communityRepository.verdict = sharedVegan("agua, xantolina")
+
+            val viewModel =
+                ProductResultViewModel(
+                    OffFixtures.UNKNOWN_STATUS_BARCODE,
+                    pipelineUseCase(),
+                    refine,
+                    research,
+                    community,
+                )
+            advanceUntilIdle()
+
+            val found = assertIs<ProductResultUiState.Found>(viewModel.state.value)
+            assertEquals(VerdictSource.COMMUNITY, found.verdict.source)
+            assertEquals("agua, xantolina", found.communityIngredients)
+        }
+
+    @Test
+    fun communityReportIsSentOnce() =
+        runTest(main.dispatcher) {
+            products.result = AppResult.Success(productFromFixture(OffFixtures.unknownStatusNoIngredients))
+            communityRepository.verdict = sharedVegan("agua, xantolina")
+            val viewModel =
+                ProductResultViewModel(
+                    OffFixtures.UNKNOWN_STATUS_BARCODE,
+                    pipelineUseCase(),
+                    refine,
+                    research,
+                    community,
+                )
+            advanceUntilIdle()
+
+            viewModel.onAction(ProductResultAction.ReportCommunityVerdict)
+            viewModel.onAction(ProductResultAction.ReportCommunityVerdict)
+            advanceUntilIdle()
+
+            assertTrue(assertIs<ProductResultUiState.Found>(viewModel.state.value).communityReported)
+            assertEquals(listOf(OffFixtures.UNKNOWN_STATUS_BARCODE), communityRepository.reported)
+        }
+
+    private fun researchedVegan(name: String) =
+        ResearchedIngredient(name, name, IngredientVeganStatus.YES, "r", "r", emptyList())
 }

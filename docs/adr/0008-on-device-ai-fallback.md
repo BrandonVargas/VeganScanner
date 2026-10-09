@@ -23,5 +23,5 @@ Cloud research (ADR 0007) needs a connection and is capped by daily limits. With
 
 ## Consequences
 - It only works on supported devices with the model ready. Elsewhere nothing changes, and the app shows the existing "couldn't look up" note.
-- Small models are less reliable, so their answers are never shared with other users.
+- Small models are less reliable, so their per-ingredient answers aren't cached or shared. A product they make vegan can still be shared as a community verdict that records its source and has a warning and report option (ADR 0009).
 - Nothing leaves the phone for these estimates.

@@ -60,6 +60,7 @@ extension VerdictSource {
         case .labelScan: "source.label_scan"
         case .webResearch: "source.web_research"
         case .onDeviceAi: "source.on_device_ai"
+        case .community: "source.community"
         case .undetermined: "source.undetermined"
         }
     }

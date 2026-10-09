@@ -30,6 +30,9 @@ enum class VerdictSource {
     /** Online research wasn't possible, so the phone's own AI model estimated the ingredients. Show with a warning. */
     ON_DEVICE_AI,
 
+    /** Another user's AI research concluded this product's verdict and shared it. Show with a warning and report. */
+    COMMUNITY,
+
     /** Nothing could decide; the verdict is a best-effort partial result. */
     UNDETERMINED,
 }

@@ -9,6 +9,7 @@ import dev.brandonvargas.veganscanner.core.model.Product
 import dev.brandonvargas.veganscanner.core.model.VeganVerdict
 import dev.brandonvargas.veganscanner.feature.scanner.domain.ScanOutcome
 import dev.brandonvargas.veganscanner.feature.scanner.domain.ScanProductUseCase
+import dev.brandonvargas.veganscanner.feature.scanner.domain.community.CommunityVerdictsUseCase
 import dev.brandonvargas.veganscanner.feature.scanner.domain.research.IngredientResearchRepository
 import dev.brandonvargas.veganscanner.feature.scanner.domain.research.RefineWithWebResearchUseCase
 import dev.brandonvargas.veganscanner.feature.scanner.domain.research.ResearchIssue
@@ -32,6 +33,10 @@ sealed interface ProductResultUiState {
         /** Ingredients that couldn't be researched online this time (retried on the next visit), and why. */
         val unresearchedCount: Int = 0,
         val researchIssue: ResearchIssue? = null,
+        /** The ingredient list shared with a community verdict, when this phone has none for the product. */
+        val communityIngredients: String? = null,
+        /** The user reported the community verdict shown here as wrong. */
+        val communityReported: Boolean = false,
     ) : ProductResultUiState
 
     data class NotFound(val barcode: String) : ProductResultUiState
@@ -44,17 +49,21 @@ sealed interface ProductResultAction {
 
     /** The user thinks a web-researched ingredient verdict is wrong. */
     data class ReportResearched(val researchKey: String) : ProductResultAction
+
+    /** The user thinks the community verdict for this product is wrong. */
+    data object ReportCommunityVerdict : ProductResultAction
 }
 
 /**
- * Shows the offline verdict as soon as it's ready, then refines it with web research in the background when some
- * ingredients weren't recognized.
+ * Shows the offline verdict as soon as it's ready, then refines it in the background when it's inconclusive:
+ * with a verdict another user shared for this product, or else with web research (which may then be shared).
  */
 class ProductResultViewModel(
     private val barcode: String,
     private val scanProduct: ScanProductUseCase,
     private val refineWithWebResearch: RefineWithWebResearchUseCase,
     private val research: IngredientResearchRepository,
+    private val community: CommunityVerdictsUseCase,
 ) : ViewModel() {
     private val _state = MutableStateFlow<ProductResultUiState>(ProductResultUiState.Loading)
     val state: StateFlow<ProductResultUiState> = _state.asStateFlow()
@@ -69,6 +78,7 @@ class ProductResultViewModel(
         when (action) {
             ProductResultAction.Retry -> load()
             is ProductResultAction.ReportResearched -> report(action.researchKey)
+            ProductResultAction.ReportCommunityVerdict -> reportCommunityVerdict()
         }
     }
 
@@ -89,7 +99,7 @@ class ProductResultViewModel(
 
                     is AppResult.Success -> {
                         when (val outcome = result.value) {
-                            is ScanOutcome.NotFound -> _state.value = ProductResultUiState.NotFound(barcode)
+                            is ScanOutcome.NotFound -> showMissing(parsed)
                             is ScanOutcome.Found -> showAndRefine(outcome)
                         }
                     }
@@ -97,9 +107,28 @@ class ProductResultViewModel(
             }
     }
 
+    /** Not in Open Food Facts: another user may have shared a label scan and verdict for it. */
+    private suspend fun showMissing(barcode: Barcode) {
+        val (product, match) =
+            community.lookupMissing(barcode) ?: run {
+                _state.value = ProductResultUiState.NotFound(barcode.value)
+                return
+            }
+        _state.value = ProductResultUiState.Found(product, match.verdict, communityIngredients = match.ingredientsText)
+    }
+
     private suspend fun showAndRefine(outcome: ScanOutcome.Found) {
         val shouldResearch = refineWithWebResearch.shouldResearch(outcome.verdict)
         _state.value = ProductResultUiState.Found(outcome.product, outcome.verdict, isResearching = shouldResearch)
+
+        community.lookup(outcome.product, outcome.verdict)?.let { match ->
+            _state.update { current ->
+                (current as? ProductResultUiState.Found)
+                    ?.copy(verdict = match.verdict, isResearching = false, communityIngredients = match.ingredientsText)
+                    ?: current
+            }
+            return
+        }
         if (!shouldResearch) return
         val refinement = refineWithWebResearch(outcome.product, outcome.verdict)
         _state.update { current ->
@@ -114,6 +143,14 @@ class ProductResultViewModel(
                 current
             }
         }
+        refinement.verdict?.let { community.shareIfEligible(outcome.product, it) }
+    }
+
+    private fun reportCommunityVerdict() {
+        val current = _state.value as? ProductResultUiState.Found ?: return
+        if (current.communityReported) return
+        _state.value = current.copy(communityReported = true)
+        viewModelScope.launch { community.report(current.product.barcode.value, reason = null) }
     }
 
     private fun report(researchKey: String) {

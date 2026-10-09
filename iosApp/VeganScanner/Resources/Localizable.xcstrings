@@ -137,6 +137,91 @@
         }
       }
     },
+    "community.ingredients_hint" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "From another person's label scan"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Del escaneo de etiqueta de otra persona"
+          }
+        }
+      }
+    },
+    "community.reasons_title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Why the AI marked it vegan"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Por qué la IA lo marcó como vegano"
+          }
+        }
+      }
+    },
+    "community.report" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Report as not vegan"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reportar como no vegano"
+          }
+        }
+      }
+    },
+    "community.title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Shared by the community"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Compartido por la comunidad"
+          }
+        }
+      }
+    },
+    "community.warning" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Another person's scan was checked by AI and marked this product as vegan. AI can be wrong: check the label. Think it's wrong? Report it."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La IA revisó el escaneo de otra persona y marcó este producto como vegano. La IA puede equivocarse: revisa la etiqueta. ¿Crees que está mal? Repórtalo."
+          }
+        }
+      }
+    },
     "error.network" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -1123,6 +1208,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Apunta la cámara a un código de barras"
+          }
+        }
+      }
+    },
+    "source.community" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Shared by the community (AI estimate)"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Compartido por la comunidad (estimación de IA)"
           }
         }
       }

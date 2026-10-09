@@ -18,6 +18,7 @@ import androidx.compose.material.icons.rounded.AutoAwesome
 import androidx.compose.material.icons.rounded.CloudOff
 import androidx.compose.material.icons.rounded.DocumentScanner
 import androidx.compose.material.icons.rounded.ErrorOutline
+import androidx.compose.material.icons.rounded.Groups
 import androidx.compose.material.icons.rounded.Info
 import androidx.compose.material.icons.rounded.Schedule
 import androidx.compose.material.icons.rounded.SearchOff
@@ -118,6 +119,7 @@ fun ResultContent(
                         state = state,
                         onScanLabel = onScanLabel,
                         onReport = { onAction(ProductResultAction.ReportResearched(it)) },
+                        onReportCommunity = { onAction(ProductResultAction.ReportCommunityVerdict) },
                     )
                 }
 
@@ -142,6 +144,7 @@ private fun FoundContent(
     state: ProductResultUiState.Found,
     onScanLabel: () -> Unit,
     onReport: (String) -> Unit,
+    onReportCommunity: () -> Unit,
 ) {
     val product = state.product
     val verdict = state.verdict
@@ -153,6 +156,9 @@ private fun FoundContent(
         if (state.isResearching) ResearchingIndicator()
         state.researchIssue?.let { if (state.unresearchedCount > 0) ResearchIssueNote(it, state.unresearchedCount) }
         ProductHeader(product)
+        if (verdict.source == VerdictSource.COMMUNITY) {
+            CommunityVerdictNotice(reported = state.communityReported, onReport = onReportCommunity)
+        }
         if (verdict.flaggedIngredients.isNotEmpty()) {
             FlaggedIngredients(verdict, reportedKeys = state.reportedKeys, onReport = onReport)
         }
@@ -160,6 +166,7 @@ private fun FoundContent(
             ResearchedIngredients(
                 verdict.researched,
                 onDeviceOnly = verdict.source == VerdictSource.ON_DEVICE_AI,
+                fromCommunity = verdict.source == VerdictSource.COMMUNITY,
                 reportedKeys = state.reportedKeys,
                 onReport = onReport,
             )
@@ -171,6 +178,7 @@ private fun FoundContent(
             )
         }
         product.ingredientsText?.let { IngredientsText(it) }
+            ?: state.communityIngredients?.let { IngredientsText(it, sharedByCommunity = true) }
         HorizontalDivider()
         Text(
             text = stringResource(R.string.result_disclaimer),
@@ -319,6 +327,7 @@ private fun ResearchingIndicator() {
 private fun ResearchedIngredients(
     researched: List<FlaggedIngredient>,
     onDeviceOnly: Boolean,
+    fromCommunity: Boolean,
     reportedKeys: Set<String>,
     onReport: (String) -> Unit,
 ) {
@@ -327,15 +336,26 @@ private fun ResearchedIngredients(
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Icon(Icons.Rounded.AutoAwesome, contentDescription = null)
                 Text(
-                    stringResource(if (onDeviceOnly) R.string.research_title_on_device else R.string.research_title),
+                    stringResource(
+                        when {
+                            fromCommunity -> R.string.community_reasons_title
+                            onDeviceOnly -> R.string.research_title_on_device
+                            else -> R.string.research_title
+                        },
+                    ),
                     style = MaterialTheme.typography.titleMedium,
                     modifier = Modifier.padding(start = 8.dp).semantics { heading() },
                 )
             }
-            Text(
-                stringResource(if (onDeviceOnly) R.string.research_warning_on_device else R.string.research_warning),
-                style = MaterialTheme.typography.bodySmall,
-            )
+            // A community verdict's warning and report button are in its own card above.
+            if (!fromCommunity) {
+                Text(
+                    stringResource(
+                        if (onDeviceOnly) R.string.research_warning_on_device else R.string.research_warning,
+                    ),
+                    style = MaterialTheme.typography.bodySmall,
+                )
+            }
             researched.forEach { ingredient ->
                 Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                     Text(
@@ -418,14 +438,44 @@ private fun InconclusiveNotice(fromLabel: Boolean, onScanLabel: () -> Unit) {
 }
 
 @Composable
-private fun IngredientsText(text: String) {
+private fun IngredientsText(text: String, sharedByCommunity: Boolean = false) {
     Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
         Text(
             stringResource(R.string.ingredients_title),
             style = MaterialTheme.typography.titleMedium,
             modifier = Modifier.semantics { heading() },
         )
+        if (sharedByCommunity) {
+            Text(
+                stringResource(R.string.community_ingredients_hint),
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
         Text(text, style = MaterialTheme.typography.bodyMedium)
+    }
+}
+
+/** A verdict another user's AI research concluded and shared: always with a warning and a way to report it. */
+@Composable
+private fun CommunityVerdictNotice(reported: Boolean, onReport: () -> Unit) {
+    Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer)) {
+        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(Icons.Rounded.Groups, contentDescription = null)
+                Text(
+                    stringResource(R.string.community_title),
+                    style = MaterialTheme.typography.titleMedium,
+                    modifier = Modifier.padding(start = 8.dp).semantics { heading() },
+                )
+            }
+            Text(stringResource(R.string.community_warning), style = MaterialTheme.typography.bodyMedium)
+            if (reported) {
+                Text(stringResource(R.string.research_reported), style = MaterialTheme.typography.labelMedium)
+            } else {
+                OutlinedButton(onClick = onReport) { Text(stringResource(R.string.community_report)) }
+            }
+        }
     }
 }
 

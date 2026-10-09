@@ -12,3 +12,4 @@ Short records of the decisions that shape this codebase, in [Michael Nygard's fo
 | [0006](0006-dictionary-and-label-ocr.md) | Ingredient dictionary as data, OCR in the platform UI | Accepted |
 | [0007](0007-cloud-ingredient-research.md) | Cloud ingredient research with a shared cache | Accepted |
 | [0008](0008-on-device-ai-fallback.md) | On-device AI as the offline fallback for ingredient research | Accepted |
+| [0009](0009-community-verdicts.md) | Community verdicts | Accepted |

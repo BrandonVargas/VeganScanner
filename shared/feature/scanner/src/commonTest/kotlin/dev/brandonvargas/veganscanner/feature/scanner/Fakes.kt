@@ -17,6 +17,8 @@ import dev.brandonvargas.veganscanner.feature.scanner.data.toDomain
 import dev.brandonvargas.veganscanner.feature.scanner.domain.LabelScanRepository
 import dev.brandonvargas.veganscanner.feature.scanner.domain.ProductRepository
 import dev.brandonvargas.veganscanner.feature.scanner.domain.ScanHistoryRepository
+import dev.brandonvargas.veganscanner.feature.scanner.domain.community.CommunityVerdict
+import dev.brandonvargas.veganscanner.feature.scanner.domain.community.CommunityVerdictRepository
 import dev.brandonvargas.veganscanner.feature.scanner.domain.research.IngredientResearchRepository
 import dev.brandonvargas.veganscanner.feature.scanner.domain.research.ResearchIssue
 import dev.brandonvargas.veganscanner.feature.scanner.domain.research.ResearchOutcome
@@ -132,5 +134,26 @@ class FakeIngredientResearchDao : IngredientResearchDao {
 
     override suspend fun delete(normalizedName: String) {
         rows.remove(normalizedName)
+    }
+}
+
+class FakeCommunityVerdictRepository(
+    var verdict: CommunityVerdict? = null,
+    override val isAvailable: Boolean = true,
+) : CommunityVerdictRepository {
+    val shared = mutableListOf<CommunityVerdict>()
+    val reported = mutableListOf<String>()
+
+    override suspend fun find(barcode: String): AppResult<CommunityVerdict?> =
+        AppResult.Success(verdict?.takeIf { it.barcode == barcode })
+
+    override suspend fun share(verdict: CommunityVerdict): AppResult<Boolean> {
+        shared += verdict
+        return AppResult.Success(true)
+    }
+
+    override suspend fun report(barcode: String, reason: String?): AppResult<Unit> {
+        reported += barcode
+        return AppResult.Success(Unit)
     }
 }
