@@ -101,7 +101,12 @@ private struct FoundContent: View {
                     flaggedIngredients
                 }
                 if !verdict.researched.isEmpty {
-                    ResearchedIngredients(ingredients: verdict.researched, reportedKeys: reportedKeys, onReport: onReport)
+                    ResearchedIngredients(
+                        ingredients: verdict.researched,
+                        onDeviceOnly: verdict.source == .onDeviceAi,
+                        reportedKeys: reportedKeys,
+                        onReport: onReport
+                    )
                 }
                 if !verdict.isConclusive && !isResearching {
                     inconclusiveNotice
@@ -224,15 +229,17 @@ private struct ResearchLinks: View {
 /// Ingredients resolved by AI web research: always shown with a warning, reasons, sources and a report option.
 private struct ResearchedIngredients: View {
     let ingredients: [FlaggedIngredient]
+    /// Every answer came from the phone's own model (offline), not from online research.
+    let onDeviceOnly: Bool
     let reportedKeys: Set<String>
     let onReport: (String) -> Void
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Label("research.title", systemImage: "sparkles")
+            Label(onDeviceOnly ? "research.title_on_device" : "research.title", systemImage: "sparkles")
                 .font(.headline)
                 .accessibilityAddTraits(.isHeader)
-            Text("research.warning").font(.footnote)
+            Text(onDeviceOnly ? "research.warning_on_device" : "research.warning").font(.footnote)
             ForEach(Array(ingredients.enumerated()), id: \.offset) { _, ingredient in
                 VStack(alignment: .leading, spacing: 4) {
                     HStack(alignment: .firstTextBaseline) {
@@ -242,6 +249,9 @@ private struct ResearchedIngredients: View {
                     }
                     if let note = ingredient.note {
                         Text(note).font(.callout)
+                    }
+                    if ingredient.onDevice && !onDeviceOnly {
+                        Text("research.on_device_item").font(.caption).foregroundStyle(.secondary)
                     }
                     ResearchLinks(ingredient: ingredient, reportedKeys: reportedKeys, onReport: onReport)
                 }

@@ -97,6 +97,7 @@ class RefineWithWebResearchUseCase(
                         note = result.reason(deviceLanguage),
                         sources = result.sources,
                         researchKey = result.key,
+                        onDevice = result.onDevice,
                     )
                 researched += resolved
                 resolved.takeUnless { it.status == IngredientVeganStatus.YES }
@@ -112,7 +113,7 @@ class RefineWithWebResearchUseCase(
             }
         return VeganVerdict(
             status = status,
-            source = VerdictSource.WEB_RESEARCH,
+            source = if (researched.all { it.onDevice }) VerdictSource.ON_DEVICE_AI else VerdictSource.WEB_RESEARCH,
             flaggedIngredients =
                 if (status == VeganStatus.NON_VEGAN) {
                     remaining.filter { it.status == IngredientVeganStatus.NO }
@@ -132,6 +133,7 @@ class RefineWithWebResearchUseCase(
             note = result.reason(deviceLanguage),
             sources = result.sources,
             researchKey = result.key,
+            onDevice = result.onDevice,
         )
     }
 

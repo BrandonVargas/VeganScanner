@@ -63,6 +63,7 @@ import dev.brandonvargas.veganscanner.core.model.IngredientsSource
 import dev.brandonvargas.veganscanner.core.model.Product
 import dev.brandonvargas.veganscanner.core.model.VeganStatus
 import dev.brandonvargas.veganscanner.core.model.VeganVerdict
+import dev.brandonvargas.veganscanner.core.model.VerdictSource
 import dev.brandonvargas.veganscanner.feature.scanner.domain.research.ResearchIssue
 import dev.brandonvargas.veganscanner.feature.scanner.presentation.result.ProductResultAction
 import dev.brandonvargas.veganscanner.feature.scanner.presentation.result.ProductResultUiState
@@ -156,7 +157,12 @@ private fun FoundContent(
             FlaggedIngredients(verdict, reportedKeys = state.reportedKeys, onReport = onReport)
         }
         if (verdict.researched.isNotEmpty()) {
-            ResearchedIngredients(verdict.researched, reportedKeys = state.reportedKeys, onReport = onReport)
+            ResearchedIngredients(
+                verdict.researched,
+                onDeviceOnly = verdict.source == VerdictSource.ON_DEVICE_AI,
+                reportedKeys = state.reportedKeys,
+                onReport = onReport,
+            )
         }
         if (!verdict.isConclusive && !state.isResearching) {
             InconclusiveNotice(
@@ -312,6 +318,7 @@ private fun ResearchingIndicator() {
 @Composable
 private fun ResearchedIngredients(
     researched: List<FlaggedIngredient>,
+    onDeviceOnly: Boolean,
     reportedKeys: Set<String>,
     onReport: (String) -> Unit,
 ) {
@@ -320,12 +327,15 @@ private fun ResearchedIngredients(
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Icon(Icons.Rounded.AutoAwesome, contentDescription = null)
                 Text(
-                    stringResource(R.string.research_title),
+                    stringResource(if (onDeviceOnly) R.string.research_title_on_device else R.string.research_title),
                     style = MaterialTheme.typography.titleMedium,
                     modifier = Modifier.padding(start = 8.dp).semantics { heading() },
                 )
             }
-            Text(stringResource(R.string.research_warning), style = MaterialTheme.typography.bodySmall)
+            Text(
+                stringResource(if (onDeviceOnly) R.string.research_warning_on_device else R.string.research_warning),
+                style = MaterialTheme.typography.bodySmall,
+            )
             researched.forEach { ingredient ->
                 Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                     Text(
@@ -334,6 +344,12 @@ private fun ResearchedIngredients(
                         fontWeight = FontWeight.SemiBold,
                     )
                     ingredient.note?.let { Text(it, style = MaterialTheme.typography.bodyMedium) }
+                    if (ingredient.onDevice && !onDeviceOnly) {
+                        Text(
+                            stringResource(R.string.research_on_device_item),
+                            style = MaterialTheme.typography.labelSmall,
+                        )
+                    }
                     ResearchLinks(ingredient, reportedKeys, onReport)
                 }
             }

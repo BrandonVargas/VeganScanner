@@ -24,8 +24,11 @@ enum class VerdictSource {
     /** The ingredient dictionary applied to text the user scanned from the product label. */
     LABEL_SCAN,
 
-    /** Unrecognized ingredients were researched on the web by AI (Wikipedia + Gemini). Show with a warning. */
+    /** Unrecognized ingredients were researched on the web by AI (Gemini + web search). Show with a warning. */
     WEB_RESEARCH,
+
+    /** Online research wasn't possible, so the phone's own AI model estimated the ingredients. Show with a warning. */
+    ON_DEVICE_AI,
 
     /** Nothing could decide; the verdict is a best-effort partial result. */
     UNDETERMINED,
@@ -39,6 +42,8 @@ data class FlaggedIngredient(
     val sources: List<SourceLink> = emptyList(),
     /** Key of the shared web-research entry, so users can report it as wrong. `null` when not web-researched. */
     val researchKey: String? = null,
+    /** Estimated by the phone's own AI model rather than researched online. */
+    val onDevice: Boolean = false,
 )
 
 data class SourceLink(val title: String, val url: String)

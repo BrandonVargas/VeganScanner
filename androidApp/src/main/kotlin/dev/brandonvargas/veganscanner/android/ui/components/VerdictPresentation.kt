@@ -84,6 +84,7 @@ fun VerdictSource.labelRes(): Int =
         VerdictSource.RULE_ENGINE -> R.string.source_rule_engine
         VerdictSource.LABEL_SCAN -> R.string.source_label_scan
         VerdictSource.WEB_RESEARCH -> R.string.source_web_research
+        VerdictSource.ON_DEVICE_AI -> R.string.source_on_device_ai
         VerdictSource.UNDETERMINED -> R.string.source_none
     }
 

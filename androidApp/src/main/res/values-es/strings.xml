@@ -77,6 +77,10 @@
     <string name="research_explanation_hint">Explicación de IA basada en fuentes web. Puede estar equivocada.</string>
     <string name="source_web_research">Investigado en línea con IA (Gemini + búsqueda web)</string>
     <string name="research_in_progress">Investigando en línea los ingredientes no reconocidos…</string>
+    <string name="source_on_device_ai">Estimado por la IA de tu teléfono (sin conexión)</string>
+    <string name="research_title_on_device">Estimado por la IA de tu teléfono</string>
+    <string name="research_warning_on_device">No se pudo investigar en línea, así que el modelo de IA de tu teléfono estimó estos ingredientes, sin fuentes web. Puede equivocarse: revisa la etiqueta.</string>
+    <string name="research_on_device_item">Estimado en este teléfono, sin fuentes</string>
     <string name="research_title">Investigado en línea con IA</string>
     <string name="research_warning">Estas respuestas vienen de fuentes web y pueden estar equivocadas. Revisa la etiqueta y reporta lo que no parezca correcto.</string>
     <string name="research_status_vegan">vegano</string>

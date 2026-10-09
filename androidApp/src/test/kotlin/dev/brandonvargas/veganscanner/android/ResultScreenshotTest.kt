@@ -139,6 +139,31 @@ class ResultScreenshotTest {
         )
 
     @Test
+    fun estimatedOnDevice() =
+        capture(
+            ProductResultUiState.Found(
+                product.copy(
+                    ingredientsSource = IngredientsSource.LABEL_SCAN,
+                    ingredientsText = "Agua, goma gelana, sal",
+                ),
+                VeganVerdict(
+                    VeganStatus.VEGAN,
+                    VerdictSource.ON_DEVICE_AI,
+                    researched =
+                        listOf(
+                            FlaggedIngredient(
+                                "goma gelana",
+                                IngredientVeganStatus.YES,
+                                note = "Se obtiene por fermentación bacteriana.",
+                                onDevice = true,
+                            ),
+                        ),
+                ),
+                researchIssue = ResearchIssue.OFFLINE,
+            ),
+        )
+
+    @Test
     fun notFound() = capture(ProductResultUiState.NotFound("7501000000012"))
 
     @Test

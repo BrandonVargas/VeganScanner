@@ -59,6 +59,7 @@ extension VerdictSource {
         case .ruleEngine: "source.rule_engine"
         case .labelScan: "source.label_scan"
         case .webResearch: "source.web_research"
+        case .onDeviceAi: "source.on_device_ai"
         case .undetermined: "source.undetermined"
         }
     }
