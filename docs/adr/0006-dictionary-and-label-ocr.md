@@ -17,7 +17,7 @@ Both must work offline, in English and Spanish, and with contributions from non-
 - `IngredientDictionaryTest` validates the file in CI.
 
 **Open Food Facts taxonomy (added in phase 2b)**
-- A curated dictionary alone covers too little. The Open Food Facts ingredient taxonomy (ODbL) adds about 5,000 ingredients with an effective vegan status (inherited through `parents`) and English/Spanish names.
+- A curated dictionary alone covers too little. The Open Food Facts ingredient taxonomy (ODbL) adds about 5,000 ingredients with an effective vegan status (inherited through `parents`) and English/Spanish names. About half of them have no Spanish name, so `off-taxonomy-es.json` adds Wikidata labels and Gemini translations for those. They're generated offline at build time (no AI at runtime), committed so changes are reviewable, and loaded with the lowest precedence.
 - `updateOffTaxonomy` (build-logic) trims it into the committed `dictionary/off-taxonomy.json`. Curated `overrides` (e.g. sugar → vegan) are applied to whole sub-trees, but never relax an explicit `no`.
 - A weekly GitHub Action refreshes the file and opens a PR.
 - `GenerateDictionarySourceTask` embeds it in chunks, because a JVM string constant is limited to 64 KB.
