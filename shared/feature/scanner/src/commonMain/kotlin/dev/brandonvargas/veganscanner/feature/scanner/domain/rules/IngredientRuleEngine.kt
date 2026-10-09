@@ -39,7 +39,10 @@ internal data class IngredientAnalysis(val items: List<AnalyzedItem>) {
  * 3. Additive codes are matched in any common form: E120, E-120, E 120, INS 120.
  * 4. Within each item, the longest known phrase wins at every position (hash lookups of word n-grams), so
  *    "leche de coco" (plant-based) beats "leche", and "suero de leche" isn't also reported as "leche".
- * 5. A doubtful or unknown compound followed by its composition, like "base de avena (agua, avena)", is judged by
+ * 5. "X de Y" where X is only doubtful in the Open Food Facts taxonomy and Y is vegan ("pasta de tomate": *pasta*
+ *    is noodles that may contain egg) isn't judged by X: the whole phrase is unrecognized, so web research looks it
+ *    up as a whole. Curated doubtful terms and anything non-vegan are never relaxed this way.
+ * 6. A doubtful or unknown compound followed by its composition, like "base de avena (agua, avena)", is judged by
  *    the listed sub-ingredients instead of its generic name. A non-vegan name stays flagged.
  */
 internal class IngredientRuleEngine(private val knowledge: IngredientKnowledge) {
@@ -103,6 +106,8 @@ internal class IngredientRuleEngine(private val knowledge: IngredientKnowledge) 
         tokens: List<Token>,
     ): AnalyzedItem? {
         val matches = codes.toMutableList()
+        // Token span and curation of each word match, for the "X de Y" rule below.
+        val spans = mutableMapOf<RuleMatch, Pair<IntRange, Boolean>>()
         val covered = BooleanArray(tokens.size)
         var i = 0
         while (i < tokens.size) {
@@ -116,7 +121,9 @@ internal class IngredientRuleEngine(private val knowledge: IngredientKnowledge) 
                 continue
             }
             val (n, known) = longest
-            matches += match(known, original, tokens[i].start, tokens[i + n - 1].end)
+            val match = match(known, original, tokens[i].start, tokens[i + n - 1].end)
+            matches += match
+            spans[match] = (i until i + n) to known.curated
             for (k in i until i + n) covered[k] = true
             i += n
         }
@@ -124,8 +131,12 @@ internal class IngredientRuleEngine(private val knowledge: IngredientKnowledge) 
         val meaningful = tokens.indices.filterNot { covered[it] || isFiller(tokens[it].text) }
         if (matches.isEmpty() && meaningful.isEmpty()) return null
 
+        val ambiguousHead = ambiguousHead(matches, spans, tokens)
+        if (ambiguousHead != null) matches -= ambiguousHead
+
         val status =
             when {
+                ambiguousHead != null -> IngredientVeganStatus.UNKNOWN
                 matches.any { it.status == IngredientVeganStatus.NO } -> IngredientVeganStatus.NO
                 matches.any { it.status == IngredientVeganStatus.MAYBE } -> IngredientVeganStatus.MAYBE
                 meaningful.isNotEmpty() -> IngredientVeganStatus.UNKNOWN
@@ -136,6 +147,23 @@ internal class IngredientRuleEngine(private val knowledge: IngredientKnowledge) 
                 if (it.length > MAX_ITEM_LENGTH) it.take(MAX_ITEM_LENGTH).trimEnd() + "…" else it
             }
         return AnalyzedItem(itemText, status, matches.sortedBy { it.position })
+    }
+
+    /** The taxonomy-only doubtful X of an "X de Y" phrase whose Y is vegan, if this item is one. */
+    private fun ambiguousHead(
+        matches: List<RuleMatch>,
+        spans: Map<RuleMatch, Pair<IntRange, Boolean>>,
+        tokens: List<Token>,
+    ): RuleMatch? {
+        if (matches.any { it.status == IngredientVeganStatus.NO }) return null
+        val head = matches.singleOrNull { it.status == IngredientVeganStatus.MAYBE } ?: return null
+        val (span, curated) = spans[head] ?: return null // additive codes are never ambiguous
+        if (curated || tokens.getOrNull(span.last + 1)?.text !in OF_WORDS) return null
+        val complementIsVegan =
+            matches.any { other ->
+                other.status == IngredientVeganStatus.YES && (spans[other]?.first?.first ?: -1) > span.last + 1
+            }
+        return head.takeIf { complementIsVegan }
     }
 
     private fun match(known: KnownTerm, original: String, start: Int, end: Int) =
@@ -191,10 +219,11 @@ internal class IngredientRuleEngine(private val knowledge: IngredientKnowledge) 
 
     private fun isFiller(word: String) = word in FILLER_WORDS || word.all { it.isDigit() } || word.length == 1
 
-    private companion object {
+    internal companion object {
         val SENTENCE_ENDS = charArrayOf('.', ';', '\n')
         val ITEM_SEPARATORS = setOf(',', ';', '(', ')', '[', ']', '{', '}', '.', '\n', '*')
         val GROUP_OPENERS = setOf('(', '[', '{')
+        val OF_WORDS = setOf("de", "del")
 
         /** A non-vegan name stays flagged, and a vegan one ("levadura (Saccharomyces…)") needs no help. */
         val DEFERS_TO_COMPOSITION = setOf(IngredientVeganStatus.MAYBE, IngredientVeganStatus.UNKNOWN)

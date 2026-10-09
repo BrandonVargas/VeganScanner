@@ -50,6 +50,13 @@ object IngredientLabelText {
             "libre de alergenos",
         ).map { TextFolding.termRegex(it) }
 
+    /**
+     * The ingredient list from positioned OCR lines: the heading's column is followed on the photo first
+     * ([IngredientLabelLayout]), then the text is trimmed to the list and common misreads are fixed ([OcrCorrection]).
+     */
+    fun extract(lines: List<OcrLine>): String =
+        OcrCorrection.Bundled.correct(extract(IngredientLabelLayout.select(lines).joinToString("\n") { it.text }))
+
     fun extract(rawText: String): String {
         val joined =
             rawText

@@ -89,22 +89,22 @@ struct LabelScanView: View {
     private func captureAndRecognize() {
         model.send(LabelScanActionCaptureStarted.shared)
         Task {
-            var text = ""
+            var lines: [OcrLine] = []
             do {
                 let photo = try await camera.capturePhoto()
-                text = try await TextRecognizer.recognizeText(in: photo)
+                lines = try await TextRecognizer.recognizeLines(in: photo)
             } catch {
                 Logger.label.error("Photo capture or OCR failed: \(String(describing: error))")
             }
-            if text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+            if lines.isEmpty {
                 // The live preview has been recognizing text all along; use it rather than failing.
-                text = camera.liveText()
-                Logger.label.info("Using live preview text (\(text.count) characters)")
+                lines = camera.liveLines()
+                Logger.label.info("Using live preview text (\(lines.count) lines)")
             }
-            if text.isEmpty {
+            if lines.isEmpty {
                 model.send(LabelScanActionRecognitionFailed.shared)
             } else {
-                model.send(LabelScanActionTextRecognized(rawText: text))
+                model.send(LabelScanActionTextRecognized(lines: lines))
             }
         }
     }
