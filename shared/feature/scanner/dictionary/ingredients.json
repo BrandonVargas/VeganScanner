@@ -109,7 +109,13 @@
                  "es": ["acido ascorbico", "acido citrico", "acido malico", "acido acetico", "acido tartarico"] } },
     { "id": "mx-staples", "status": "yes", "category": "plant",
       "terms": { "en": ["nixtamalized corn", "corn masa", "xanthan gum", "corn starch", "cornstarch"],
-                 "es": ["maiz nixtamalizado", "masa de maiz", "harina de maiz nixtamalizado", "tortilla de maiz", "goma xantana", "almidon de maiz", "fecula de maiz", "chile", "chiles", "chile guajillo", "chile ancho", "chile chipotle", "nopal", "epazote", "piloncillo", "jamaica", "tamarindo"] } }
+                 "es": ["maiz nixtamalizado", "masa de maiz", "harina de maiz nixtamalizado", "tortilla de maiz", "goma xantana", "almidon de maiz", "fecula de maiz", "chile", "chiles", "chile guajillo", "chile ancho", "chile chipotle", "nopal", "epazote", "piloncillo", "jamaica", "tamarindo"] } },
+    { "id": "plant-pastes", "status": "yes", "category": "plant",
+      "note": "\"Pasta\" alone is noodles (may contain egg); these pastes are ground plants.",
+      "terms": { "en": ["tomato paste", "tomato concentrate", "chili paste", "sesame paste", "tahini", "achiote paste", "annatto paste"],
+                 "es": ["pasta de tomate", "pasta de jitomate", "concentrado de tomate", "concentrado de jitomate", "pure de jitomate",
+                        "pasta de chile", "pasta de chiles", "pasta de ajonjoli", "pasta de sesamo", "pasta de achiote", "pasta de cacao",
+                        "pasta de cacahuate", "pasta de mani", "pasta de almendra", "pasta de ajo", "pasta de tamarindo"] } }
   ],
   "plantBasedExceptions": {
     "en": ["coconut milk", "almond milk", "soy milk", "soya milk", "oat milk", "rice milk", "cashew milk", "plant milk", "plant-based milk",

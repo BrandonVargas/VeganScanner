@@ -123,7 +123,10 @@ class IngredientRecognitionTest {
               {"id":"en:e330","status":"yes","en":["citric acid"],"e":"E330"},
               {"id":"en:oat-base","status":"maybe","en":["oat base"],"es":["base de avena"]},
               {"id":"en:oat","status":"yes","en":["oat"],"es":["avena"]},
-              {"id":"en:vitamin-a","status":"maybe","en":["vitamin A"],"es":["vitamina A"]}
+              {"id":"en:vitamin-a","status":"maybe","en":["vitamin A"],"es":["vitamina A"]},
+              {"id":"en:pasta","status":"maybe","en":["pasta"]},
+              {"id":"en:squash","status":"yes","en":["squash"],"es":["calabaza"]},
+              {"id":"en:vanilla","status":"yes","en":["vanilla"],"es":["vainilla"]}
             ]}
             """.trimIndent(),
         )
@@ -196,6 +199,31 @@ class IngredientRecognitionTest {
         val analysis = engine.analyze("base de avena (agua, avena), PALMITATO DE VITAMINA A")
 
         assertEquals(listOf("VITAMINA A" to MAYBE), analysis.flagged.map { it.text to it.status })
+    }
+
+    @Test
+    fun curatedPastesAreRecognizedVegan() {
+        val analysis = engine.analyze("PASTA DE TOMATE, agua, sal")
+
+        assertTrue(analysis.allVegan, analysis.items.toString())
+    }
+
+    @Test
+    fun ambiguousTaxonomyHeadOfAVeganComplementIsLeftForResearch() {
+        val analysis = engine.analyze("PASTA DE CALABAZA, sal")
+
+        assertEquals(emptyList(), analysis.flagged)
+        assertEquals(listOf("PASTA DE CALABAZA"), analysis.unrecognized.map { it.text })
+    }
+
+    @Test
+    fun ambiguityRuleNeverRelaxesNonVeganOrCuratedFindings() {
+        assertEquals(listOf("pasta" to MAYBE), engine.analyze("pasta, sal").flagged.map { it.text to it.status })
+        assertEquals(NO, engine.analyze("pasta de clara").items.single().status)
+        assertEquals(
+            listOf("saborizantes naturales" to MAYBE),
+            engine.analyze("saborizantes naturales de vainilla").flagged.map { it.text to it.status },
+        )
     }
 
     @Test
