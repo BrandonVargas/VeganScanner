@@ -76,7 +76,7 @@
     <string name="label_privacy_note">The photo is read on your phone and never uploaded.</string>
     <string name="research_explanation_hint">AI explanation from web sources. It may be wrong.</string>
     <string name="source_web_research">Researched online with AI (Gemini + web search)</string>
-    <string name="research_in_progress">Researching unrecognized ingredients online…</string>
+    <string name="research_in_progress">Checking the ingredients with AI…</string>
     <string name="source_on_device_ai">Estimated by the AI on your phone (offline)</string>
     <string name="research_title_on_device">Estimated by the AI on your phone</string>
     <string name="research_warning_on_device">Online research wasn\'t possible, so the AI model on your phone estimated these, without web sources. It may be wrong: check the label.</string>

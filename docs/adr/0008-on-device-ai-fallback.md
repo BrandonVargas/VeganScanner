@@ -8,7 +8,7 @@ Cloud research (ADR 0007) needs a connection and is capped by daily limits. With
 
 ## Decision
 - **Shared contract, native models.** `OnDeviceLanguageModel` in shared code has two calls: `isAvailable()` and `generate(instructions, prompt)`.
-  - Android implements it with the ML Kit GenAI Prompt API (`GeminiNanoModel`). If the model is downloadable, the first availability check starts the download in the background.
+  - Android implements it with the ML Kit GenAI Prompt API (`GeminiNanoModel`). Even on phones where AICore already runs Google's own features, the model for apps is a separate download. The app requests it at launch, while the phone is likely online, because a phone that is already offline can't download it (found on a Xiaomi device: it reported `DOWNLOADABLE` offline and became `AVAILABLE` after one online launch).
   - iOS implements it with Foundation Models (`AppleFoundationModel`). The framework is weak-linked, because the app still supports iOS 17.
   - Each app passes its model to `startVeganKit`.
 - **Shared prompt, parsing and safety.** `OnDeviceIngredientClassifier` sends one request per ingredient with the same rules and statuses as the server, then parses the JSON answer leniently. Unusable answers and requests over 20 s are dropped.

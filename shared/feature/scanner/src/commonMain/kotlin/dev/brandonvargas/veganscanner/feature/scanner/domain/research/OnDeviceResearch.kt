@@ -1,5 +1,6 @@
 package dev.brandonvargas.veganscanner.feature.scanner.domain.research
 
+import co.touchlab.kermit.Logger
 import dev.brandonvargas.veganscanner.core.common.AppResult
 import dev.brandonvargas.veganscanner.core.model.IngredientVeganStatus
 import kotlinx.coroutines.withTimeoutOrNull
@@ -34,9 +35,14 @@ class OnDeviceIngredientClassifier(
         names.mapNotNull { name ->
             val answer =
                 withTimeoutOrNull(TIMEOUT_MS) {
-                    runCatching { model.generate(INSTRUCTIONS, prompt(name, labelLanguage)) }.getOrNull()
+                    runCatching { model.generate(INSTRUCTIONS, prompt(name, labelLanguage)) }
+                        .onFailure { log.w(it) { "On-device model failed for \"$name\"" } }
+                        .getOrNull()
                 }
-            answer?.let { parse(name, it) }
+            // A parsing bug must never take the screen down: an unusable answer just leaves the item pending.
+            val parsed = answer?.let { runCatching { parse(name, it) }.getOrNull() }
+            if (parsed == null) log.w { "No usable on-device answer for \"$name\": $answer" }
+            parsed
         }
 
     private fun prompt(name: String, labelLanguage: String): String {
@@ -73,6 +79,7 @@ class OnDeviceIngredientClassifier(
     }
 
     private companion object {
+        val log = Logger.withTag("OnDeviceAI")
         const val TIMEOUT_MS = 20_000L
         const val MAX_REASON_LENGTH = 300
         val json = Json { isLenient = true }
@@ -89,9 +96,13 @@ class OnDeviceIngredientClassifier(
             "reason": one short sentence naming the usual source.
             """.trimIndent()
 
+        // Braces are escaped: Android's regex engine (ICU) rejects a bare "}" that the JVM accepts.
+        private val MISSING_VALUE = Regex(":\\s*(?=[,\\}])")
+        private val TRAILING_COMMA = Regex(",\\s*(?=\\})")
+
         /** Small models sometimes leave a value out (`"reason":}`) or add a trailing comma. */
         fun parseLenientJson(text: String): JsonObject? =
-            listOf(text, text.replace(Regex(":\\s*(?=[,}])"), ": null").replace(Regex(",\\s*(?=})"), ""))
+            listOf(text, text.replace(MISSING_VALUE, ": null").replace(TRAILING_COMMA, ""))
                 .firstNotNullOfOrNull { runCatching { json.parseToJsonElement(it).jsonObject }.getOrNull() }
     }
 }

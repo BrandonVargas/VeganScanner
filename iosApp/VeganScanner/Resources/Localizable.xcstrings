@@ -789,13 +789,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Researching unrecognized ingredients online…"
+            "value" : "Checking the ingredients with AI…"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Investigando en línea los ingredientes no reconocidos…"
+            "value" : "Revisando los ingredientes con IA…"
           }
         }
       }

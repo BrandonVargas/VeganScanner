@@ -20,7 +20,7 @@ class VeganScannerApplication : Application() {
             isDebug = BuildConfig.DEBUG,
             supabaseHost = BuildConfig.SUPABASE_HOST,
             supabasePublishableKey = BuildConfig.SUPABASE_PUBLISHABLE_KEY,
-            onDeviceModel = GeminiNanoModel(appScope),
+            onDeviceModel = GeminiNanoModel(appScope).also { it.prepare() },
         )
     }
 }

@@ -76,7 +76,7 @@
     <string name="label_privacy_note">La foto se lee en tu teléfono y nunca se sube.</string>
     <string name="research_explanation_hint">Explicación de IA basada en fuentes web. Puede estar equivocada.</string>
     <string name="source_web_research">Investigado en línea con IA (Gemini + búsqueda web)</string>
-    <string name="research_in_progress">Investigando en línea los ingredientes no reconocidos…</string>
+    <string name="research_in_progress">Revisando los ingredientes con IA…</string>
     <string name="source_on_device_ai">Estimado por la IA de tu teléfono (sin conexión)</string>
     <string name="research_title_on_device">Estimado por la IA de tu teléfono</string>
     <string name="research_warning_on_device">No se pudo investigar en línea, así que el modelo de IA de tu teléfono estimó estos ingredientes, sin fuentes web. Puede equivocarse: revisa la etiqueta.</string>
