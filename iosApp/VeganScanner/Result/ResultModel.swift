@@ -28,6 +28,10 @@ final class ResultModel {
         viewModel.onAction(action: ProductResultActionReportResearched(researchKey: researchKey))
     }
 
+    func reportCommunityVerdict() {
+        viewModel.onAction(action: ProductResultActionReportCommunityVerdict.shared)
+    }
+
     func retry() {
         viewModel.onAction(action: ProductResultActionRetry.shared)
     }

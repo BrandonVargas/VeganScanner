@@ -6,6 +6,7 @@ Used for online features. The app works fully without it: forks and CI builds si
 |---|---|
 | `migrations/` | Database schema, Row Level Security and functions |
 | `tests/` | pgTAP tests for RLS and rate limits |
+| `migrations/*community_verdicts*` | Shared product verdicts and reports. See [ADR 0009](../docs/adr/0009-community-verdicts.md) |
 | `functions/research-ingredients/` | Edge Function: web research of unknown ingredients (Wikipedia excerpts + Gemini, which may also use Google Search within a cap), shared cache. See [ADR 0007](../docs/adr/0007-cloud-ingredient-research.md) |
 
 ## Setup for your own project
@@ -27,5 +28,6 @@ Then enable **Authentication → Sign In / Providers → Allow anonymous sign-in
 ```bash
 cd supabase/functions/research-ingredients && deno test --allow-env   # Edge Function (no network)
 supabase db query --linked -f supabase/tests/ingredient_research_test.sql   # pgTAP, no Docker needed
+supabase db query --linked -f supabase/tests/community_verdicts_test.sql
 supabase db advisors --linked                                                # Supabase security/performance lints
 ```

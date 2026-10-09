@@ -18,6 +18,7 @@
 		7CAC3DB931D12CD419E41DC9 /* ScannerModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2970842D1AB88EAA532DA1B6 /* ScannerModelTests.swift */; };
 		7DBEE27351A8782060FBB7D4 /* TextRecognizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8ADFC1B0079957D4EA32A50D /* TextRecognizer.swift */; };
 		81871D6D2BADEE1C47FC54B4 /* LabelScanView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D36F03896CAFFBEE9E87E80 /* LabelScanView.swift */; };
+		881CB71E87C087F40CDEEC59 /* AppleFoundationModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = FEA35EFAEEE4FD41D159A750 /* AppleFoundationModel.swift */; };
 		8B8F72DE840ED8A2D97F6FB7 /* LabelScanModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = E18FAD7111840F1D3F79640E /* LabelScanModel.swift */; };
 		8D91C405F66754B617C0ED5E /* VeganScannerApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 182A60BC0BFA0263AEDBC227 /* VeganScannerApp.swift */; };
 		8DDD0AE38665B196AFB7ABB5 /* HistoryModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD7DC7D59E80DCE9A4022339 /* HistoryModel.swift */; };
@@ -69,6 +70,7 @@
 		DD7DC7D59E80DCE9A4022339 /* HistoryModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HistoryModel.swift; sourceTree = "<group>"; };
 		E18FAD7111840F1D3F79640E /* LabelScanModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LabelScanModel.swift; sourceTree = "<group>"; };
 		F939DC4B5B544F71902C44C3 /* VeganScanner.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = VeganScanner.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		FEA35EFAEEE4FD41D159A750 /* AppleFoundationModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppleFoundationModel.swift; sourceTree = "<group>"; };
 		FEAE727047DB67D3CF7E1907 /* VerdictPresentation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VerdictPresentation.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -141,6 +143,14 @@
 			path = Label;
 			sourceTree = "<group>";
 		};
+		61FDA9DB7FFC811ECD4C71D4 /* AI */ = {
+			isa = PBXGroup;
+			children = (
+				FEA35EFAEEE4FD41D159A750 /* AppleFoundationModel.swift */,
+			);
+			path = AI;
+			sourceTree = "<group>";
+		};
 		6E07A5026ACC2FFEABB095DC /* VeganScannerUITests */ = {
 			isa = PBXGroup;
 			children = (
@@ -178,6 +188,7 @@
 			isa = PBXGroup;
 			children = (
 				721EFD83FFC5345DE1BFB404 /* Info.plist */,
+				61FDA9DB7FFC811ECD4C71D4 /* AI */,
 				38BA3B2B83C9430E2698B844 /* App */,
 				93D36951EDB23A82B415581C /* History */,
 				4E564F6FA3CF869D08B11FFF /* Label */,
@@ -341,6 +352,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				881CB71E87C087F40CDEEC59 /* AppleFoundationModel.swift in Sources */,
 				05B6A0D5D8AC96F56FA6DA5C /* BarcodeScannerView.swift in Sources */,
 				8DDD0AE38665B196AFB7ABB5 /* HistoryModel.swift in Sources */,
 				A38A9BBF1F5B6409BA9F3C75 /* HistoryView.swift in Sources */,
@@ -404,6 +416,8 @@
 					"$(inherited)",
 					"-framework",
 					VeganKit,
+					"-weak_framework",
+					FoundationModels,
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = dev.brandonvargas.veganscanner;
 				PRODUCT_NAME = VeganScanner;
@@ -617,6 +631,8 @@
 					"$(inherited)",
 					"-framework",
 					VeganKit,
+					"-weak_framework",
+					FoundationModels,
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = dev.brandonvargas.veganscanner;
 				PRODUCT_NAME = VeganScanner;

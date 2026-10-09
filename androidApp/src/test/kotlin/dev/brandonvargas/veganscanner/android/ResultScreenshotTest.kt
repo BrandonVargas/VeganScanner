@@ -139,6 +139,48 @@ class ResultScreenshotTest {
         )
 
     @Test
+    fun estimatedOnDevice() =
+        capture(
+            ProductResultUiState.Found(
+                product.copy(
+                    ingredientsSource = IngredientsSource.LABEL_SCAN,
+                    ingredientsText = "Agua, goma gelana, sal",
+                ),
+                VeganVerdict(
+                    VeganStatus.VEGAN,
+                    VerdictSource.ON_DEVICE_AI,
+                    researched =
+                        listOf(
+                            FlaggedIngredient(
+                                "goma gelana",
+                                IngredientVeganStatus.YES,
+                                note = "Se obtiene por fermentación bacteriana.",
+                                onDevice = true,
+                            ),
+                        ),
+                ),
+                researchIssue = ResearchIssue.OFFLINE,
+            ),
+        )
+
+    @Test
+    fun communityVerdict() =
+        capture(
+            ProductResultUiState.Found(
+                product.copy(name = null, brands = null, ingredientsText = null),
+                VeganVerdict(
+                    VeganStatus.VEGAN,
+                    VerdictSource.COMMUNITY,
+                    researched =
+                        listOf(
+                            FlaggedIngredient("goma gelana", IngredientVeganStatus.YES, note = "Hecha por bacterias."),
+                        ),
+                ),
+                communityIngredients = "Agua, goma gelana, sal",
+            ),
+        )
+
+    @Test
     fun notFound() = capture(ProductResultUiState.NotFound("7501000000012"))
 
     @Test

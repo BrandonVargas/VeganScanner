@@ -19,7 +19,8 @@ struct VeganScannerApp: App {
             isDebug: isDebug,
             deviceLanguage: Locale.current.language.languageCode?.identifier ?? "en",
             supabaseHost: Bundle.main.object(forInfoDictionaryKey: "SupabaseHost") as? String,
-            supabasePublishableKey: Bundle.main.object(forInfoDictionaryKey: "SupabasePublishableKey") as? String
+            supabasePublishableKey: Bundle.main.object(forInfoDictionaryKey: "SupabasePublishableKey") as? String,
+            onDeviceModel: AppleFoundationModel()
         )
     }
 

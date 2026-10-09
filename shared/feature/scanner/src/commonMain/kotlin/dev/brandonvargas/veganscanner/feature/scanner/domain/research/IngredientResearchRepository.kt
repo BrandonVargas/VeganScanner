@@ -5,15 +5,19 @@ import dev.brandonvargas.veganscanner.core.common.AppResult
 import dev.brandonvargas.veganscanner.core.model.IngredientVeganStatus
 import dev.brandonvargas.veganscanner.core.model.SourceLink
 
-/** An ingredient researched on the web by AI, shared by all users through the server cache. */
+/**
+ * An ingredient classified by AI: researched on the web and shared by all users through the server cache, or, when
+ * that isn't possible, estimated by the phone's own model ([onDevice]).
+ */
 data class ResearchedIngredient(
     val name: String,
-    /** Key of the shared entry; used to report it as wrong. */
-    val key: String,
+    /** Key of the shared entry; used to report it as wrong. `null` for on-device estimates, which aren't shared. */
+    val key: String?,
     val status: IngredientVeganStatus,
     val reasonEn: String?,
     val reasonEs: String?,
     val sources: List<SourceLink>,
+    val onDevice: Boolean = false,
 ) {
     fun reason(language: String): String? = if (language == "es") reasonEs ?: reasonEn else reasonEn ?: reasonEs
 }

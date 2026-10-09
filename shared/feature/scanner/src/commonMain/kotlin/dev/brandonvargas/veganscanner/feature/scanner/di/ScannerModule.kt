@@ -5,14 +5,21 @@ import dev.brandonvargas.veganscanner.core.network.NetworkJson
 import dev.brandonvargas.veganscanner.feature.scanner.data.DefaultLabelScanRepository
 import dev.brandonvargas.veganscanner.feature.scanner.data.DefaultProductRepository
 import dev.brandonvargas.veganscanner.feature.scanner.data.DefaultScanHistoryRepository
+import dev.brandonvargas.veganscanner.feature.scanner.data.community.SupabaseCommunityVerdictRepository
 import dev.brandonvargas.veganscanner.feature.scanner.data.research.DefaultIngredientResearchRepository
 import dev.brandonvargas.veganscanner.feature.scanner.data.research.SupabaseResearchRemote
 import dev.brandonvargas.veganscanner.feature.scanner.domain.LabelScanRepository
 import dev.brandonvargas.veganscanner.feature.scanner.domain.ProductRepository
 import dev.brandonvargas.veganscanner.feature.scanner.domain.ScanHistoryRepository
 import dev.brandonvargas.veganscanner.feature.scanner.domain.ScanProductUseCase
+import dev.brandonvargas.veganscanner.feature.scanner.domain.community.CommunityVerdictRepository
+import dev.brandonvargas.veganscanner.feature.scanner.domain.community.CommunityVerdictsUseCase
+import dev.brandonvargas.veganscanner.feature.scanner.domain.community.DisabledCommunityVerdictRepository
 import dev.brandonvargas.veganscanner.feature.scanner.domain.research.DisabledIngredientResearchRepository
 import dev.brandonvargas.veganscanner.feature.scanner.domain.research.IngredientResearchRepository
+import dev.brandonvargas.veganscanner.feature.scanner.domain.research.OnDeviceFallbackResearchRepository
+import dev.brandonvargas.veganscanner.feature.scanner.domain.research.OnDeviceIngredientClassifier
+import dev.brandonvargas.veganscanner.feature.scanner.domain.research.OnDeviceLanguageModel
 import dev.brandonvargas.veganscanner.feature.scanner.domain.research.RefineWithWebResearchUseCase
 import dev.brandonvargas.veganscanner.feature.scanner.domain.rules.IngredientKnowledge
 import dev.brandonvargas.veganscanner.feature.scanner.domain.verdict.appVerdictPipeline
@@ -36,16 +43,23 @@ val scannerModule =
         single { appVerdictPipeline(IngredientKnowledge.Bundled) }
         single<IngredientResearchRepository> {
             val supabase = getOrNull<SupabaseClient>()
-            if (supabase == null) {
-                DisabledIngredientResearchRepository
-            } else {
-                DefaultIngredientResearchRepository(
-                    remote = SupabaseResearchRemote(supabase, session = get(), json = NetworkJson),
-                    dao = get(),
-                    json = NetworkJson,
-                    clock = get(),
-                )
-            }
+            val online =
+                if (supabase == null) {
+                    DisabledIngredientResearchRepository
+                } else {
+                    DefaultIngredientResearchRepository(
+                        remote = SupabaseResearchRemote(supabase, session = get(), json = NetworkJson),
+                        dao = get(),
+                        json = NetworkJson,
+                        clock = get(),
+                    )
+                }
+            // Registered by the app when the platform has an on-device model (see startVeganKit).
+            val model = getOrNull<OnDeviceLanguageModel>() ?: return@single online
+            OnDeviceFallbackResearchRepository(
+                online = online,
+                onDevice = OnDeviceIngredientClassifier(model, getOrNull<AppInfo>()?.deviceLanguage ?: "en"),
+            )
         }
         factory {
             RefineWithWebResearchUseCase(
@@ -55,6 +69,15 @@ val scannerModule =
                 deviceLanguage = getOrNull<AppInfo>()?.deviceLanguage ?: "en",
             )
         }
+        single<CommunityVerdictRepository> {
+            val supabase = getOrNull<SupabaseClient>()
+            if (supabase == null) {
+                DisabledCommunityVerdictRepository
+            } else {
+                SupabaseCommunityVerdictRepository(supabase, session = get(), json = NetworkJson)
+            }
+        }
+        factoryOf(::CommunityVerdictsUseCase)
         factoryOf(::ScanProductUseCase)
 
         viewModelOf(::ScannerViewModel)
@@ -65,6 +88,7 @@ val scannerModule =
                 scanProduct = get(),
                 refineWithWebResearch = get(),
                 research = get(),
+                community = get(),
             )
         }
         viewModel { (barcode: String) -> LabelScanViewModel(barcode = barcode, repository = get()) }

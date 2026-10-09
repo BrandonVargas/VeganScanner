@@ -37,8 +37,11 @@ struct ResultView: View {
                 reportedKeys: found.reportedKeys,
                 researchIssue: found.researchIssue,
                 unresearchedCount: Int(found.unresearchedCount),
+                communityIngredients: found.communityIngredients,
+                communityReported: found.communityReported,
                 onScanLabel: onScanLabel,
-                onReport: model.report
+                onReport: model.report,
+                onReportCommunity: model.reportCommunityVerdict
             )
         case .notFound:
             ContentUnavailableView {
@@ -77,8 +80,11 @@ private struct FoundContent: View {
     let reportedKeys: Set<String>
     let researchIssue: ResearchIssue?
     let unresearchedCount: Int
+    let communityIngredients: String?
+    let communityReported: Bool
     let onScanLabel: () -> Void
     let onReport: (String) -> Void
+    let onReportCommunity: () -> Void
 
     var body: some View {
         ScrollView {
@@ -97,18 +103,30 @@ private struct FoundContent: View {
                         .foregroundStyle(.secondary)
                 }
                 header
+                if verdict.source == .community {
+                    CommunityVerdictNotice(reported: communityReported, onReport: onReportCommunity)
+                }
                 if !verdict.flaggedIngredients.isEmpty {
                     flaggedIngredients
                 }
                 if !verdict.researched.isEmpty {
-                    ResearchedIngredients(ingredients: verdict.researched, reportedKeys: reportedKeys, onReport: onReport)
+                    ResearchedIngredients(
+                        ingredients: verdict.researched,
+                        onDeviceOnly: verdict.source == .onDeviceAi,
+                        fromCommunity: verdict.source == .community,
+                        reportedKeys: reportedKeys,
+                        onReport: onReport
+                    )
                 }
                 if !verdict.isConclusive && !isResearching {
                     inconclusiveNotice
                 }
-                if let ingredients = product.ingredientsText {
+                if let ingredients = product.ingredientsText ?? communityIngredients {
                     VStack(alignment: .leading, spacing: 6) {
                         Text("result.ingredients").font(.headline).accessibilityAddTraits(.isHeader)
+                        if product.ingredientsText == nil {
+                            Text("community.ingredients_hint").font(.caption).foregroundStyle(.secondary)
+                        }
                         Text(ingredients).font(.body)
                     }
                 }
@@ -221,18 +239,48 @@ private struct ResearchLinks: View {
     }
 }
 
+/// A verdict another user's AI research concluded and shared: always with a warning and a way to report it.
+private struct CommunityVerdictNotice: View {
+    let reported: Bool
+    let onReport: () -> Void
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Label("community.title", systemImage: "person.3.fill")
+                .font(.headline)
+                .accessibilityAddTraits(.isHeader)
+            Text("community.warning").font(.callout)
+            if reported {
+                Text("research.reported").font(.footnote).foregroundStyle(.secondary)
+            } else {
+                Button("community.report", action: onReport)
+                    .buttonStyle(.bordered)
+            }
+        }
+        .padding()
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(Color.secondary.opacity(0.12), in: RoundedRectangle(cornerRadius: 16))
+    }
+}
+
 /// Ingredients resolved by AI web research: always shown with a warning, reasons, sources and a report option.
 private struct ResearchedIngredients: View {
     let ingredients: [FlaggedIngredient]
+    /// Every answer came from the phone's own model (offline), not from online research.
+    let onDeviceOnly: Bool
+    /// Reasons of a community verdict, whose warning and report button are in its own card.
+    let fromCommunity: Bool
     let reportedKeys: Set<String>
     let onReport: (String) -> Void
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Label("research.title", systemImage: "sparkles")
+            Label(title, systemImage: "sparkles")
                 .font(.headline)
                 .accessibilityAddTraits(.isHeader)
-            Text("research.warning").font(.footnote)
+            if !fromCommunity {
+                Text(onDeviceOnly ? "research.warning_on_device" : "research.warning").font(.footnote)
+            }
             ForEach(Array(ingredients.enumerated()), id: \.offset) { _, ingredient in
                 VStack(alignment: .leading, spacing: 4) {
                     HStack(alignment: .firstTextBaseline) {
@@ -243,6 +291,9 @@ private struct ResearchedIngredients: View {
                     if let note = ingredient.note {
                         Text(note).font(.callout)
                     }
+                    if ingredient.onDevice && !onDeviceOnly {
+                        Text("research.on_device_item").font(.caption).foregroundStyle(.secondary)
+                    }
                     ResearchLinks(ingredient: ingredient, reportedKeys: reportedKeys, onReport: onReport)
                 }
             }
@@ -250,6 +301,11 @@ private struct ResearchedIngredients: View {
         .padding()
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(Color.purple.opacity(0.08), in: RoundedRectangle(cornerRadius: 16))
+    }
+
+    private var title: LocalizedStringKey {
+        if fromCommunity { return "community.reasons_title" }
+        return onDeviceOnly ? "research.title_on_device" : "research.title"
     }
 }
 

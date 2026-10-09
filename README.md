@@ -5,7 +5,7 @@ Vegan Scanner is free, open source, and built with **Kotlin Multiplatform**: the
 
 Product data comes from [Open Food Facts](https://world.openfoodfacts.org), the free, collaborative food database.
 
-> **Status:** early development. Phases 1–2 (scanner, rule engine and label scanning) are done. See the [roadmap](#roadmap).
+> **Status:** early development. Phases 1–4 (scanner, rule engine, label scanning, AI research, on-device AI and community verdicts) are done. See the [roadmap](#roadmap).
 
 ## Features
 
@@ -19,7 +19,10 @@ Product data comes from [Open Food Facts](https://world.openfoodfacts.org), the 
 
 - **Web research with AI:** ingredients still unrecognized are looked up online (Wikipedia + Gemini, which may also search Google within the free allowance; through a Supabase Edge Function). Each answer is cached once for everyone, shown with its sources and an AI warning, and can be reported by users.
 
-Coming next: on-device AI as an offline fallback, shared community verdicts, and a local marketplace for vegan products with contact over WhatsApp.
+- **On-device AI fallback:** offline or out of quota, Gemini Nano (Android) or Apple Intelligence (iOS 26) estimates the remaining ingredients on the phone.
+- **Community verdicts:** when AI marks a product vegan, the verdict (and a label-scanned ingredient list) is shared with everyone, with an AI warning and a report button.
+
+Coming next: a local marketplace for vegan products with contact over WhatsApp.
 
 ## Architecture
 
@@ -133,7 +136,7 @@ Screenshot baselines live in `androidApp/src/test/screenshots`. Re-record them w
 - [x] **Phase 2:** Rule engine (en/es ingredient dictionary) + ingredient-label OCR
 - [x] **Phase 2b:** Open Food Facts ingredient taxonomy (about 5,000 ingredients)
 - [x] **Phase 3:** Supabase + web research of unknown ingredients with AI (shared cache, reports)
-- [ ] **Phase 4:** On-device AI offline fallback + community verdicts
+- [x] **Phase 4:** On-device AI offline fallback + community verdicts
 - [ ] **Phase 5:** Local marketplace: listings near you, contact over WhatsApp
 - [ ] **Phase 6:** Trust & safety, privacy, accessibility
 - [ ] **Phase 7:** Google Play & App Store release

@@ -137,6 +137,91 @@
         }
       }
     },
+    "community.ingredients_hint" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "From another person's label scan"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Del escaneo de etiqueta de otra persona"
+          }
+        }
+      }
+    },
+    "community.reasons_title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Why the AI marked it vegan"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Por qué la IA lo marcó como vegano"
+          }
+        }
+      }
+    },
+    "community.report" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Report as not vegan"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reportar como no vegano"
+          }
+        }
+      }
+    },
+    "community.title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Shared by the community"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Compartido por la comunidad"
+          }
+        }
+      }
+    },
+    "community.warning" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Another person's scan was checked by AI and marked this product as vegan. AI can be wrong: check the label. Think it's wrong? Report it."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La IA revisó el escaneo de otra persona y marcó este producto como vegano. La IA puede equivocarse: revisa la etiqueta. ¿Crees que está mal? Repórtalo."
+          }
+        }
+      }
+    },
     "error.network" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -704,13 +789,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Researching unrecognized ingredients online…"
+            "value" : "Checking the ingredients with AI…"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Investigando en línea los ingredientes no reconocidos…"
+            "value" : "Revisando los ingredientes con IA…"
           }
         }
       }
@@ -838,6 +923,23 @@
         }
       }
     },
+    "research.on_device_item" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Estimated on this phone, without sources"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Estimado en este teléfono, sin fuentes"
+          }
+        }
+      }
+    },
     "research.report" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -906,6 +1008,23 @@
         }
       }
     },
+    "research.title_on_device" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Estimated by the AI on your phone"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Estimado por la IA de tu teléfono"
+          }
+        }
+      }
+    },
     "research.warning" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -919,6 +1038,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Estas respuestas vienen de fuentes web y pueden estar equivocadas. Revisa la etiqueta y reporta lo que no parezca correcto."
+          }
+        }
+      }
+    },
+    "research.warning_on_device" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Online research wasn't possible, so the AI model on your phone estimated these, without web sources. It may be wrong: check the label."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No se pudo investigar en línea, así que el modelo de IA de tu teléfono estimó estos ingredientes, sin fuentes web. Puede equivocarse: revisa la etiqueta."
           }
         }
       }
@@ -1076,6 +1212,23 @@
         }
       }
     },
+    "source.community" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Shared by the community (AI estimate)"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Compartido por la comunidad (estimación de IA)"
+          }
+        }
+      }
+    },
     "source.label_scan" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -1123,6 +1276,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Según los ingredientes en Open Food Facts"
+          }
+        }
+      }
+    },
+    "source.on_device_ai" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Estimated by the AI on your phone (offline)"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Estimado por la IA de tu teléfono (sin conexión)"
           }
         }
       }
